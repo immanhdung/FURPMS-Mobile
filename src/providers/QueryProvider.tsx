@@ -7,10 +7,11 @@ import { MMKV_KEYS } from '@/constants/storageKeys';
 // Persisted keys: these queries survive app restarts and power offline reads
 const PERSISTED_QUERY_KEYS = new Set([
   'proposals',
-  'reviews',
+  'memberships',
+  'scores',
   'meetings',
   'notifications',
-  'profile',
+  'auth',
 ]);
 
 const queryClient = new QueryClient({

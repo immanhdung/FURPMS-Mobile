@@ -1,8 +1,10 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as SecureStore from '@/utils/secureStore';
 import { SECURE_KEYS } from '@/constants/storageKeys';
+import type { ApiResponse } from '@/types/common';
+import type { ProposalDocument } from '@/features/faculty/types/proposal-document.types';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/api';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpms-be-1.onrender.com/api';
 
 export interface PickedFile {
   uri: string;
@@ -61,13 +63,13 @@ export const uploadService = {
     };
   },
 
-  async uploadFile(
+  async uploadFile<T>(
     file: PickedFile,
     endpoint: string,
     fieldName: string = 'file',
     extraFields?: Record<string, string>,
     onProgress?: UploadProgressCallback,
-  ): Promise<UploadedFile> {
+  ): Promise<T> {
     const token = await SecureStore.getItemAsync(SECURE_KEYS.ACCESS_TOKEN);
     const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
 
@@ -84,7 +86,7 @@ export const uploadService = {
       });
     }
 
-    return new Promise<UploadedFile>((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
       xhr.upload.addEventListener('progress', (e) => {
@@ -100,7 +102,10 @@ export const uploadService = {
       xhr.addEventListener('load', () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
-            resolve(JSON.parse(xhr.responseText) as UploadedFile);
+            // Every real endpoint wraps its payload in ApiResponse<T> — unwrap it here so
+            // callers deal in plain domain types, matching web's service-layer convention.
+            const parsed = JSON.parse(xhr.responseText) as ApiResponse<T>;
+            resolve(parsed.data);
           } catch {
             reject(new Error('Invalid JSON response from upload endpoint'));
           }
@@ -123,28 +128,14 @@ export const uploadService = {
   async uploadProposalDocument(
     proposalId: string,
     file: PickedFile,
-    documentType: string,
+    documentType?: string,
     onProgress?: UploadProgressCallback,
-  ): Promise<UploadedFile> {
-    return this.uploadFile(
+  ): Promise<ProposalDocument> {
+    return this.uploadFile<ProposalDocument>(
       file,
       `/proposals/${proposalId}/documents`,
-      'document',
-      { type: documentType },
-      onProgress,
-    );
-  },
-
-  async uploadReviewAttachment(
-    submissionId: string,
-    file: PickedFile,
-    onProgress?: UploadProgressCallback,
-  ): Promise<UploadedFile> {
-    return this.uploadFile(
-      file,
-      `/reviews/${submissionId}/attachments`,
       'file',
-      undefined,
+      documentType ? { documentType } : undefined,
       onProgress,
     );
   },

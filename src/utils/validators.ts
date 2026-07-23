@@ -53,6 +53,18 @@ export const reviewScoreSchema = z.object({
   decision: z.enum(['APPROVE', 'REJECT', 'REVISION_REQUIRED']),
 });
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your new password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 export type CreateProposalFormValues = z.infer<typeof createProposalSchema>;
 export type ReviewScoreFormValues = z.infer<typeof reviewScoreSchema>;

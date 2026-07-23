@@ -92,15 +92,20 @@ export const pushNotificationService: PushNotificationService = {
       return null;
     }
 
-    // Register with backend — non-fatal on failure
-    try {
-      await httpClient.post('/users/me/push-token', {
-        token,
-        platform: Platform.OS,
-        deviceName: Device.deviceName ?? undefined,
-      });
-    } catch {
-      // Swallow — token registration failure must not block the app
+    // The real backend has no push-token registration endpoint yet. Skip the network call (it's
+    // a guaranteed 404 on every cold start) but still return the local Expo token so in-app
+    // local notifications keep working. Flip EXPO_PUBLIC_ENABLE_PUSH_REGISTRATION once the
+    // backend adds the endpoint.
+    if (process.env.EXPO_PUBLIC_ENABLE_PUSH_REGISTRATION === 'true') {
+      try {
+        await httpClient.post('/users/me/push-token', {
+          token,
+          platform: Platform.OS,
+          deviceName: Device.deviceName ?? undefined,
+        });
+      } catch {
+        // Swallow — token registration failure must not block the app
+      }
     }
 
     return token;

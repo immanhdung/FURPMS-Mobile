@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
 import { useLogin } from '../hooks/useLogin';
+import type { ApiError } from '@/types/common';
 
 const schema = z.object({
   email: z
@@ -32,8 +33,7 @@ export function LoginForm() {
     login(data);
   }
 
-  const apiErrorMessage =
-    error instanceof Error ? error.message : error ? 'Login failed. Please try again.' : null;
+  const apiErrorMessage = error ? (error as ApiError).message ?? 'Login failed. Please try again.' : null;
 
   return (
     <KeyboardAvoidingView
