@@ -22,10 +22,10 @@ const TABS: TabItem[] = [
     iconFocused: 'document-text',
   },
   {
-    name: 'meetings',
-    title: 'Meetings',
-    icon: 'calendar-outline',
-    iconFocused: 'calendar',
+    name: 'reports',
+    title: 'Reports',
+    icon: 'bar-chart-outline',
+    iconFocused: 'bar-chart',
   },
   {
     name: 'notifications/index',

@@ -6,18 +6,18 @@ import { QUERY_KEYS } from '@/constants/queryKeys';
 export function useNotifications() {
   return useQuery({
     queryKey: QUERY_KEYS.notifications.feed,
-    queryFn: () => notificationService.getNotifications(),
+    queryFn: () => notificationService.list(),
   });
 }
 
 export function useUnreadCount() {
   const setUnreadCount = useNotificationStore((s) => s.setUnreadCount);
   return useQuery({
-    queryKey: QUERY_KEYS.notifications.unreadCount,
+    queryKey: QUERY_KEYS.notifications.count,
     queryFn: async () => {
-      const result = await notificationService.getUnreadCount();
-      setUnreadCount(result.count);
-      return result;
+      const count = await notificationService.count();
+      setUnreadCount(count);
+      return count;
     },
     refetchInterval: 60_000,
   });
@@ -30,7 +30,7 @@ export function useMarkAsRead() {
     mutationFn: (id: string) => notificationService.markAsRead(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.feed });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.unreadCount });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.count });
       decrementUnread();
     },
   });
@@ -43,7 +43,7 @@ export function useMarkAllAsRead() {
     mutationFn: () => notificationService.markAllAsRead(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.feed });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.unreadCount });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.count });
       setUnreadCount(0);
     },
   });

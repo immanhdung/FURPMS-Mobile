@@ -1,44 +1,19 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
-import { formatDateTime, formatDuration } from '@/utils/date';
-import type { BadgeVariant } from '@/shared/components/ui/Badge';
+import { formatDateTime, formatDuration, isUpcoming } from '@/utils/date';
 import { Badge } from '@/shared/components/ui/Badge';
-import type { MeetingSummary, MeetingType, MeetingStatus } from '../types/meeting.types';
-
-const typeVariant: Record<MeetingType, BadgeVariant> = {
-  REVIEW: 'purple',
-  DISCUSSION: 'info',
-  GENERAL: 'default',
-};
-
-const typeLabel: Record<MeetingType, string> = {
-  REVIEW: 'Review',
-  DISCUSSION: 'Discussion',
-  GENERAL: 'General',
-};
-
-const statusIcon: Record<MeetingStatus, string> = {
-  UPCOMING: 'time-outline',
-  IN_PROGRESS: 'radio-button-on',
-  COMPLETED: 'checkmark-circle-outline',
-  CANCELLED: 'close-circle-outline',
-};
-
-const statusColor: Record<MeetingStatus, string> = {
-  UPCOMING: '#5E6AD2',
-  IN_PROGRESS: '#22C55E',
-  COMPLETED: '#9F9FAD',
-  CANCELLED: '#EF4444',
-};
+import type { Meeting } from '../types/meeting.types';
 
 interface MeetingCardProps {
-  meeting: MeetingSummary;
+  meeting: Meeting;
+  proposalTitle?: string | null;
   onPress: () => void;
 }
 
-export function MeetingCard({ meeting, onPress }: MeetingCardProps) {
+export function MeetingCard({ meeting, proposalTitle, onPress }: MeetingCardProps) {
   const { colors } = useTheme();
+  const upcoming = isUpcoming(meeting.scheduledAt);
 
   return (
     <TouchableOpacity
@@ -52,18 +27,17 @@ export function MeetingCard({ meeting, onPress }: MeetingCardProps) {
             className="text-neutral-900 dark:text-neutral-50 text-base font-semibold leading-snug"
             numberOfLines={2}
           >
-            {meeting.title}
+            {meeting.title || 'Council meeting'}
           </Text>
-          {meeting.linkedProposalTitle && (
-            <Text
-              className="text-violet-600 dark:text-violet-400 text-xs font-medium"
-              numberOfLines={1}
-            >
-              {meeting.linkedProposalTitle}
+          {proposalTitle && (
+            <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium" numberOfLines={1}>
+              {proposalTitle}
             </Text>
           )}
         </View>
-        <Badge label={typeLabel[meeting.type]} variant={typeVariant[meeting.type]} size="sm" />
+        {meeting.status ? (
+          <Badge label={meeting.status} variant={upcoming ? 'info' : 'default'} size="sm" />
+        ) : null}
       </View>
 
       <View className="h-px bg-neutral-100 dark:bg-dark-200" />
@@ -83,17 +57,12 @@ export function MeetingCard({ meeting, onPress }: MeetingCardProps) {
               {formatDuration(meeting.durationMinutes)}
             </Text>
           </View>
-
-          <View className="flex-row items-center gap-1">
-            <Ionicons
-              name={statusIcon[meeting.status] as React.ComponentProps<typeof Ionicons>['name']}
-              size={13}
-              color={statusColor[meeting.status]}
-            />
-            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans capitalize">
-              {meeting.status.toLowerCase().replace('_', ' ')}
-            </Text>
-          </View>
+          {meeting.platform && (
+            <View className="flex-row items-center gap-1">
+              <Ionicons name="videocam-outline" size={12} color={colors.icon.muted} />
+              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{meeting.platform}</Text>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>

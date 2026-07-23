@@ -5,6 +5,7 @@ import { AppState, type AppStateStatus, Platform } from 'react-native';
 import { useNotificationStore } from '@/stores/notification.store';
 import { pushNotificationService } from '@/services/push-notification.service';
 import { useAuthStore } from '@/stores/auth.store';
+import { ROLES } from '@/constants/roles';
 
 // Configure foreground notification handling globally
 if (Platform.OS !== 'web') {
@@ -19,21 +20,34 @@ if (Platform.OS !== 'web') {
   });
 }
 
-// Deep-link navigation targets embedded in notification data
-function resolveNotificationRoute(data: Record<string, unknown>): string | null {
-  const { type, targetId } = data as { type?: string; targetId?: string };
-  if (!type || !targetId) return null;
+// Deep-link navigation targets by notification type. The real AppNotification.link field's exact
+// format isn't guaranteed to map onto app routes, so we route to the relevant list screen for the
+// current role rather than assuming a specific item id is reachable from the payload.
+function resolveNotificationRoute(data: Record<string, unknown>, isReviewer: boolean): string | null {
+  const type = (data as { type?: string }).type;
+  if (!type) return null;
 
-  const routes: Record<string, (id: string) => string> = {
-    PROPOSAL_UPDATE: (id) => `/(faculty)/proposals/${id}`,
-    REVIEW_ASSIGNED: (id) => `/(review)/queue/${id}`,
-    REVIEW_DUE: (id) => `/(review)/queue/${id}`,
-    MEETING_REMINDER: (id) => `/(faculty)/meetings/${id}`,
-    REVIEW_MEETING: (id) => `/(review)/meetings/${id}`,
-    NOTIFICATION: () => `/(faculty)/notifications`,
+  if (isReviewer) {
+    const reviewerRoutes: Record<string, string> = {
+      PROPOSAL: '/(review)/queue',
+      REVIEW: '/(review)/queue',
+      COUNCIL: '/(review)/queue',
+      MEETING: '/(review)/meetings',
+      CONTRACT: '/(review)/queue',
+      SYSTEM: '/(review)/notifications',
+    };
+    return reviewerRoutes[type] ?? null;
+  }
+
+  const facultyRoutes: Record<string, string> = {
+    PROPOSAL: '/(faculty)/proposals',
+    REVIEW: '/(faculty)/proposals',
+    COUNCIL: '/(faculty)/proposals',
+    MEETING: '/(faculty)/notifications',
+    CONTRACT: '/(faculty)/reports',
+    SYSTEM: '/(faculty)/notifications',
   };
-
-  return routes[type]?.(targetId) ?? null;
+  return facultyRoutes[type] ?? null;
 }
 
 interface NotificationProviderProps {
@@ -43,7 +57,8 @@ interface NotificationProviderProps {
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const router = useRouter();
   const { setPermission, setPushToken } = useNotificationStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+  const isReviewer = !user?.roles?.includes(ROLES.FACULTY) && !!user?.roles?.includes(ROLES.REVIEW_COMMITTEE);
   const appState = useRef<AppStateStatus>(AppState.currentState);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
   const foregroundListener = useRef<Notifications.EventSubscription | null>(null);
@@ -92,7 +107,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     Notifications.getLastNotificationResponseAsync().then((response) => {
       if (!response) return;
       const data = response.notification.request.content.data as Record<string, unknown>;
-      const route = resolveNotificationRoute(data);
+      const route = resolveNotificationRoute(data, isReviewer);
       if (route) router.push(route as never);
     }).catch(() => {});
 
@@ -100,7 +115,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         const data = response.notification.request.content.data as Record<string, unknown>;
-        const route = resolveNotificationRoute(data);
+        const route = resolveNotificationRoute(data, isReviewer);
         if (route) router.push(route as never);
       },
     );
@@ -108,7 +123,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     return () => {
       responseListener.current?.remove();
     };
-  }, [router]);
+  }, [router, isReviewer]);
 
   // App foreground: clear badge and refresh unread count
   useEffect(() => {

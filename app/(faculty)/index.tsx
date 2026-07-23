@@ -6,12 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { Avatar } from '@/shared/components/ui/Avatar';
-import { Badge } from '@/shared/components/ui/Badge';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { useProposalStats } from '@/features/faculty/hooks/useProposals';
-import { useMeetings } from '@/features/meeting/hooks/useMeetings';
 import { useNotifications, useUnreadCount } from '@/features/notification/hooks/useNotifications';
-import { formatDateTime } from '@/utils/date';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface StatCardProps {
@@ -37,7 +34,6 @@ export default function FacultyDashboard() {
   const queryClient = useQueryClient();
 
   const { data: stats, isLoading: statsLoading } = useProposalStats();
-  const { data: meetings } = useMeetings({ upcoming: true });
   const { data: notifications } = useNotifications();
   useUnreadCount();
 
@@ -48,8 +44,7 @@ export default function FacultyDashboard() {
     return 'Good evening';
   }, []);
 
-  const nextMeeting = meetings?.[0];
-  const recentNotifications = notifications?.filter((n) => !n.isRead).slice(0, 3) ?? [];
+  const recentNotifications = notifications?.filter((n) => !n.read).slice(0, 3) ?? [];
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
@@ -160,38 +155,6 @@ export default function FacultyDashboard() {
           </View>
         </View>
 
-        {/* Upcoming Meeting */}
-        {nextMeeting && (
-          <View className="px-5 mt-5 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">
-              Next Meeting
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.push(`/(faculty)/meetings/${nextMeeting.id}`)}
-              activeOpacity={0.7}
-              className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-2"
-            >
-              <View className="flex-row items-center justify-between">
-                <Badge
-                  label={nextMeeting.type === 'REVIEW' ? 'Review' : nextMeeting.type === 'DISCUSSION' ? 'Discussion' : 'General'}
-                  variant={nextMeeting.type === 'REVIEW' ? 'purple' : 'info'}
-                />
-                <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">
-                  {formatDateTime(nextMeeting.scheduledAt)}
-                </Text>
-              </View>
-              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold" numberOfLines={2}>
-                {nextMeeting.title}
-              </Text>
-              {nextMeeting.linkedProposalTitle && (
-                <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium" numberOfLines={1}>
-                  {nextMeeting.linkedProposalTitle}
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
-
         {/* Recent Notifications */}
         {recentNotifications.length > 0 && (
           <View className="px-5 mt-5 gap-3">
@@ -214,7 +177,7 @@ export default function FacultyDashboard() {
                         {n.title}
                       </Text>
                       <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-0.5" numberOfLines={2}>
-                        {n.body}
+                        {n.message}
                       </Text>
                     </View>
                   </View>

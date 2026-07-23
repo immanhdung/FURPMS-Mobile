@@ -1,26 +1,21 @@
 import { httpClient } from '@/services/http.client';
-import type {
-  Meeting,
-  MeetingSummary,
-  MeetingFilters,
-} from '../types/meeting.types';
+import type { ApiResponse } from '@/types/common';
+import type { Meeting } from '../types/meeting.types';
 
 export interface MeetingService {
-  getMeetings(filters?: MeetingFilters): Promise<MeetingSummary[]>;
-  getMeetingById(id: string): Promise<Meeting>;
+  list(): Promise<Meeting[]>;
+  listByCouncil(councilId: string): Promise<Meeting[]>;
 }
 
 const realMeetingService: MeetingService = {
-  async getMeetings(filters) {
-    const { data } = await httpClient.get<MeetingSummary[]>('/meetings', {
-      params: filters,
-    });
-    return data;
+  async list() {
+    const { data } = await httpClient.get<ApiResponse<Meeting[]>>('/meetings');
+    return data.data;
   },
 
-  async getMeetingById(id) {
-    const { data } = await httpClient.get<Meeting>(`/meetings/${id}`);
-    return data;
+  async listByCouncil(councilId) {
+    const { data } = await httpClient.get<ApiResponse<Meeting[]>>(`/councils/${councilId}/meetings`);
+    return data.data;
   },
 };
 

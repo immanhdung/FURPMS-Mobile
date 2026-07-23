@@ -26,7 +26,7 @@ export default function NotificationsScreen() {
   const { mutate: markAsRead } = useMarkAsRead();
   const { mutate: markAllAsRead, isPending: isMarkingAll } = useMarkAllAsRead();
 
-  const unreadCount = unreadData?.count ?? 0;
+  const unreadCount = unreadData ?? 0;
 
   const onRefresh = useCallback(async () => {
     await refetch();
@@ -81,7 +81,7 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <NotificationItem
               notification={item}
-              onPress={() => handlePress(item.id, item.isRead)}
+              onPress={() => handlePress(item.id, item.read)}
             />
           )}
           contentContainerStyle={{ flexGrow: 1 }}

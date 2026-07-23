@@ -11,7 +11,7 @@ import { useUnreadCount } from '@/features/notification/hooks/useNotifications';
 import { Avatar } from '@/shared/components/ui/Avatar';
 import { Badge } from '@/shared/components/ui/Badge';
 import { ReviewQueueCard } from '@/features/reviewCommittee/components/ReviewQueueCard';
-import { formatDateTime } from '@/utils/date';
+import { formatDateTime, isUpcoming } from '@/utils/date';
 
 function StatCard({
   value,
@@ -39,15 +39,17 @@ export default function ReviewDashboard() {
 
   const { data: stats, refetch: refetchStats, isFetching: fetchingStats } = useReviewQueueStats();
   const { data: queue, refetch: refetchQueue } = useReviewQueue();
-  const { data: meetings } = useMeetings({ upcoming: true } as never);
+  const { data: meetings } = useMeetings();
   const { data: unreadData } = useUnreadCount();
-  const unreadCount = unreadData?.count ?? 0;
+  const unreadCount = unreadData ?? 0;
 
   const highPriority = (queue ?? [])
     .filter((r) => r.status !== 'COMPLETED' && r.priority === 'HIGH')
     .slice(0, 3);
 
-  const nextMeeting = meetings?.[0];
+  const nextMeeting = [...(meetings ?? [])]
+    .filter((m) => isUpcoming(m.scheduledAt))
+    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0];
 
   const onRefresh = useCallback(async () => {
     await Promise.all([refetchStats(), refetchQueue()]);
@@ -161,7 +163,7 @@ export default function ReviewDashboard() {
                 className="text-neutral-900 dark:text-neutral-50 text-base font-semibold"
                 numberOfLines={1}
               >
-                {nextMeeting.title}
+                {nextMeeting.title || 'Council meeting'}
               </Text>
               <View className="flex-row items-center gap-1.5">
                 <Ionicons name="calendar-outline" size={13} color={colors.icon.muted} />

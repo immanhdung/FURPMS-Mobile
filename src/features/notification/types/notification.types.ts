@@ -1,39 +1,11 @@
-export type NotificationType =
-  | 'PROPOSAL_STATUS_CHANGED'
-  | 'REVIEW_ASSIGNED'
-  | 'REVIEW_SUBMITTED'
-  | 'MEETING_SCHEDULED'
-  | 'MEETING_REMINDER'
-  | 'REVISION_REQUESTED'
-  | 'PROPOSAL_APPROVED'
-  | 'PROPOSAL_REJECTED'
-  | 'GENERAL';
+export type NotificationType = 'PROPOSAL' | 'REVIEW' | 'COUNCIL' | 'MEETING' | 'CONTRACT' | 'SYSTEM';
 
-export interface NotificationData {
-  proposalId?: string;
-  meetingId?: string;
-  reviewId?: string;
-}
-
-export interface Notification {
+export interface AppNotification {
   id: string;
   type: NotificationType;
   title: string;
-  body: string;
-  isRead: boolean;
+  message: string;
+  read: boolean;
   createdAt: string;
-  data?: NotificationData;
-}
-
-export interface NotificationSummary {
-  id: string;
-  type: NotificationType;
-  title: string;
-  body: string;
-  isRead: boolean;
-  createdAt: string;
-}
-
-export interface UnreadCountResponse {
-  count: number;
+  link?: string | null;
 }

@@ -24,18 +24,24 @@ export const QUERY_KEYS = {
   },
 
   meetings: {
-    list: (role?: string) => ['meetings', 'list', role] as const,
-    detail: (id: string) => ['meetings', 'detail', id] as const,
+    all: ['meetings', 'all'] as const,
+    byCouncil: (councilId: string) => ['meetings', 'by-council', councilId] as const,
   },
 
   notifications: {
     feed: ['notifications', 'feed'] as const,
-    unreadCount: ['notifications', 'unread-count'] as const,
-    detail: (id: string) => ['notifications', 'detail', id] as const,
+    count: ['notifications', 'count'] as const,
   },
 
   search: {
     results: (query: string) => ['search', query] as const,
   },
+
+  analytics: {
+    faculty: ['analytics', 'faculty'] as const,
+    reviewer: ['analytics', 'reviewer'] as const,
+  },
+
+  uploadPolicy: ['system-settings', 'upload-policy'] as const,
 
 } as const;
