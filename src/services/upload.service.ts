@@ -63,7 +63,7 @@ export const uploadService = {
     };
   },
 
-  async uploadFile<T>(
+  async uploadFile<T = UploadedFile>(
     file: PickedFile,
     endpoint: string,
     fieldName: string = 'file',
@@ -130,14 +130,24 @@ export const uploadService = {
     file: PickedFile,
     documentType?: string,
     onProgress?: UploadProgressCallback,
-  ): Promise<ProposalDocument> {
-    return this.uploadFile<ProposalDocument>(
+  ): Promise<UploadedFile> {
+    // The FileUploader widget renders a generic {name,size,url,...} shape regardless of endpoint;
+    // adapt the real ProposalDocument response (fileName/fileSizeBytes/downloadUrl) into it.
+    const doc = await this.uploadFile<ProposalDocument>(
       file,
       `/proposals/${proposalId}/documents`,
       'file',
       documentType ? { documentType } : undefined,
       onProgress,
     );
+    return {
+      id: doc.id,
+      name: doc.fileName,
+      url: doc.downloadUrl ?? '',
+      size: doc.fileSizeBytes,
+      mimeType: file.mimeType,
+      uploadedAt: doc.uploadedAt,
+    };
   },
 
   formatFileSize(bytes: number): string {

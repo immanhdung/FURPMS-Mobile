@@ -80,11 +80,11 @@ export default function FacultyDashboard() {
               {greeting}
             </Text>
             <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold tracking-tight">
-              {user?.name ?? 'Faculty'}
+              {user?.fullName ?? 'Faculty'}
             </Text>
           </View>
           <TouchableOpacity onPress={() => router.push('/(faculty)/profile/index')} activeOpacity={0.7}>
-            <Avatar name={user?.name ?? ''} size="md" />
+            <Avatar name={user?.fullName ?? ''} size="md" />
           </TouchableOpacity>
         </View>
 

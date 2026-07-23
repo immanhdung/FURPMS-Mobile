@@ -76,11 +76,11 @@ export default function ReviewDashboard() {
           <View className="gap-0.5">
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{greeting}</Text>
             <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold tracking-tight">
-              {user?.name ?? 'Reviewer'}
+              {user?.fullName ?? 'Reviewer'}
             </Text>
           </View>
           <View className="items-end gap-2">
-            {user && <Avatar name={user.name} size="md" />}
+            {user && <Avatar name={user.fullName} size="md" />}
             <Badge label="Reviewer" variant="info" size="sm" />
           </View>
         </View>

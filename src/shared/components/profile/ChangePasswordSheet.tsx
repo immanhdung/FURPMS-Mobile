@@ -42,8 +42,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
       {
         onSuccess: handleClose,
         onError: (error) => {
-          const message = (error as { message?: string })?.message;
-          setApiError(message ?? 'Could not change password. Please try again.');
+          setApiError(error.message || 'Could not change password. Please try again.');
         },
       },
     );

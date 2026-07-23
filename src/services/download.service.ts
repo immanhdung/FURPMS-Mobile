@@ -3,7 +3,7 @@ import * as Sharing from 'expo-sharing';
 import * as SecureStore from '@/utils/secureStore';
 import { SECURE_KEYS } from '@/constants/storageKeys';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/api';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpms-be-1.onrender.com/api';
 
 export interface DownloadProgress {
   loaded: number;
