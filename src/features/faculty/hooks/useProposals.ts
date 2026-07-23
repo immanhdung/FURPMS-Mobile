@@ -57,11 +57,14 @@ export function useUpdateProposal(id: string) {
   });
 }
 
-export function useSubmitProposal(id: string) {
+/** Takes the proposal id per-call (not at hook-creation time) so it can't go stale — important
+ *  right after a create() in the same callback chain, where a hook-bound id would still closure
+ *  over the pre-creation value until the next render. */
+export function useSubmitProposal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (confirmCv: boolean) => proposalService.submit(id, confirmCv),
-    onSuccess: () => {
+    mutationFn: ({ id, confirmCv }: { id: string; confirmCv: boolean }) => proposalService.submit(id, confirmCv),
+    onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.proposals.mine });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.proposals.detail(id) });
     },

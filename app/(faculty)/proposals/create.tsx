@@ -1,310 +1,247 @@
-import { useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useForm, Controller } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
-import { useCreateProposal, useUpdateProposal } from '@/features/faculty/hooks/useProposals';
+import { useProposal, useCreateProposal, useUpdateProposal, useSubmitProposal } from '@/features/faculty/hooks/useProposals';
 import { Button } from '@/shared/components/ui/Button';
-import { createProposalSchema, type CreateProposalFormValues } from '@/utils/validators';
+import { LoadingState } from '@/shared/components/feedback/LoadingState';
+import { WizardStepper } from '@/features/faculty/components/wizard/WizardStepper';
+import { Step1CycleFieldType } from '@/features/faculty/components/wizard/Step1CycleFieldType';
+import { Step2ResearchContent } from '@/features/faculty/components/wizard/Step2ResearchContent';
+import { Step3Details } from '@/features/faculty/components/wizard/Step3Details';
+import { Step4TeamMembers } from '@/features/faculty/components/wizard/Step4TeamMembers';
+import { Step5Preview } from '@/features/faculty/components/wizard/Step5Preview';
+import { SubmitProposalSheet } from '@/features/faculty/components/SubmitProposalSheet';
+import { proposalWizardSchema, type ProposalWizardFormValues } from '@/utils/validators';
+import { uploadService, type PickedFile } from '@/services/upload.service';
+import type { ProposalPayload } from '@/features/faculty/types/proposal.types';
 
-function FieldLabel({ label, required }: { label: string; required?: boolean }) {
-  return (
-    <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-medium mb-1.5">
-      {label}
-      {required && <Text className="text-red-500"> *</Text>}
-    </Text>
-  );
-}
+const STEP_FIELDS: (keyof ProposalWizardFormValues)[][] = [
+  ['cycleId', 'trackId', 'researchType'],
+  [],
+  ['titleVI', 'objectives', 'fundingMethod', 'durationMonths'],
+  [],
+  [],
+];
 
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <Text className="text-red-500 dark:text-red-400 text-xs font-sans mt-1">{message}</Text>;
-}
+const DEFAULT_VALUES: ProposalWizardFormValues = {
+  cycleId: undefined as unknown as number,
+  trackId: '',
+  researchType: undefined as unknown as number,
+  orderId: undefined,
+  titleVI: '',
+  titleEN: '',
+  abstractEN: '',
+  objectives: '',
+  methodology: '',
+  expectedOutput: '',
+  urgency: '',
+  novelty: '',
+  applicationPotential: '',
+  transferPotential: '',
+  facilities: '',
+  fundingMethod: 'WHOLE',
+  durationMonths: 12,
+  members: [],
+};
 
-export default function CreateProposalScreen() {
+export default function ProposalWizardScreen() {
   const router = useRouter();
   const { edit: editId } = useLocalSearchParams<{ edit?: string }>();
   const { colors } = useTheme();
   const isEditing = !!editId;
 
+  const [proposalId, setProposalId] = useState<string | null>(editId ?? null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [pickedFile, setPickedFile] = useState<PickedFile | null>(null);
+  const [documentAttached, setDocumentAttached] = useState(false);
+  const [submitSheetVisible, setSubmitSheetVisible] = useState(false);
+
+  const { data: existingProposal, isLoading: loadingExisting } = useProposal(editId ?? '');
   const { mutate: createProposal, isPending: isCreating } = useCreateProposal();
-  const { mutate: updateProposal, isPending: isUpdating } = useUpdateProposal(editId ?? '');
+  const { mutate: updateProposal, isPending: isUpdating } = useUpdateProposal(proposalId ?? '');
+  const { mutate: submitProposal, isPending: isSubmitting } = useSubmitProposal();
+
+  const methods = useForm<ProposalWizardFormValues>({
+    resolver: zodResolver(proposalWizardSchema),
+    defaultValues: DEFAULT_VALUES,
+  });
+  const { trigger, handleSubmit, reset, getValues } = methods;
+
+  useEffect(() => {
+    if (!existingProposal) return;
+    reset({
+      cycleId: existingProposal.cycleId ?? (undefined as unknown as number),
+      trackId: existingProposal.trackId ?? '',
+      researchType: existingProposal.researchType,
+      orderId: existingProposal.orderId ?? undefined,
+      titleVI: existingProposal.titleVI ?? '',
+      titleEN: existingProposal.titleEN ?? '',
+      abstractEN: existingProposal.abstractEN ?? '',
+      objectives: existingProposal.objectives ?? '',
+      methodology: existingProposal.methodology ?? '',
+      expectedOutput: existingProposal.expectedOutput ?? '',
+      urgency: existingProposal.urgency ?? '',
+      novelty: existingProposal.novelty ?? '',
+      applicationPotential: existingProposal.applicationPotential ?? '',
+      transferPotential: existingProposal.transferPotential ?? '',
+      facilities: existingProposal.facilities ?? '',
+      fundingMethod: (existingProposal.fundingMethod as 'WHOLE' | 'PARTIAL') ?? 'WHOLE',
+      durationMonths: existingProposal.durationMonths ?? 12,
+      members: (existingProposal.members ?? []).map((m) => ({
+        fullName: m.fullName,
+        email: m.email,
+        department: m.department ?? undefined,
+        role: m.role ?? undefined,
+        workMonths: m.workMonths,
+        academicTitle: m.academicTitle ?? undefined,
+        memberRoleCode: m.memberRoleCode ?? undefined,
+        isSecretary: m.isSecretary,
+      })),
+    });
+    setDocumentAttached(true); // an existing proposal may already have documents; don't re-attach automatically
+  }, [existingProposal, reset]);
 
   const isPending = isCreating || isUpdating;
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<CreateProposalFormValues>({
-    resolver: zodResolver(createProposalSchema),
-    defaultValues: {
-      title: '',
-      abstract: '',
-      researchField: '',
-      startDate: '',
-      endDate: '',
-      budget: 0,
-      objectives: '',
-      methodology: '',
-      expectedOutcomes: '',
-    },
-  });
+  async function attachPickedFileIfNeeded(targetProposalId: string) {
+    if (!pickedFile || documentAttached) return;
+    try {
+      await uploadService.uploadProposalDocument(targetProposalId, pickedFile);
+      setDocumentAttached(true);
+    } catch {
+      Alert.alert('Document not attached', 'Your proposal was saved, but the document could not be uploaded. You can retry from the proposal detail page.');
+    }
+  }
 
-  const inputClass =
-    'bg-white dark:bg-dark-50 border border-neutral-200 dark:border-dark-200 rounded-xl px-4 py-3 text-neutral-900 dark:text-neutral-50 text-sm font-sans';
+  function toPayload(values: ProposalWizardFormValues): ProposalPayload {
+    return {
+      cycleId: values.cycleId,
+      orderId: values.orderId,
+      trackId: values.trackId,
+      titleVI: values.titleVI,
+      titleEN: values.titleEN || undefined,
+      researchType: values.researchType,
+      durationMonths: values.durationMonths,
+      objectives: values.objectives,
+      methodology: values.methodology || undefined,
+      expectedOutput: values.expectedOutput || undefined,
+      abstractEN: values.abstractEN || undefined,
+      urgency: values.urgency || undefined,
+      novelty: values.novelty || undefined,
+      applicationPotential: values.applicationPotential || undefined,
+      transferPotential: values.transferPotential || undefined,
+      facilities: values.facilities || undefined,
+      fundingMethod: values.fundingMethod,
+      members: values.members,
+    };
+  }
 
-  const handleSave = (data: CreateProposalFormValues) => {
-    const payload = { ...data, budgetItems: [], team: [] };
-    if (isEditing) {
+  function saveDraft(onDone?: (id: string) => void) {
+    const payload = toPayload(getValues());
+    if (proposalId) {
       updateProposal(payload, {
-        onSuccess: () => {
-          Alert.alert('Saved', 'Your proposal has been updated.');
-          router.back();
+        onSuccess: async () => {
+          await attachPickedFileIfNeeded(proposalId);
+          onDone?.(proposalId);
         },
         onError: () => Alert.alert('Error', 'Failed to save changes. Please try again.'),
       });
     } else {
       createProposal(payload, {
-        onSuccess: (proposal) => {
-          Alert.alert('Draft Saved', 'Your proposal has been saved as a draft.');
-          router.replace(`/(faculty)/proposals/${proposal.id}`);
+        onSuccess: async (created) => {
+          setProposalId(created.id);
+          await attachPickedFileIfNeeded(created.id);
+          onDone?.(created.id);
         },
         onError: () => Alert.alert('Error', 'Failed to create proposal. Please try again.'),
       });
     }
-  };
+  }
+
+  async function handleNext() {
+    const fields = STEP_FIELDS[currentStep - 1];
+    if (fields.length > 0) {
+      const valid = await trigger(fields);
+      if (!valid) return;
+    }
+    if (currentStep < 5) {
+      setCurrentStep((s) => s + 1);
+    }
+  }
+
+  function handleBack() {
+    if (currentStep > 1) setCurrentStep((s) => s - 1);
+  }
+
+  function handleSaveDraft() {
+    saveDraft(() => {
+      Alert.alert('Draft Saved', 'Your proposal has been saved as a draft.');
+    });
+  }
+
+  function handleSubmitProposal(confirmCv: boolean) {
+    saveDraft((id) => {
+      submitProposal(
+        { id, confirmCv },
+        {
+          onSuccess: () => {
+            setSubmitSheetVisible(false);
+            router.replace(`/(faculty)/proposals/${id}`);
+          },
+          onError: () => Alert.alert('Error', 'Failed to submit proposal. Please try again.'),
+        },
+      );
+    });
+  }
+
+  if (isEditing && loadingExisting) return <LoadingState message="Loading proposal…" />;
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['bottom']}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
-      >
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Title */}
-          <View className="mb-5">
-            <FieldLabel label="Title" required />
-            <Controller
-              control={control}
-              name="title"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Enter a descriptive title for your research"
-                  placeholderTextColor={colors.text.tertiary}
-                  className={inputClass}
-                  multiline
-                  numberOfLines={2}
-                  style={{ minHeight: 56, textAlignVertical: 'top' }}
-                />
-              )}
-            />
-            <FieldError message={errors.title?.message} />
-          </View>
+      <FormProvider {...methods}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
+          <WizardStepper currentStep={currentStep} />
+          <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            {currentStep === 1 && <Step1CycleFieldType />}
+            {currentStep === 2 && <Step2ResearchContent pickedFile={pickedFile} onPickedFileChange={(f) => { setPickedFile(f); setDocumentAttached(false); }} />}
+            {currentStep === 3 && <Step3Details />}
+            {currentStep === 4 && <Step4TeamMembers />}
+            {currentStep === 5 && <Step5Preview />}
+          </ScrollView>
 
-          {/* Research Field */}
-          <View className="mb-5">
-            <FieldLabel label="Research Field" required />
-            <Controller
-              control={control}
-              name="researchField"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="e.g. Artificial Intelligence, Blockchain"
-                  placeholderTextColor={colors.text.tertiary}
-                  className={inputClass}
-                />
+          <View className="px-5 pt-3 pb-4 border-t border-neutral-100 dark:border-dark-200 bg-neutral-50 dark:bg-dark-0 gap-3">
+            <View className="flex-row gap-3">
+              {currentStep > 1 && (
+                <TouchableOpacity
+                  onPress={handleBack}
+                  activeOpacity={0.7}
+                  className="flex-row items-center justify-center px-4 py-3 rounded-xl border border-neutral-200 dark:border-dark-200"
+                >
+                  <Ionicons name="chevron-back" size={18} color={colors.icon.default} />
+                </TouchableOpacity>
               )}
-            />
-            <FieldError message={errors.researchField?.message} />
-          </View>
-
-          {/* Abstract */}
-          <View className="mb-5">
-            <FieldLabel label="Abstract" required />
-            <Controller
-              control={control}
-              name="abstract"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Briefly describe your research proposal (min. 50 characters)…"
-                  placeholderTextColor={colors.text.tertiary}
-                  className={inputClass}
-                  multiline
-                  numberOfLines={4}
-                  style={{ minHeight: 100, textAlignVertical: 'top' }}
-                />
+              <Button label="Save Draft" variant="secondary" onPress={handleSaveDraft} loading={isPending} />
+              {currentStep < 5 ? (
+                <Button label="Next" onPress={handleNext} fullWidth />
+              ) : (
+                <Button label="Review & Submit" onPress={() => setSubmitSheetVisible(true)} fullWidth />
               )}
-            />
-            <FieldError message={errors.abstract?.message} />
-          </View>
-
-          {/* Dates */}
-          <View className="flex-row gap-3 mb-5">
-            <View className="flex-1">
-              <FieldLabel label="Start Date" required />
-              <Controller
-                control={control}
-                name="startDate"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    placeholder="YYYY-MM-DD"
-                    placeholderTextColor={colors.text.tertiary}
-                    className={inputClass}
-                  />
-                )}
-              />
-              <FieldError message={errors.startDate?.message} />
-            </View>
-            <View className="flex-1">
-              <FieldLabel label="End Date" required />
-              <Controller
-                control={control}
-                name="endDate"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    placeholder="YYYY-MM-DD"
-                    placeholderTextColor={colors.text.tertiary}
-                    className={inputClass}
-                  />
-                )}
-              />
-              <FieldError message={errors.endDate?.message} />
             </View>
           </View>
+        </KeyboardAvoidingView>
+      </FormProvider>
 
-          {/* Budget */}
-          <View className="mb-5">
-            <FieldLabel label="Total Budget (VND)" required />
-            <Controller
-              control={control}
-              name="budget"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value === 0 ? '' : String(value)}
-                  onChangeText={(t) => onChange(Number(t.replace(/[^0-9]/g, '')) || 0)}
-                  onBlur={onBlur}
-                  placeholder="e.g. 45000000"
-                  placeholderTextColor={colors.text.tertiary}
-                  className={inputClass}
-                  keyboardType="numeric"
-                />
-              )}
-            />
-            <FieldError message={errors.budget?.message} />
-          </View>
-
-          {/* Objectives */}
-          <View className="mb-5">
-            <FieldLabel label="Objectives" required />
-            <Controller
-              control={control}
-              name="objectives"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="What specific goals does this research aim to achieve?"
-                  placeholderTextColor={colors.text.tertiary}
-                  className={inputClass}
-                  multiline
-                  numberOfLines={3}
-                  style={{ minHeight: 80, textAlignVertical: 'top' }}
-                />
-              )}
-            />
-            <FieldError message={errors.objectives?.message} />
-          </View>
-
-          {/* Methodology */}
-          <View className="mb-5">
-            <FieldLabel label="Methodology" required />
-            <Controller
-              control={control}
-              name="methodology"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Describe your research approach and methods…"
-                  placeholderTextColor={colors.text.tertiary}
-                  className={inputClass}
-                  multiline
-                  numberOfLines={3}
-                  style={{ minHeight: 80, textAlignVertical: 'top' }}
-                />
-              )}
-            />
-            <FieldError message={errors.methodology?.message} />
-          </View>
-
-          {/* Expected Outcomes */}
-          <View className="mb-8">
-            <FieldLabel label="Expected Outcomes" required />
-            <Controller
-              control={control}
-              name="expectedOutcomes"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="What are the expected deliverables or contributions?"
-                  placeholderTextColor={colors.text.tertiary}
-                  className={inputClass}
-                  multiline
-                  numberOfLines={3}
-                  style={{ minHeight: 80, textAlignVertical: 'top' }}
-                />
-              )}
-            />
-            <FieldError message={errors.expectedOutcomes?.message} />
-          </View>
-
-          {/* Actions */}
-          <Button
-            label={isPending ? 'Saving…' : isEditing ? 'Save Changes' : 'Save as Draft'}
-            variant="primary"
-            size="lg"
-            fullWidth
-            loading={isPending}
-            onPress={handleSubmit(handleSave)}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <SubmitProposalSheet
+        visible={submitSheetVisible}
+        isSubmitting={isSubmitting || isPending}
+        onClose={() => setSubmitSheetVisible(false)}
+        onConfirm={handleSubmitProposal}
+      />
     </SafeAreaView>
   );
 }

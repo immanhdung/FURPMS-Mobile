@@ -5,9 +5,10 @@ interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   error?: string;
   hint?: string;
+  required?: boolean;
 }
 
-export function Input({ label, error, hint, ...props }: InputProps) {
+export function Input({ label, error, hint, required, ...props }: InputProps) {
   const { colors } = useTheme();
 
   return (
@@ -15,6 +16,7 @@ export function Input({ label, error, hint, ...props }: InputProps) {
       {label && (
         <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
           {label}
+          {required && <Text className="text-red-500"> *</Text>}
         </Text>
       )}
       <TextInput

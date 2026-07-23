@@ -58,7 +58,7 @@ export default function ProposalDetailScreen() {
   const { colors } = useTheme();
 
   const { data: proposal, isLoading, isError, refetch } = useProposal(id);
-  const { mutate: submitProposal, isPending: isSubmitting } = useSubmitProposal(id);
+  const { mutate: submitProposal, isPending: isSubmitting } = useSubmitProposal();
   const { mutate: withdrawProposal, isPending: isWithdrawing } = useWithdrawProposal(id);
   const [submitSheetVisible, setSubmitSheetVisible] = useState(false);
 
@@ -230,9 +230,10 @@ export default function ProposalDetailScreen() {
         isSubmitting={isSubmitting}
         onClose={() => setSubmitSheetVisible(false)}
         onConfirm={(confirmCv) =>
-          submitProposal(confirmCv, {
-            onSuccess: () => setSubmitSheetVisible(false),
-          })
+          submitProposal(
+            { id, confirmCv },
+            { onSuccess: () => setSubmitSheetVisible(false) },
+          )
         }
       />
     </SafeAreaView>
