@@ -10,15 +10,33 @@ export const QUERY_KEYS = {
     expectedProducts: (proposalId: string) => ['proposals', 'expected-products', proposalId] as const,
   },
 
-  reviews: {
-    all: ['reviews'] as const,
-    queue: ['reviews', 'queue'] as const,
-    detail: (id: string) => ['reviews', 'detail', id] as const,
-    completed: ['reviews', 'completed'] as const,
-    stats: ['reviews', 'stats'] as const,
-    criteria: (submissionId: string) => ['reviews', 'criteria', submissionId] as const,
-    aiSummary: (submissionId: string) => ['reviews', 'ai-summary', submissionId] as const,
-    result: (submissionId: string) => ['reviews', 'result', submissionId] as const,
+  memberships: {
+    mine: ['memberships', 'mine'] as const,
+  },
+
+  councilMembers: {
+    list: (councilId: string) => ['council-members', councilId] as const,
+  },
+
+  rubrics: {
+    all: ['rubrics'] as const,
+  },
+
+  scores: {
+    mine: (councilId: string) => ['scores', 'mine', councilId] as const,
+    all: (councilId: string) => ['scores', 'all', councilId] as const,
+  },
+
+  decisions: {
+    byCouncil: (councilId: string) => ['decisions', councilId] as const,
+  },
+
+  acceptance: {
+    byCouncil: (councilId: string) => ['acceptance', councilId] as const,
+  },
+
+  feedback: {
+    byCouncil: (councilId: string) => ['feedback', councilId] as const,
   },
 
   meetings: {
