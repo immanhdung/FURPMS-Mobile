@@ -9,10 +9,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
     onSuccess: async (response) => {
-      await setUser(response.user, {
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-      });
+      await setUser(response.user, response.accessToken);
     },
   });
 }

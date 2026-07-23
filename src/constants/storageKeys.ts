@@ -1,6 +1,5 @@
 export const SECURE_KEYS = {
   ACCESS_TOKEN: 'furpms_access_token',
-  REFRESH_TOKEN: 'furpms_refresh_token',
   USER: 'furpms_user',
 } as const;
 

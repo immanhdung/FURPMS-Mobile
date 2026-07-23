@@ -1,21 +1,17 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { profileService } from '../services/profile.service';
 import { QUERY_KEYS } from '@/constants/queryKeys';
-import type { UpdateProfileDTO } from '../types/profile.types';
+import type { ChangePasswordRequest } from '@/features/auth/types/auth.types';
 
 export function useProfile() {
   return useQuery({
-    queryKey: QUERY_KEYS.profile.me,
+    queryKey: QUERY_KEYS.auth.me,
     queryFn: () => profileService.getProfile(),
   });
 }
 
-export function useUpdateProfile() {
-  const queryClient = useQueryClient();
+export function useChangePassword() {
   return useMutation({
-    mutationFn: (payload: UpdateProfileDTO) => profileService.updateProfile(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile.me });
-    },
+    mutationFn: (payload: ChangePasswordRequest) => profileService.changePassword(payload),
   });
 }

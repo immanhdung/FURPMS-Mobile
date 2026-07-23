@@ -2,7 +2,7 @@ import type { ProposalFilters } from '@/features/faculty/types/proposal.types';
 
 export const QUERY_KEYS = {
   auth: {
-    profile: ['auth', 'profile'] as const,
+    me: ['auth', 'me'] as const,
   },
 
   proposals: {
@@ -38,7 +38,4 @@ export const QUERY_KEYS = {
     results: (query: string) => ['search', query] as const,
   },
 
-  profile: {
-    me: ['profile', 'me'] as const,
-  },
 } as const;

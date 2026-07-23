@@ -1,50 +1,71 @@
-import axios from 'axios';
-import * as SecureStore from '@/utils/secureStore';
-import { SECURE_KEYS } from '@/constants/storageKeys';
+import axios, { type AxiosError } from 'axios';
+import type { ApiError } from '@/types/common';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/api';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpms-be-1.onrender.com/api';
 
 export const httpClient = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
-  headers: { 'Content-Type': 'application/json' },
+  // No default Content-Type — axios sets it per-request (JSON for plain objects, the correct
+  // multipart boundary for FormData). A fixed "application/json" header breaks file uploads.
 });
 
-httpClient.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync(SECURE_KEYS.ACCESS_TOKEN);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// In-memory token cache: SecureStore.getItemAsync is an async native-bridge round trip, too slow
+// to await on every request. The auth store is the single writer (see stores/auth.store.ts).
+let cachedToken: string | null = null;
+
+export function setAuthToken(token: string | null): void {
+  cachedToken = token;
+}
+
+httpClient.interceptors.request.use((config) => {
+  if (cachedToken) {
+    config.headers.Authorization = `Bearer ${cachedToken}`;
   }
   return config;
 });
 
+type UnauthorizedListener = () => void;
+let unauthorizedListener: UnauthorizedListener | null = null;
+
+/** Registered once by AuthProvider — kept decoupled from the auth store to avoid a circular import. */
+export function onUnauthorized(listener: UnauthorizedListener): void {
+  unauthorizedListener = listener;
+}
+
+function mapStatusToMessage(status: number): string {
+  switch (status) {
+    case 400:
+      return 'The request could not be processed. Please check your input.';
+    case 401:
+      return 'Your session has expired. Please sign in again.';
+    case 403:
+      return 'You do not have permission to perform this action.';
+    case 404:
+      return 'The requested resource was not found.';
+    case 0:
+      return 'Unable to reach the server. Please check your connection.';
+    default:
+      return 'Something went wrong. Please try again.';
+  }
+}
+
 httpClient.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const original = error.config;
+  (error: AxiosError<{ message?: string | null; errors?: string[] | null }>) => {
+    const status = error.response?.status ?? 0;
 
-    if (error.response?.status === 401 && !original._retry) {
-      original._retry = true;
-      try {
-        const refreshToken = await SecureStore.getItemAsync(SECURE_KEYS.REFRESH_TOKEN);
-        if (!refreshToken) throw new Error('No refresh token');
+    const apiError: ApiError = {
+      status,
+      message: error.response?.data?.message || error.response?.data?.errors?.[0] || mapStatusToMessage(status),
+      errors: error.response?.data?.errors ?? undefined,
+    };
 
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
-
-        await SecureStore.setItemAsync(SECURE_KEYS.ACCESS_TOKEN, data.accessToken);
-        await SecureStore.setItemAsync(SECURE_KEYS.REFRESH_TOKEN, data.refreshToken);
-
-        original.headers.Authorization = `Bearer ${data.accessToken}`;
-        return httpClient(original);
-      } catch {
-        await Promise.all([
-          SecureStore.deleteItemAsync(SECURE_KEYS.ACCESS_TOKEN),
-          SecureStore.deleteItemAsync(SECURE_KEYS.REFRESH_TOKEN),
-          SecureStore.deleteItemAsync(SECURE_KEYS.USER),
-        ]);
-      }
+    if (status === 401) {
+      cachedToken = null;
+      unauthorizedListener?.();
     }
 
-    return Promise.reject(error);
+    return Promise.reject(apiError);
   },
 );

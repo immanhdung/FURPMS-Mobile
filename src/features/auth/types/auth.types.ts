@@ -1,14 +1,13 @@
-export type UserRole = 'FACULTY' | 'REVIEW_COMMITTEE';
+import type { Role } from '@/constants/roles';
 
 export interface User {
   id: string;
+  fullName: string;
   email: string;
-  name: string;
-  role: UserRole;
-  department?: string;
-  faculty?: string;
-  avatar?: string;
-  staffId?: string;
+  roles: Role[];
+  avatarUrl?: string | null;
+  status?: string | null;
+  lastLoginAt?: string | null;
 }
 
 export interface LoginCredentials {
@@ -16,11 +15,15 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface TokenPair {
+/** Matches web's LoginResponse — the real backend issues a single access token, no refresh token. */
+export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: User;
 }
 
-export interface AuthResponse extends TokenPair {
-  user: User;
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }
