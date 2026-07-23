@@ -1,55 +1,36 @@
-import { useCallback } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  Alert,
-} from 'react-native';
+import { useCallback, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
-import { useProposal, useSubmitProposal, useDeleteProposal } from '@/features/faculty/hooks/useProposals';
+import { useProposal, useSubmitProposal, useWithdrawProposal } from '@/features/faculty/hooks/useProposals';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Button } from '@/shared/components/ui/Button';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
 import { Avatar } from '@/shared/components/ui/Avatar';
-import { formatDate, formatRelative } from '@/utils/date';
-import { formatBudget } from '@/utils/currency';
+import { ProposalStatusTimeline } from '@/features/faculty/components/ProposalStatusTimeline';
+import { ProposalDocumentsCard } from '@/features/faculty/components/ProposalDocumentsCard';
+import { ExpectedProductsCard } from '@/features/faculty/components/ExpectedProductsCard';
+import { SubmitProposalSheet } from '@/features/faculty/components/SubmitProposalSheet';
+import { formatDate } from '@/utils/date';
 import { getStatusLabel } from '@/utils/status';
+import { PROPOSAL_STATUS } from '@/constants/statuses';
 import type { BadgeVariant } from '@/shared/components/ui/Badge';
-import type { ProposalStatus, BudgetCategory, TeamMemberRole } from '@/features/faculty/types/proposal.types';
 
-const statusVariant: Record<ProposalStatus, BadgeVariant> = {
-  DRAFT: 'default',
-  SUBMITTED: 'info',
-  UNDER_REVIEW: 'warning',
-  REVISION_REQUIRED: 'warning',
-  APPROVED: 'success',
-  REJECTED: 'danger',
-};
-
-const categoryLabel: Record<BudgetCategory, string> = {
-  PERSONNEL: 'Personnel',
-  EQUIPMENT: 'Equipment',
-  OVERHEAD: 'Overhead',
-  OTHER: 'Other',
-};
-
-const roleLabel: Record<TeamMemberRole, string> = {
-  PI: 'Principal Investigator',
-  CO_PI: 'Co-Investigator',
-  MEMBER: 'Team Member',
+const statusVariant: Record<string, BadgeVariant> = {
+  [PROPOSAL_STATUS.DRAFT]: 'default',
+  [PROPOSAL_STATUS.SUBMITTED]: 'info',
+  [PROPOSAL_STATUS.UNDER_REVIEW]: 'warning',
+  [PROPOSAL_STATUS.APPROVED]: 'success',
+  [PROPOSAL_STATUS.REJECTED]: 'danger',
+  [PROPOSAL_STATUS.WITHDRAWN]: 'default',
 };
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold mb-3">
-      {title}
-    </Text>
+    <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold mb-3">{title}</Text>
   );
 }
 
@@ -61,20 +42,12 @@ function InfoCard({ children }: { children: React.ReactNode }) {
   );
 }
 
-function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
-  const { colors } = useTheme();
+function TextField({ label, value }: { label: string; value?: string | null }) {
+  if (!value) return null;
   return (
-    <View className="flex-row items-start gap-3">
-      <Ionicons
-        name={icon as React.ComponentProps<typeof Ionicons>['name']}
-        size={16}
-        color={colors.icon.muted}
-        style={{ marginTop: 1 }}
-      />
-      <View className="flex-1">
-        <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mb-0.5">{label}</Text>
-        <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-snug">{value}</Text>
-      </View>
+    <View className="gap-1">
+      <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{label}</Text>
+      <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">{value}</Text>
     </View>
   );
 }
@@ -86,65 +59,28 @@ export default function ProposalDetailScreen() {
 
   const { data: proposal, isLoading, isError, refetch } = useProposal(id);
   const { mutate: submitProposal, isPending: isSubmitting } = useSubmitProposal(id);
-  const { mutate: deleteProposal, isPending: isDeleting } = useDeleteProposal();
+  const { mutate: withdrawProposal, isPending: isWithdrawing } = useWithdrawProposal(id);
+  const [submitSheetVisible, setSubmitSheetVisible] = useState(false);
 
   const onRefresh = useCallback(async () => {
     await refetch();
   }, [refetch]);
 
-  const handleSubmit = () => {
-    Alert.alert(
-      'Submit Proposal',
-      'Are you sure you want to submit this proposal for review? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Submit',
-          style: 'default',
-          onPress: () =>
-            submitProposal(undefined, {
-              onSuccess: () => {
-                Alert.alert('Submitted', 'Your proposal has been submitted for review.');
-              },
-            }),
-        },
-      ],
-    );
-  };
-
-  const handleDelete = () => {
-    Alert.alert(
-      'Delete Proposal',
-      'Are you sure you want to delete this draft? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () =>
-            deleteProposal(id, {
-              onSuccess: () => router.back(),
-            }),
-        },
-      ],
-    );
-  };
-
   if (isLoading) return <LoadingState message="Loading proposal…" />;
-  if (isError || !proposal)
-    return (
-      <ErrorState
-        title="Could not load proposal"
-        message="Check your connection and try again."
-        onRetry={refetch}
-      />
-    );
+  if (isError || !proposal) {
+    return <ErrorState title="Could not load proposal" message="Check your connection and try again." onRetry={refetch} />;
+  }
 
-  const canSubmit = proposal.status === 'DRAFT' || proposal.status === 'REVISION_REQUIRED';
-  const canEdit = proposal.status === 'DRAFT' || proposal.status === 'REVISION_REQUIRED';
-  const canDelete = proposal.status === 'DRAFT';
+  const isDraft = proposal.status === PROPOSAL_STATUS.DRAFT;
+  const canWithdraw = proposal.status === PROPOSAL_STATUS.SUBMITTED || proposal.status === PROPOSAL_STATUS.UNDER_REVIEW;
+  const title = proposal.titleVI || proposal.titleEN || 'Untitled proposal';
 
-  const totalBudget = proposal.budgetItems.reduce((s, b) => s + b.amount, 0);
+  function handleWithdraw() {
+    Alert.alert('Withdraw Proposal', 'Are you sure you want to withdraw this proposal? This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Withdraw', style: 'destructive', onPress: () => withdrawProposal() },
+    ]);
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['bottom']}>
@@ -153,61 +89,38 @@ export default function ProposalDetailScreen() {
         contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={onRefresh}
-            tintColor={colors.accent.primary}
-            colors={[colors.accent.primary]}
-          />
+          <RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={colors.accent.primary} colors={[colors.accent.primary]} />
         }
       >
         {/* Hero */}
         <View className="px-5 pt-4 pb-5 gap-3">
-          <View className="flex-row items-center gap-2 flex-wrap">
-            <Badge
-              label={getStatusLabel(proposal.status)}
-              variant={statusVariant[proposal.status]}
-              size="md"
-            />
-            <Badge label={proposal.researchField} variant="default" size="md" />
-          </View>
-          <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">
-            {proposal.title}
-          </Text>
-          <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-            Updated {formatRelative(proposal.updatedAt)}
-          </Text>
+          <Badge label={getStatusLabel(proposal.status)} variant={statusVariant[proposal.status ?? ''] ?? 'default'} size="md" />
+          <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">{title}</Text>
+          {proposal.titleVI && proposal.titleEN && proposal.titleVI !== proposal.titleEN && (
+            <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans italic">{proposal.titleEN}</Text>
+          )}
+          {proposal.createdAt && (
+            <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">Created {formatDate(proposal.createdAt)}</Text>
+          )}
+          <ProposalStatusTimeline status={proposal.status} />
         </View>
 
         {/* Action buttons */}
-        {(canSubmit || canEdit || canDelete) && (
+        {(isDraft || canWithdraw) && (
           <View className="px-5 mb-5 flex-row gap-3">
-            {canSubmit && (
-              <Button
-                label="Submit for Review"
-                variant="primary"
-                size="md"
-                loading={isSubmitting}
-                onPress={handleSubmit}
-                fullWidth
-              />
+            {isDraft && (
+              <>
+                <Button label="Submit" variant="primary" size="md" onPress={() => setSubmitSheetVisible(true)} />
+                <Button
+                  label="Edit"
+                  variant="secondary"
+                  size="md"
+                  onPress={() => router.push(`/(faculty)/proposals/create?edit=${id}`)}
+                />
+              </>
             )}
-            {canEdit && (
-              <Button
-                label="Edit"
-                variant="secondary"
-                size="md"
-                onPress={() => router.push(`/(faculty)/proposals/create?edit=${id}`)}
-              />
-            )}
-            {canDelete && (
-              <Button
-                label="Delete"
-                variant="danger"
-                size="md"
-                loading={isDeleting}
-                onPress={handleDelete}
-              />
+            {canWithdraw && (
+              <Button label="Withdraw" variant="danger" size="md" loading={isWithdrawing} onPress={handleWithdraw} />
             )}
           </View>
         )}
@@ -217,63 +130,62 @@ export default function ProposalDetailScreen() {
           <View>
             <SectionHeader title="Overview" />
             <InfoCard>
-              <View className="gap-1">
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Abstract</Text>
-                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">
-                  {proposal.abstract}
-                </Text>
-              </View>
+              <TextField label="Abstract" value={proposal.abstractEN} />
               <View className="h-px bg-neutral-100 dark:bg-dark-200" />
-              <InfoRow icon="calendar-outline" label="Start Date" value={formatDate(proposal.startDate)} />
-              <InfoRow icon="calendar" label="End Date" value={formatDate(proposal.endDate)} />
-              <InfoRow icon="wallet-outline" label="Total Budget" value={formatBudget(proposal.budget)} />
+              <TextField label="Objectives" value={proposal.objectives} />
+              <TextField label="Methodology" value={proposal.methodology} />
+              <TextField label="Expected Output" value={proposal.expectedOutput} />
+              <View className="h-px bg-neutral-100 dark:bg-dark-200" />
+              <View className="flex-row gap-6">
+                <View className="flex-1">
+                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Duration</Text>
+                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium mt-0.5">
+                    {proposal.durationMonths} months
+                  </Text>
+                </View>
+                {proposal.fundingMethod && (
+                  <View className="flex-1">
+                    <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Funding</Text>
+                    <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium mt-0.5">
+                      {proposal.fundingMethod === 'PARTIAL' ? 'Partial' : 'Whole'}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </InfoCard>
           </View>
 
-          {/* Research Content */}
-          <View>
-            <SectionHeader title="Research Content" />
-            <InfoCard>
-              <View className="gap-1">
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Objectives</Text>
-                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">
-                  {proposal.objectives}
-                </Text>
-              </View>
-              <View className="h-px bg-neutral-100 dark:bg-dark-200" />
-              <View className="gap-1">
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Methodology</Text>
-                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">
-                  {proposal.methodology}
-                </Text>
-              </View>
-              <View className="h-px bg-neutral-100 dark:bg-dark-200" />
-              <View className="gap-1">
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Expected Outcomes</Text>
-                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">
-                  {proposal.expectedOutcomes}
-                </Text>
-              </View>
-            </InfoCard>
-          </View>
+          {/* Additional details */}
+          {(proposal.urgency || proposal.novelty || proposal.applicationPotential || proposal.transferPotential || proposal.facilities) && (
+            <View>
+              <SectionHeader title="Research Assessment" />
+              <InfoCard>
+                <TextField label="Urgency" value={proposal.urgency} />
+                <TextField label="Novelty" value={proposal.novelty} />
+                <TextField label="Application Potential" value={proposal.applicationPotential} />
+                <TextField label="Transfer Potential" value={proposal.transferPotential} />
+                <TextField label="Facilities" value={proposal.facilities} />
+              </InfoCard>
+            </View>
+          )}
 
           {/* Team */}
-          {proposal.team.length > 0 && (
+          {proposal.members && proposal.members.length > 0 && (
             <View>
               <SectionHeader title="Research Team" />
               <InfoCard>
-                {proposal.team.map((member, i) => (
-                  <View key={member.id}>
+                {proposal.members.map((member, i) => (
+                  <View key={`${member.email}-${i}`}>
                     {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200" />}
                     <View className="flex-row items-center gap-3">
-                      <Avatar name={member.name} size="sm" />
+                      <Avatar name={member.fullName} size="sm" />
                       <View className="flex-1">
                         <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-                          {member.name}
+                          {member.fullName}
+                          {member.isSecretary ? ' (Secretary)' : ''}
                         </Text>
                         <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-                          {roleLabel[member.role]}
-                          {member.department ? ` · ${member.department}` : ''}
+                          {[member.academicTitle, member.role, member.department].filter(Boolean).join(' · ')}
                         </Text>
                       </View>
                     </View>
@@ -283,133 +195,46 @@ export default function ProposalDetailScreen() {
             </View>
           )}
 
-          {/* Budget */}
-          {proposal.budgetItems.length > 0 && (
-            <View>
-              <SectionHeader title="Budget Breakdown" />
-              <InfoCard>
-                {proposal.budgetItems.map((item, i) => (
-                  <View key={item.id}>
-                    {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200" />}
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-1">
-                        <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">
-                          {item.description}
-                        </Text>
-                        <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-                          {categoryLabel[item.category]}
-                        </Text>
-                      </View>
-                      <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-                        {formatBudget(item.amount)}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-                <View className="h-px bg-neutral-200 dark:bg-dark-300" />
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">
-                    Total
-                  </Text>
-                  <Text className="text-violet-600 dark:text-violet-400 text-sm font-bold">
-                    {formatBudget(totalBudget)}
-                  </Text>
-                </View>
-              </InfoCard>
-            </View>
-          )}
+          {/* Expected Products */}
+          <View>
+            <SectionHeader title="Expected Products" />
+            <ExpectedProductsCard proposalId={id} editable={isDraft} />
+          </View>
 
-          {/* Review Feedback */}
-          {proposal.reviews.length > 0 && (
-            <View>
-              <SectionHeader title="Review Feedback" />
-              {proposal.reviews.map((review) => (
-                <InfoCard key={review.id}>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center gap-2">
-                      <Avatar name={review.reviewerName} size="xs" />
-                      <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-                        {review.reviewerName}
-                      </Text>
-                    </View>
-                    <Badge
-                      label={review.decision === 'APPROVE' ? 'Approved' : review.decision === 'REJECT' ? 'Rejected' : 'Needs Revision'}
-                      variant={review.decision === 'APPROVE' ? 'success' : review.decision === 'REJECT' ? 'danger' : 'warning'}
-                    />
-                  </View>
-                  <View className="gap-1">
-                    <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Feedback</Text>
-                    <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">
-                      {review.feedback}
-                    </Text>
-                  </View>
-                  {review.revisionInstructions && (
-                    <View className="gap-1 bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3">
-                      <Text className="text-amber-700 dark:text-amber-300 text-xs font-semibold">
-                        Revision Instructions
-                      </Text>
-                      <Text className="text-amber-800 dark:text-amber-200 text-sm font-sans leading-relaxed">
-                        {review.revisionInstructions}
-                      </Text>
-                    </View>
-                  )}
-                  <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">
-                    Submitted {formatDate(review.submittedAt)}
-                  </Text>
-                </InfoCard>
-              ))}
-            </View>
-          )}
+          {/* Documents */}
+          <View>
+            <SectionHeader title="Documents" />
+            <ProposalDocumentsCard proposalId={id} editable={isDraft} />
+          </View>
 
-          {/* Status Timeline */}
-          {proposal.statusHistory.length > 0 && (
-            <View>
-              <SectionHeader title="Status Timeline" />
-              <InfoCard>
-                {proposal.statusHistory.map((item, i) => (
-                  <View key={i} className="flex-row gap-3">
-                    <View className="items-center gap-1 pt-0.5">
-                      <View
-                        className={`w-2 h-2 rounded-full ${
-                          i === proposal.statusHistory.length - 1
-                            ? 'bg-violet-500'
-                            : 'bg-neutral-300 dark:bg-dark-300'
-                        }`}
-                      />
-                      {i < proposal.statusHistory.length - 1 && (
-                        <View className="w-px flex-1 bg-neutral-200 dark:bg-dark-200 min-h-[20px]" />
-                      )}
-                    </View>
-                    <View className="flex-1 pb-3">
-                      <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">
-                        {getStatusLabel(item.status)}
-                      </Text>
-                      <View className="flex-row items-center gap-1.5 mt-0.5">
-                        <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">
-                          {formatDate(item.timestamp)}
-                        </Text>
-                        {item.actorName && (
-                          <>
-                            <Text className="text-neutral-300 dark:text-dark-300 text-xs">·</Text>
-                            <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">
-                              {item.actorName}
-                            </Text>
-                          </>
-                        )}
-                      </View>
-                      {item.note && (
-                        <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-1">
-                          {item.note}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                ))}
-              </InfoCard>
-            </View>
+          {proposal.status === PROPOSAL_STATUS.APPROVED && (
+            <TouchableOpacity
+              onPress={() => router.push('/(faculty)/reports')}
+              activeOpacity={0.7}
+              className="flex-row items-center justify-between bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4"
+            >
+              <View className="flex-row items-center gap-3">
+                <Ionicons name="bar-chart-outline" size={20} color={colors.accent.primary} />
+                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
+                  Progress & Final Reports
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.icon.muted} />
+            </TouchableOpacity>
           )}
         </View>
       </ScrollView>
+
+      <SubmitProposalSheet
+        visible={submitSheetVisible}
+        isSubmitting={isSubmitting}
+        onClose={() => setSubmitSheetVisible(false)}
+        onConfirm={(confirmCv) =>
+          submitProposal(confirmCv, {
+            onSuccess: () => setSubmitSheetVisible(false),
+          })
+        }
+      />
     </SafeAreaView>
   );
 }

@@ -10,30 +10,36 @@ export const loginSchema = z.object({
     .min(6, 'Password must be at least 6 characters'),
 });
 
-export const createProposalSchema = z.object({
-  title: z
-    .string()
-    .min(10, 'Title must be at least 10 characters')
-    .max(200, 'Title must be under 200 characters'),
-  abstract: z
-    .string()
-    .min(50, 'Abstract must be at least 50 characters')
-    .max(2000, 'Abstract must be under 2000 characters'),
-  researchField: z.string().min(1, 'Research field is required'),
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
-  budget: z
-    .number()
-    .positive('Budget must be greater than 0'),
-  objectives: z
-    .string()
-    .min(20, 'Objectives must be at least 20 characters'),
-  methodology: z
-    .string()
-    .min(20, 'Methodology must be at least 20 characters'),
-  expectedOutcomes: z
-    .string()
-    .min(20, 'Expected outcomes must be at least 20 characters'),
+export const proposalMemberSchema = z.object({
+  fullName: z.string().min(1, 'Name is required'),
+  email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
+  department: z.string().optional(),
+  role: z.string().optional(),
+  workMonths: z.number().min(0, 'Work months must be 0 or more'),
+  academicTitle: z.string().optional(),
+  memberRoleCode: z.string().optional(),
+  isSecretary: z.boolean(),
+});
+
+export const proposalWizardSchema = z.object({
+  cycleId: z.number({ error: 'Please select a cycle' }),
+  trackId: z.string().min(1, 'Please select a track'),
+  researchType: z.number({ error: 'Please select a research type' }),
+  orderId: z.number().optional(),
+  titleVI: z.string().min(1, 'Vietnamese title is required'),
+  titleEN: z.string().optional(),
+  abstractEN: z.string().optional(),
+  objectives: z.string().min(1, 'Objectives are required'),
+  methodology: z.string().optional(),
+  expectedOutput: z.string().optional(),
+  urgency: z.string().optional(),
+  novelty: z.string().optional(),
+  applicationPotential: z.string().optional(),
+  transferPotential: z.string().optional(),
+  facilities: z.string().optional(),
+  fundingMethod: z.enum(['WHOLE', 'PARTIAL']),
+  durationMonths: z.number().positive('Duration must be greater than 0'),
+  members: z.array(proposalMemberSchema),
 });
 
 export const reviewScoreSchema = z.object({
@@ -66,5 +72,5 @@ export const changePasswordSchema = z
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
-export type CreateProposalFormValues = z.infer<typeof createProposalSchema>;
+export type ProposalWizardFormValues = z.infer<typeof proposalWizardSchema>;
 export type ReviewScoreFormValues = z.infer<typeof reviewScoreSchema>;

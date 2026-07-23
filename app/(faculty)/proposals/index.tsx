@@ -1,34 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { View, Text, TextInput, ScrollView, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
-import { useProposals } from '@/features/faculty/hooks/useProposals';
+import { useMyProposals } from '@/features/faculty/hooks/useProposals';
 import { ProposalCard } from '@/features/faculty/components/ProposalCard';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
-import type { ProposalStatus } from '@/features/faculty/types/proposal.types';
+import { PROPOSAL_STATUS } from '@/constants/statuses';
 
-type FilterTab = 'ALL' | ProposalStatus;
+type FilterTab = 'ALL' | (typeof PROPOSAL_STATUS)[keyof typeof PROPOSAL_STATUS];
 
 const FILTERS: { key: FilterTab; label: string }[] = [
   { key: 'ALL', label: 'All' },
-  { key: 'DRAFT', label: 'Draft' },
-  { key: 'SUBMITTED', label: 'Submitted' },
-  { key: 'UNDER_REVIEW', label: 'Under Review' },
-  { key: 'REVISION_REQUIRED', label: 'Needs Revision' },
-  { key: 'APPROVED', label: 'Approved' },
-  { key: 'REJECTED', label: 'Rejected' },
+  { key: PROPOSAL_STATUS.DRAFT, label: 'Draft' },
+  { key: PROPOSAL_STATUS.SUBMITTED, label: 'Submitted' },
+  { key: PROPOSAL_STATUS.UNDER_REVIEW, label: 'Under Review' },
+  { key: PROPOSAL_STATUS.APPROVED, label: 'Approved' },
+  { key: PROPOSAL_STATUS.REJECTED, label: 'Rejected' },
+  { key: PROPOSAL_STATUS.WITHDRAWN, label: 'Withdrawn' },
 ];
 
 export default function ProposalsScreen() {
@@ -44,12 +36,17 @@ export default function ProposalsScreen() {
     return () => clearTimeout(t);
   }, [search]);
 
-  const filters = {
-    status: activeFilter === 'ALL' ? undefined : activeFilter,
-    search: debouncedSearch || undefined,
-  };
+  const { data, isLoading, isError, refetch, isFetching } = useMyProposals();
 
-  const { data, isLoading, isError, refetch, isFetching } = useProposals(filters);
+  const filtered = useMemo(() => {
+    const query = debouncedSearch.trim().toLowerCase();
+    return (data ?? []).filter((p) => {
+      if (activeFilter !== 'ALL' && p.status !== activeFilter) return false;
+      if (!query) return true;
+      const haystack = `${p.titleVI ?? ''} ${p.titleEN ?? ''}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [data, activeFilter, debouncedSearch]);
 
   const onRefresh = useCallback(async () => {
     await refetch();
@@ -117,13 +114,7 @@ export default function ProposalsScreen() {
                 : 'bg-white dark:bg-dark-50 border-neutral-200 dark:border-dark-200'
             }`}
           >
-            <Text
-              className={`text-sm font-medium ${
-                activeFilter === key
-                  ? 'text-white'
-                  : 'text-neutral-600 dark:text-dark-500'
-              }`}
-            >
+            <Text className={`text-sm font-medium ${activeFilter === key ? 'text-white' : 'text-neutral-600 dark:text-dark-500'}`}>
               {label}
             </Text>
           </TouchableOpacity>
@@ -134,44 +125,23 @@ export default function ProposalsScreen() {
       {isLoading ? (
         <LoadingState message="Loading proposals…" />
       ) : isError ? (
-        <ErrorState
-          title="Could not load proposals"
-          message="Check your connection and try again."
-          onRetry={refetch}
-        />
+        <ErrorState title="Could not load proposals" message="Check your connection and try again." onRetry={refetch} />
       ) : (
         <FlatList
-          data={data ?? []}
+          data={filtered}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ProposalCard
-              proposal={item}
-              onPress={() => router.push(`/(faculty)/proposals/${item.id}`)}
-            />
+            <ProposalCard proposal={item} onPress={() => router.push(`/(faculty)/proposals/${item.id}`)} />
           )}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingBottom: 32,
-            gap: 12,
-            flexGrow: 1,
-          }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32, gap: 12, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl
-              refreshing={isFetching && !isLoading}
-              onRefresh={onRefresh}
-              tintColor={colors.accent.primary}
-              colors={[colors.accent.primary]}
-            />
+            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={onRefresh} tintColor={colors.accent.primary} colors={[colors.accent.primary]} />
           }
           ListEmptyComponent={
             <EmptyState
               title={search ? 'No results found' : 'No proposals yet'}
-              description={
-                search
-                  ? `No proposals match "${search}"`
-                  : 'Start by creating your first research proposal.'
-              }
+              description={search ? `No proposals match "${search}"` : 'Start by creating your first research proposal.'}
               action={{ label: 'New Proposal', onPress: () => router.push('/(faculty)/proposals/create') }}
             />
           }

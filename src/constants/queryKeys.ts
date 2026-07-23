@@ -1,15 +1,13 @@
-import type { ProposalFilters } from '@/features/faculty/types/proposal.types';
-
 export const QUERY_KEYS = {
   auth: {
     me: ['auth', 'me'] as const,
   },
 
   proposals: {
-    all: ['proposals'] as const,
-    list: (filters?: ProposalFilters) => ['proposals', 'list', filters] as const,
+    mine: ['proposals', 'mine'] as const,
     detail: (id: string) => ['proposals', 'detail', id] as const,
-    stats: ['proposals', 'stats'] as const,
+    documents: (proposalId: string) => ['proposals', 'documents', proposalId] as const,
+    expectedProducts: (proposalId: string) => ['proposals', 'expected-products', proposalId] as const,
   },
 
   reviews: {

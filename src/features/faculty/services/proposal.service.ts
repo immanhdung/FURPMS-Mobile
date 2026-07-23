@@ -1,58 +1,39 @@
 import { httpClient } from '@/services/http.client';
-import type {
-  Proposal,
-  ProposalSummary,
-  ProposalStats,
-  CreateProposalDTO,
-  ProposalFilters,
-} from '../types/proposal.types';
+import type { ApiResponse } from '@/types/common';
+import type { ProposalDetail, ProposalPayload, ProposalSummary } from '../types/proposal.types';
 
-export interface ProposalService {
-  getProposals(filters?: ProposalFilters): Promise<ProposalSummary[]>;
-  getProposalById(id: string): Promise<Proposal>;
-  getProposalStats(): Promise<ProposalStats>;
-  createProposal(data: CreateProposalDTO): Promise<Proposal>;
-  updateProposal(id: string, data: Partial<CreateProposalDTO>): Promise<Proposal>;
-  submitProposal(id: string): Promise<Proposal>;
-  deleteProposal(id: string): Promise<void>;
-}
-
-const realProposalService: ProposalService = {
-  async getProposals(filters) {
-    const { data } = await httpClient.get<ProposalSummary[]>('/proposals', {
-      params: filters,
-    });
-    return data;
+export const proposalService = {
+  async mine(): Promise<ProposalSummary[]> {
+    const { data } = await httpClient.get<ApiResponse<ProposalSummary[]>>('/proposals/my');
+    return data.data;
   },
 
-  async getProposalById(id) {
-    const { data } = await httpClient.get<Proposal>(`/proposals/${id}`);
-    return data;
+  async getById(id: string): Promise<ProposalDetail> {
+    const { data } = await httpClient.get<ApiResponse<ProposalDetail>>(`/proposals/${id}`);
+    return data.data;
   },
 
-  async getProposalStats() {
-    const { data } = await httpClient.get<ProposalStats>('/proposals/stats');
-    return data;
+  async create(payload: ProposalPayload): Promise<ProposalDetail> {
+    const { data } = await httpClient.post<ApiResponse<ProposalDetail>>('/proposals', payload);
+    return data.data;
   },
 
-  async createProposal(payload) {
-    const { data } = await httpClient.post<Proposal>('/proposals', payload);
-    return data;
+  async update(id: string, payload: ProposalPayload): Promise<ProposalDetail> {
+    const { data } = await httpClient.put<ApiResponse<ProposalDetail>>(`/proposals/${id}`, payload);
+    return data.data;
   },
 
-  async updateProposal(id, payload) {
-    const { data } = await httpClient.put<Proposal>(`/proposals/${id}`, payload);
-    return data;
+  async submit(id: string, confirmCv: boolean): Promise<ProposalDetail> {
+    const { data } = await httpClient.post<ApiResponse<ProposalDetail>>(
+      `/proposals/${id}/submit`,
+      undefined,
+      { params: { confirmCv } },
+    );
+    return data.data;
   },
 
-  async submitProposal(id) {
-    const { data } = await httpClient.post<Proposal>(`/proposals/${id}/submit`);
-    return data;
-  },
-
-  async deleteProposal(id) {
-    await httpClient.delete(`/proposals/${id}`);
+  async withdraw(id: string): Promise<ProposalDetail> {
+    const { data } = await httpClient.patch<ApiResponse<ProposalDetail>>(`/proposals/${id}/withdraw`);
+    return data.data;
   },
 };
-
-export const proposalService: ProposalService = realProposalService;
