@@ -4,6 +4,8 @@ export type ReviewStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 export type ReviewDecision = 'APPROVE' | 'REJECT' | 'REVISION_REQUIRED';
 
+export type ReviewPriority = 'HIGH' | 'MEDIUM' | 'LOW';
+
 export interface ScoringCriteria {
   id: string;
   name: string;
@@ -29,7 +31,7 @@ export interface ReviewSubmission {
   status: ReviewStatus;
   reviewerId: string;
   reviewerName: string;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: ReviewPriority;
 }
 
 export interface ReviewSubmissionSummary {
@@ -40,7 +42,7 @@ export interface ReviewSubmissionSummary {
   assignedAt: string;
   dueDate: string;
   status: ReviewStatus;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: ReviewPriority;
 }
 
 export interface SubmitReviewDTO {
@@ -65,4 +67,15 @@ export interface ReviewQueueStats {
   inProgress: number;
   completed: number;
   overdue: number;
+}
+
+export interface AISummary {
+  submissionId: string;
+  summary: string;
+  keyStrengths: string[];
+  keyWeaknesses: string[];
+  concernAreas: string[];
+  suggestedScore: number;
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  generatedAt: string;
 }

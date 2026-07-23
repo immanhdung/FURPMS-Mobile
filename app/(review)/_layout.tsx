@@ -1,6 +1,8 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { View, Text } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
+import { useNotificationStore } from '@/stores/notification.store';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -13,11 +15,60 @@ interface TabItem {
 
 const TABS: TabItem[] = [
   { name: 'index', title: 'Dashboard', icon: 'home-outline', iconFocused: 'home' },
-  { name: 'queue/index', title: 'Review Queue', icon: 'clipboard-outline', iconFocused: 'clipboard' },
-  { name: 'meetings/index', title: 'Meetings', icon: 'calendar-outline', iconFocused: 'calendar' },
-  { name: 'notifications/index', title: 'Notifications', icon: 'notifications-outline', iconFocused: 'notifications' },
-  { name: 'profile/index', title: 'Profile', icon: 'person-outline', iconFocused: 'person' },
+  {
+    name: 'queue',
+    title: 'Review Queue',
+    icon: 'clipboard-outline',
+    iconFocused: 'clipboard',
+  },
+  {
+    name: 'meetings',
+    title: 'Meetings',
+    icon: 'calendar-outline',
+    iconFocused: 'calendar',
+  },
+  {
+    name: 'notifications',
+    title: 'Inbox',
+    icon: 'notifications-outline',
+    iconFocused: 'notifications',
+  },
+  {
+    name: 'profile',
+    title: 'Profile',
+    icon: 'person-outline',
+    iconFocused: 'person',
+  },
 ];
+
+function NotificationTabIcon({
+  color,
+  focused,
+  size,
+}: {
+  color: string;
+  focused: boolean;
+  size: number;
+}) {
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+
+  return (
+    <View>
+      <Ionicons
+        name={focused ? 'notifications' : 'notifications-outline'}
+        size={size}
+        color={color}
+      />
+      {unreadCount > 0 && (
+        <View className="absolute -top-1 -right-1 bg-red-500 rounded-full min-w-4 h-4 items-center justify-center px-1">
+          <Text className="text-white text-xs font-bold" style={{ lineHeight: 14 }}>
+            {unreadCount > 99 ? '99+' : String(unreadCount)}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function ReviewLayout() {
   const { colors } = useTheme();
@@ -48,13 +99,22 @@ export default function ReviewLayout() {
           name={name}
           options={{
             title,
-            tabBarIcon: ({ color, focused, size }) => (
-              <Ionicons
-                name={focused ? iconFocused : icon}
-                size={size}
-                color={color}
-              />
-            ),
+            tabBarIcon:
+              name === 'notifications'
+                ? ({ color, focused, size }) => (
+                    <NotificationTabIcon
+                      color={color}
+                      focused={focused}
+                      size={size}
+                    />
+                  )
+                : ({ color, focused, size }) => (
+                    <Ionicons
+                      name={focused ? iconFocused : icon}
+                      size={size}
+                      color={color}
+                    />
+                  ),
           }}
         />
       ))}

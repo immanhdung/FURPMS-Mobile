@@ -13,10 +13,14 @@ export const QUERY_KEYS = {
   },
 
   reviews: {
+    all: ['reviews'] as const,
     queue: ['reviews', 'queue'] as const,
     detail: (id: string) => ['reviews', 'detail', id] as const,
     completed: ['reviews', 'completed'] as const,
     stats: ['reviews', 'stats'] as const,
+    criteria: (submissionId: string) => ['reviews', 'criteria', submissionId] as const,
+    aiSummary: (submissionId: string) => ['reviews', 'ai-summary', submissionId] as const,
+    result: (submissionId: string) => ['reviews', 'result', submissionId] as const,
   },
 
   meetings: {

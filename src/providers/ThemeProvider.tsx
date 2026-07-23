@@ -1,16 +1,16 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect } from 'react';
+import { useColorScheme as useDeviceColorScheme } from 'react-native';
 import { useColorScheme } from 'nativewind';
-import * as SecureStore from 'expo-secure-store';
 import { lightColors, darkColors, type ThemeColors } from '@/constants/colors';
-
-const THEME_STORAGE_KEY = 'furpms_theme_preference';
+import { useThemeStore, type ThemePreference } from '@/stores/theme.store';
 
 interface ThemeContextValue {
   colorScheme: 'light' | 'dark';
   colors: ThemeColors;
   isDark: boolean;
+  theme: ThemePreference;
   toggleTheme: () => void;
-  setTheme: (scheme: 'light' | 'dark') => void;
+  setTheme: (scheme: ThemePreference) => void;
 }
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -20,42 +20,26 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { colorScheme, setColorScheme } = useColorScheme();
-  const [isReady, setIsReady] = useState(false);
+  const { theme, setTheme } = useThemeStore();
+  const { setColorScheme } = useColorScheme();
+  const deviceScheme = useDeviceColorScheme();
 
   useEffect(() => {
-    loadSavedTheme();
-  }, []);
-
-  async function loadSavedTheme() {
-    try {
-      const saved = await SecureStore.getItemAsync(THEME_STORAGE_KEY);
-      if (saved === 'light' || saved === 'dark') {
-        setColorScheme(saved);
-      }
-    } catch {
-      // Fall back to system preference — no action needed
-    } finally {
-      setIsReady(true);
+    if (theme === 'system') {
+      setColorScheme('system');
+    } else {
+      setColorScheme(theme);
     }
-  }
+  }, [theme, setColorScheme]);
+
+  const resolved: 'light' | 'dark' =
+    theme === 'system' ? (deviceScheme ?? 'light') : theme;
+
+  const colors = (resolved === 'dark' ? darkColors : lightColors) as ThemeColors;
 
   function toggleTheme() {
-    const next = colorScheme === 'dark' ? 'light' : 'dark';
-    setColorScheme(next);
-    SecureStore.setItemAsync(THEME_STORAGE_KEY, next).catch(() => null);
+    setTheme(resolved === 'dark' ? 'light' : 'dark');
   }
-
-  function setTheme(scheme: 'light' | 'dark') {
-    setColorScheme(scheme);
-    SecureStore.setItemAsync(THEME_STORAGE_KEY, scheme).catch(() => null);
-  }
-
-  const resolved = colorScheme ?? 'light';
-  const colors = resolved === 'dark' ? darkColors : lightColors;
-
-  // Suppress render until theme preference is loaded to avoid flash
-  if (!isReady) return null;
 
   return (
     <ThemeContext.Provider
@@ -63,6 +47,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         colorScheme: resolved,
         colors,
         isDark: resolved === 'dark',
+        theme,
         toggleTheme,
         setTheme,
       }}

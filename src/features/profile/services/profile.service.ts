@@ -1,11 +1,9 @@
-// __MOCK__
+import { httpClient } from '@/services/http.client';
 import type {
   UserProfile,
   UserSettings,
   UpdateProfileDTO,
 } from '../types/profile.types';
-
-const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 export interface ProfileService {
   getProfile(): Promise<UserProfile>;
@@ -14,62 +12,26 @@ export interface ProfileService {
   updateSettings(settings: Partial<UserSettings>): Promise<UserSettings>;
 }
 
-const MOCK_FACULTY_PROFILE: UserProfile = {
-  id: 'u-001',
-  email: 'faculty@fpt.edu.vn',
-  name: 'Nguyen Van An',
-  role: 'FACULTY',
-  department: 'Software Engineering',
-  faculty: 'Information Technology',
-  staffId: 'GV001',
-  phone: '0901234567',
-  joinedAt: '2018-09-01T00:00:00Z',
-  bio: 'Senior lecturer specializing in AI and machine learning applications in education.',
-};
-
-const MOCK_REVIEWER_PROFILE: UserProfile = {
-  id: 'u-002',
-  email: 'reviewer@fpt.edu.vn',
-  name: 'Tran Thi Bich',
-  role: 'REVIEW_COMMITTEE',
-  department: 'Information Technology',
-  faculty: 'Information Technology',
-  staffId: 'RC001',
-  phone: '0907654321',
-  joinedAt: '2015-03-15T00:00:00Z',
-  bio: 'Associate professor and member of the university research review committee.',
-};
-
-const MOCK_SETTINGS: UserSettings = {
-  theme: 'system',
-  notifications: {
-    proposalStatusUpdates: true,
-    reviewAssignments: true,
-    meetingReminders: true,
-    generalAnnouncements: false,
-  },
-};
-
-const mockProfileService: ProfileService = {
+const realProfileService: ProfileService = {
   async getProfile() {
-    await delay(300);
-    return MOCK_FACULTY_PROFILE;
+    const { data } = await httpClient.get<UserProfile>('/users/me');
+    return data;
   },
 
-  async updateProfile(data) {
-    await delay(500);
-    return { ...MOCK_FACULTY_PROFILE, ...data };
+  async updateProfile(payload) {
+    const { data } = await httpClient.put<UserProfile>('/users/me', payload);
+    return data;
   },
 
   async getSettings() {
-    await delay(200);
-    return MOCK_SETTINGS;
+    const { data } = await httpClient.get<UserSettings>('/users/me/settings');
+    return data;
   },
 
   async updateSettings(settings) {
-    await delay(300);
-    return { ...MOCK_SETTINGS, ...settings };
+    const { data } = await httpClient.put<UserSettings>('/users/me/settings', settings);
+    return data;
   },
 };
 
-export const profileService: ProfileService = mockProfileService;
+export const profileService: ProfileService = realProfileService;

@@ -1,5 +1,6 @@
 import { QueryProvider } from './QueryProvider';
 import { ThemeProvider } from './ThemeProvider';
+import { NotificationProvider } from './NotificationProvider';
 import { AuthProvider } from './AuthProvider';
 
 interface ProvidersProps {
@@ -7,16 +8,17 @@ interface ProvidersProps {
 }
 
 // Provider order matters:
-// QueryProvider — outermost, no dependencies
-// ThemeProvider — reads SecureStore, must be before auth UI renders
-// AuthProvider  — reads SecureStore, uses router for redirects
+// QueryProvider       — outermost, no dependencies
+// ThemeProvider       — syncs MMKV store → NativeWind colorScheme
+// NotificationProvider — registers push permissions
+// AuthProvider        — reads SecureStore, drives role-based routing
 export function Providers({ children }: ProvidersProps) {
   return (
     <QueryProvider>
       <ThemeProvider>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <NotificationProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </NotificationProvider>
       </ThemeProvider>
     </QueryProvider>
   );

@@ -23,7 +23,7 @@ export const createProposalSchema = z.object({
   startDate: z.string().min(1, 'Start date is required'),
   endDate: z.string().min(1, 'End date is required'),
   budget: z
-    .number({ invalid_type_error: 'Budget must be a number' })
+    .number()
     .positive('Budget must be greater than 0'),
   objectives: z
     .string()

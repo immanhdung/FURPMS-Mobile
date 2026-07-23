@@ -14,14 +14,46 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "vn.edu.fpt.furpms",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Use Face ID to quickly and securely access FURPMS",
+        "NSCameraUsageDescription": "Allow FURPMS to access your camera for document capture",
+        "NSPhotoLibraryUsageDescription": "Allow FURPMS to access your photos for document upload",
+        "UIBackgroundModes": ["fetch", "remote-notification"]
+      },
+      "associatedDomains": ["applinks:furpms.fpt.edu.vn"]
     },
     "android": {
+      "package": "vn.edu.fpt.furpms",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "furpms.fpt.edu.vn",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,7 +61,20 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-font"
-    ]
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#7C3AED",
+          "iosDisplayInForeground": true
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Use Face ID to quickly and securely access FURPMS"
+        }
+      ]
+    ],
   }
 }

@@ -9,9 +9,16 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { Providers } from '@/providers';
+import { backgroundSyncService } from '@/services/background-sync.service';
 import '../global.css';
 
 SplashScreen.preventAutoHideAsync();
+
+// Register background sync tasks at module level — required by expo-task-manager.
+// Tasks are defined inside background-sync.service.ts via TaskManager.defineTask.
+backgroundSyncService.register().catch(() => {
+  // Non-fatal: background fetch is unavailable in simulators and some environments.
+});
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
