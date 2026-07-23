@@ -1,74 +1,79 @@
-import { useState, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/hooks/useTheme';
-import { useReviewQueue, useCompletedReviews } from '@/features/reviewCommittee/hooks/useReviews';
-import { ReviewQueueCard } from '@/features/reviewCommittee/components/ReviewQueueCard';
+import { useMyMemberships, useRespondToInvitation } from '@/features/reviewCommittee/hooks/useMemberships';
+import { MembershipCard } from '@/features/reviewCommittee/components/MembershipCard';
+import { DeclineInvitationDialog } from '@/features/reviewCommittee/components/DeclineInvitationDialog';
+import { Button } from '@/shared/components/ui/Button';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
-import type { ReviewStatus } from '@/features/reviewCommittee/types/review.types';
+import { INVITATION_STATUS, ROUND_STATUS, isAcceptedInvitation } from '@/constants/statuses';
+import type { MyMembership } from '@/features/reviewCommittee/types/membership.types';
 
-type FilterTab = 'ALL' | ReviewStatus;
+type FilterTab = 'INVITATIONS' | 'ASSIGNED' | 'SCORING' | 'ALL';
 
 const FILTERS: { key: FilterTab; label: string }[] = [
+  { key: 'INVITATIONS', label: 'Invitations' },
+  { key: 'ASSIGNED', label: 'Assigned' },
+  { key: 'SCORING', label: 'Scoring Open' },
   { key: 'ALL', label: 'All' },
-  { key: 'PENDING', label: 'Pending' },
-  { key: 'IN_PROGRESS', label: 'In Progress' },
-  { key: 'COMPLETED', label: 'Completed' },
 ];
+
+function filterMemberships(memberships: MyMembership[], tab: FilterTab): MyMembership[] {
+  switch (tab) {
+    case 'INVITATIONS':
+      return memberships.filter((m) => m.status === INVITATION_STATUS.PENDING);
+    case 'ASSIGNED':
+      return memberships.filter((m) => isAcceptedInvitation(m.status));
+    case 'SCORING':
+      return memberships.filter((m) => isAcceptedInvitation(m.status) && m.roundStatus === ROUND_STATUS.OPEN);
+    case 'ALL':
+    default:
+      return memberships;
+  }
+}
 
 export default function ReviewQueueScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [activeFilter, setActiveFilter] = useState<FilterTab>('ALL');
+  const [activeFilter, setActiveFilter] = useState<FilterTab>('INVITATIONS');
+  const [decliningId, setDecliningId] = useState<string | null>(null);
 
-  const {
-    data: queue,
-    isLoading: loadingQueue,
-    isError: errorQueue,
-    refetch: refetchQueue,
-    isFetching: fetchingQueue,
-  } = useReviewQueue();
+  const { data, isLoading, isError, refetch, isFetching } = useMyMemberships();
+  const { mutate: respond, isPending: isResponding } = useRespondToInvitation();
 
-  const {
-    data: completed,
-    isLoading: loadingCompleted,
-    refetch: refetchCompleted,
-  } = useCompletedReviews();
-
-  const allItems = [
-    ...(queue ?? []),
-    ...(activeFilter === 'ALL' || activeFilter === 'COMPLETED' ? (completed ?? []) : []),
-  ];
-
-  const filtered =
-    activeFilter === 'ALL'
-      ? allItems
-      : allItems.filter((r) => r.status === activeFilter);
-
-  const isLoading = loadingQueue || (activeFilter === 'COMPLETED' && loadingCompleted);
+  const filtered = useMemo(() => filterMemberships(data ?? [], activeFilter), [data, activeFilter]);
 
   const onRefresh = useCallback(async () => {
-    await Promise.all([refetchQueue(), refetchCompleted()]);
-  }, [refetchQueue, refetchCompleted]);
+    await refetch();
+  }, [refetch]);
+
+  function handleAccept(memberId: string) {
+    respond({ memberId, payload: { accept: true } });
+  }
+
+  function handleDeclineConfirm(reason?: string) {
+    if (!decliningId) return;
+    respond(
+      { memberId: decliningId, payload: { accept: false, declineReason: reason } },
+      { onSuccess: () => setDecliningId(null) },
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
-      {/* Header */}
       <View className="px-5 pt-6 pb-4 gap-0.5">
-        <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">
-          Review Queue
-        </Text>
+        <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">My Reviews</Text>
         {filtered.length > 0 && (
           <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-            {filtered.length} submission{filtered.length !== 1 ? 's' : ''}
+            {filtered.length} {filtered.length === 1 ? 'item' : 'items'}
           </Text>
         )}
       </View>
 
-      {/* Filter tabs */}
       <View className="mb-3">
         <FlatList
           horizontal
@@ -86,13 +91,7 @@ export default function ReviewQueueScreen() {
                   : 'bg-white dark:bg-dark-50 border-neutral-200 dark:border-dark-200'
               }`}
             >
-              <Text
-                className={`text-sm font-medium ${
-                  activeFilter === key
-                    ? 'text-white'
-                    : 'text-neutral-600 dark:text-dark-500'
-                }`}
-              >
+              <Text className={`text-sm font-medium ${activeFilter === key ? 'text-white' : 'text-neutral-600 dark:text-dark-500'}`}>
                 {label}
               </Text>
             </TouchableOpacity>
@@ -101,50 +100,56 @@ export default function ReviewQueueScreen() {
       </View>
 
       {isLoading ? (
-        <LoadingState message="Loading review queue…" />
-      ) : errorQueue ? (
-        <ErrorState
-          title="Could not load queue"
-          message="Check your connection and try again."
-          onRetry={refetchQueue}
-        />
+        <LoadingState message="Loading your reviews…" />
+      ) : isError ? (
+        <ErrorState title="Could not load reviews" message="Check your connection and try again." onRetry={refetch} />
       ) : (
         <FlatList
           data={filtered}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ReviewQueueCard
-              review={item}
-              onPress={() => router.push(`/(review)/queue/${item.id}`)}
-            />
-          )}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingBottom: 32,
-            gap: 12,
-            flexGrow: 1,
+          keyExtractor={(item) => item.memberId}
+          renderItem={({ item }) => {
+            const isInvitation = item.status === INVITATION_STATUS.PENDING;
+            return (
+              <MembershipCard
+                membership={item}
+                onPress={!isInvitation ? () => router.push(`/(review)/queue/${item.councilId}`) : undefined}
+                actions={
+                  isInvitation ? (
+                    <>
+                      <Button label="Accept" size="sm" onPress={() => handleAccept(item.memberId)} loading={isResponding} />
+                      <Button label="Decline" size="sm" variant="secondary" onPress={() => setDecliningId(item.memberId)} />
+                    </>
+                  ) : undefined
+                }
+              />
+            );
           }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32, gap: 12, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl
-              refreshing={fetchingQueue && !isLoading}
-              onRefresh={onRefresh}
-              tintColor={colors.accent.primary}
-              colors={[colors.accent.primary]}
-            />
+            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={onRefresh} tintColor={colors.accent.primary} colors={[colors.accent.primary]} />
           }
           ListEmptyComponent={
             <EmptyState
-              title="No submissions found"
+              title="Nothing here"
               description={
-                activeFilter !== 'ALL'
-                  ? `No ${activeFilter.toLowerCase().replace('_', ' ')} submissions.`
-                  : 'Your review queue is empty.'
+                activeFilter === 'INVITATIONS'
+                  ? 'No pending invitations right now.'
+                  : activeFilter === 'SCORING'
+                  ? 'No councils currently open for scoring.'
+                  : 'No reviews found.'
               }
             />
           }
         />
       )}
+
+      <DeclineInvitationDialog
+        visible={!!decliningId}
+        isSubmitting={isResponding}
+        onClose={() => setDecliningId(null)}
+        onConfirm={handleDeclineConfirm}
+      />
     </SafeAreaView>
   );
 }

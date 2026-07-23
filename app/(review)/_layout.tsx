@@ -17,7 +17,7 @@ const TABS: TabItem[] = [
   { name: 'index', title: 'Dashboard', icon: 'home-outline', iconFocused: 'home' },
   {
     name: 'queue',
-    title: 'Review Queue',
+    title: 'My Reviews',
     icon: 'clipboard-outline',
     iconFocused: 'clipboard',
   },
