@@ -1,6 +1,7 @@
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
 import { httpClient } from './http.client';
+import type { ApiResponse } from '@/types/common';
 
 const PROPOSAL_SYNC_TASK = 'FURPMS_PROPOSAL_SYNC';
 const NOTIFICATION_SYNC_TASK = 'FURPMS_NOTIFICATION_SYNC';
@@ -8,7 +9,9 @@ const NOTIFICATION_SYNC_TASK = 'FURPMS_NOTIFICATION_SYNC';
 // Tasks MUST be defined at module level (top-level), not inside functions
 TaskManager.defineTask(PROPOSAL_SYNC_TASK, async () => {
   try {
-    await httpClient.get('/proposals?limit=5&sort=updatedAt:desc');
+    // /proposals/my ignores query params and always returns the caller's own proposals —
+    // there's no limit/sort support on the real backend, this just warms the cache.
+    await httpClient.get('/proposals/my');
     return BackgroundFetch.BackgroundFetchResult.NewData;
   } catch {
     return BackgroundFetch.BackgroundFetchResult.Failed;
@@ -17,9 +20,9 @@ TaskManager.defineTask(PROPOSAL_SYNC_TASK, async () => {
 
 TaskManager.defineTask(NOTIFICATION_SYNC_TASK, async () => {
   try {
-    const { data } = await httpClient.get<{ count: number }>('/notifications/unread-count');
+    const { data } = await httpClient.get<ApiResponse<number>>('/notifications/count');
     // Badge count update is handled by the main app when it foregrounds
-    return data.count > 0
+    return data.data > 0
       ? BackgroundFetch.BackgroundFetchResult.NewData
       : BackgroundFetch.BackgroundFetchResult.NoData;
   } catch {

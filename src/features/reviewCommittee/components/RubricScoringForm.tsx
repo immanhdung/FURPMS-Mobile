@@ -77,6 +77,7 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
   }
 
   function handleSubmit() {
+    if (!template) return;
     const missing = criteria.some((c) => scores[c.id] === undefined);
     if (missing) {
       Alert.alert('Incomplete', 'Please score every criterion before submitting.');

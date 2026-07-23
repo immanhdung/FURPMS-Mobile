@@ -1,59 +1,58 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
-import { useReviewQueueStats, useReviewQueue } from '@/features/reviewCommittee/hooks/useReviews';
-import { useMeetings } from '@/features/meeting/hooks/useMeetings';
-import { useUnreadCount } from '@/features/notification/hooks/useNotifications';
 import { Avatar } from '@/shared/components/ui/Avatar';
 import { Badge } from '@/shared/components/ui/Badge';
-import { ReviewQueueCard } from '@/features/reviewCommittee/components/ReviewQueueCard';
-import { formatDateTime, isUpcoming } from '@/utils/date';
+import { Button } from '@/shared/components/ui/Button';
+import { LoadingState } from '@/shared/components/feedback/LoadingState';
+import { useReviewerDashboard } from '@/shared/hooks/useAnalytics';
+import { useMyMemberships, useRespondToInvitation } from '@/features/reviewCommittee/hooks/useMemberships';
+import { useMeetings } from '@/features/meeting/hooks/useMeetings';
+import { useUnreadCount } from '@/features/notification/hooks/useNotifications';
+import { useQueryClient } from '@tanstack/react-query';
+import { formatDateTime, formatRelative, isUpcoming } from '@/utils/date';
+import { INVITATION_STATUS } from '@/constants/statuses';
 
-function StatCard({
-  value,
-  label,
-  bgClass,
-  textClass,
-}: {
-  value: number | string;
-  label: string;
-  bgClass: string;
-  textClass: string;
-}) {
-  return (
-    <View className={`flex-1 ${bgClass} rounded-2xl p-4 gap-1`}>
-      <Text className={`${textClass} text-2xl font-bold`}>{value}</Text>
-      <Text className="text-neutral-600 dark:text-dark-400 text-xs font-sans">{label}</Text>
-    </View>
-  );
-}
+const KPI_COLORS = [
+  { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-400' },
+  { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-400' },
+  { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-700 dark:text-emerald-400' },
+  { bg: 'bg-violet-50 dark:bg-violet-900/20', text: 'text-violet-700 dark:text-violet-400' },
+];
 
 export default function ReviewDashboard() {
   const router = useRouter();
   const { user } = useAuth();
   const { colors } = useTheme();
+  const queryClient = useQueryClient();
 
-  const { data: stats, refetch: refetchStats, isFetching: fetchingStats } = useReviewQueueStats();
-  const { data: queue, refetch: refetchQueue } = useReviewQueue();
+  const { data: dashboard, isLoading: dashboardLoading, isFetching: dashboardFetching, refetch: refetchDashboard } = useReviewerDashboard();
+  const { data: memberships } = useMyMemberships();
+  const { mutate: respond, isPending: isResponding } = useRespondToInvitation();
   const { data: meetings } = useMeetings();
   const { data: unreadData } = useUnreadCount();
   const unreadCount = unreadData ?? 0;
 
-  const highPriority = (queue ?? [])
-    .filter((r) => r.status !== 'COMPLETED' && r.priority === 'HIGH')
-    .slice(0, 3);
+  const pendingInvitations = useMemo(
+    () => (memberships ?? []).filter((m) => m.status === INVITATION_STATUS.PENDING).slice(0, 3),
+    [memberships],
+  );
 
-  const nextMeeting = [...(meetings ?? [])]
-    .filter((m) => isUpcoming(m.scheduledAt))
-    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0];
+  const nextMeeting = useMemo(
+    () =>
+      [...(meetings ?? [])]
+        .filter((m) => isUpcoming(m.scheduledAt))
+        .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0],
+    [meetings],
+  );
 
   const onRefresh = useCallback(async () => {
-    await Promise.all([refetchStats(), refetchQueue()]);
-  }, [refetchStats, refetchQueue]);
+    await Promise.all([refetchDashboard(), queryClient.invalidateQueries()]);
+  }, [refetchDashboard, queryClient]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
@@ -65,12 +64,7 @@ export default function ReviewDashboard() {
         contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={fetchingStats}
-            onRefresh={onRefresh}
-            tintColor={colors.accent.primary}
-            colors={[colors.accent.primary]}
-          />
+          <RefreshControl refreshing={dashboardFetching} onRefresh={onRefresh} tintColor={colors.accent.primary} colors={[colors.accent.primary]} />
         }
       >
         {/* Header */}
@@ -87,99 +81,116 @@ export default function ReviewDashboard() {
           </View>
         </View>
 
-        {/* Stats grid */}
+        {/* KPIs */}
         <View className="px-5 gap-3">
-          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">
-            Queue Overview
-          </Text>
-          <View className="flex-row gap-3">
-            <StatCard
-              value={stats?.pending ?? '–'}
-              label="Pending"
-              bgClass="bg-amber-50 dark:bg-amber-900/20"
-              textClass="text-amber-700 dark:text-amber-400"
-            />
-            <StatCard
-              value={stats?.inProgress ?? '–'}
-              label="In Progress"
-              bgClass="bg-blue-50 dark:bg-blue-900/20"
-              textClass="text-blue-700 dark:text-blue-400"
-            />
-            <StatCard
-              value={stats?.completed ?? '–'}
-              label="Completed"
-              bgClass="bg-emerald-50 dark:bg-emerald-900/20"
-              textClass="text-emerald-700 dark:text-emerald-400"
-            />
-          </View>
-          {(stats?.overdue ?? 0) > 0 && (
-            <View className="flex-row items-center gap-2 bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3">
-              <Ionicons name="alert-circle" size={16} color={colors.accent.danger} />
-              <Text className="text-red-700 dark:text-red-400 text-sm font-medium">
-                {stats!.overdue} overdue review{stats!.overdue > 1 ? 's' : ''} — action required
-              </Text>
+          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Overview</Text>
+          {dashboardLoading ? (
+            <LoadingState message="Loading overview…" />
+          ) : (
+            <View className="flex-row flex-wrap gap-3">
+              {(dashboard?.kpis ?? []).map((kpi, i) => {
+                const color = KPI_COLORS[i % KPI_COLORS.length];
+                return (
+                  <View key={kpi.id} className={`flex-1 min-w-[45%] ${color.bg} rounded-2xl p-4 gap-1`}>
+                    <Text className={`${color.text} text-2xl font-bold`}>{kpi.value}</Text>
+                    <Text className="text-neutral-600 dark:text-dark-400 text-xs font-sans">{kpi.label}</Text>
+                  </View>
+                );
+              })}
             </View>
           )}
         </View>
 
-        {/* High priority */}
-        {highPriority.length > 0 && (
+        {/* Pending invitations */}
+        {pendingInvitations.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">
-                High Priority
-              </Text>
-              <TouchableOpacity
-                onPress={() => router.push('/(review)/queue')}
-                activeOpacity={0.7}
-              >
-                <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">
-                  View all
-                </Text>
+              <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Pending Invitations</Text>
+              <TouchableOpacity onPress={() => router.push('/(review)/queue')} activeOpacity={0.7}>
+                <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">View all</Text>
               </TouchableOpacity>
             </View>
-            {highPriority.map((review) => (
-              <ReviewQueueCard
-                key={review.id}
-                review={review}
-                onPress={() => router.push(`/(review)/queue/${review.id}`)}
-              />
+            {pendingInvitations.map((m) => (
+              <View key={m.memberId} className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold" numberOfLines={2}>
+                  {m.proposalTitleVI || 'Untitled proposal'}
+                </Text>
+                <View className="flex-row gap-2">
+                  <Button label="Accept" size="sm" onPress={() => respond({ memberId: m.memberId, payload: { accept: true } })} loading={isResponding} />
+                  <Button label="Decline" size="sm" variant="secondary" onPress={() => router.push('/(review)/queue')} />
+                </View>
+              </View>
             ))}
+          </View>
+        )}
+
+        {/* Review completion trend (no chart lib — simple bars) */}
+        {dashboard && dashboard.reviewCompletionTrend.length > 0 && (
+          <View className="px-5 mt-6 gap-3">
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Review Progress</Text>
+            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+              {dashboard.reviewCompletionTrend.map((pt) => {
+                const total = pt.completed + pt.pending || 1;
+                return (
+                  <View key={pt.label} className="gap-1">
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-neutral-700 dark:text-neutral-200 text-xs font-medium">{pt.label}</Text>
+                      <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
+                        {pt.completed}/{pt.completed + pt.pending}
+                      </Text>
+                    </View>
+                    <View className="h-2 rounded-full bg-neutral-100 dark:bg-dark-200 overflow-hidden flex-row">
+                      <View className="h-full bg-emerald-500" style={{ width: `${(pt.completed / total) * 100}%` }} />
+                      <View className="h-full bg-amber-400" style={{ width: `${(pt.pending / total) * 100}%` }} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
           </View>
         )}
 
         {/* Next meeting */}
         {nextMeeting && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">
-              Next Meeting
-            </Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Next Meeting</Text>
             <TouchableOpacity
               onPress={() => router.push(`/(review)/meetings/${nextMeeting.id}`)}
               activeOpacity={0.7}
               className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-2"
             >
-              <Text
-                className="text-neutral-900 dark:text-neutral-50 text-base font-semibold"
-                numberOfLines={1}
-              >
+              <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold" numberOfLines={1}>
                 {nextMeeting.title || 'Council meeting'}
               </Text>
               <View className="flex-row items-center gap-1.5">
                 <Ionicons name="calendar-outline" size={13} color={colors.icon.muted} />
-                <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-                  {formatDateTime(nextMeeting.scheduledAt)}
-                </Text>
+                <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{formatDateTime(nextMeeting.scheduledAt)}</Text>
               </View>
             </TouchableOpacity>
           </View>
         )}
 
+        {/* Activity */}
+        {dashboard && dashboard.activity.length > 0 && (
+          <View className="px-5 mt-6 gap-3">
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Recent Activity</Text>
+            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
+              {dashboard.activity.slice(0, 5).map((a, i) => (
+                <View key={a.id}>
+                  {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-4" />}
+                  <View className="px-4 py-3">
+                    <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans">{a.message}</Text>
+                    <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans mt-0.5">{formatRelative(a.timestamp)}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Quick actions */}
         <View className="px-5 mt-6 gap-3">
-          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">
-            Quick Actions
-          </Text>
+          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Quick Actions</Text>
           <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={() => router.push('/(review)/queue')}
@@ -187,7 +198,7 @@ export default function ReviewDashboard() {
               className="flex-1 bg-violet-500 dark:bg-violet-600 rounded-xl p-4 gap-2"
             >
               <Ionicons name="clipboard" size={22} color="#fff" />
-              <Text className="text-white text-sm font-semibold">Review Queue</Text>
+              <Text className="text-white text-sm font-semibold">My Reviews</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/(review)/notifications')}
@@ -204,9 +215,7 @@ export default function ReviewDashboard() {
                   </View>
                 )}
               </View>
-              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-                Inbox
-              </Text>
+              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">Inbox</Text>
             </TouchableOpacity>
           </View>
         </View>
