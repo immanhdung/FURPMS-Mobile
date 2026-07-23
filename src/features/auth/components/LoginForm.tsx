@@ -16,12 +16,20 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+const QUICK_LOGIN_ACCOUNTS: { label: string; email: string; password: string }[] = [
+  { label: 'PI', email: 'pi.demo@furpms.edu.vn', password: 'Faculty@123456' },
+  { label: 'Reviewer 1', email: 'reviewer1.demo@furpms.edu.vn', password: 'Reviewer@123456' },
+  { label: 'Reviewer 2', email: 'reviewer2.demo@furpms.edu.vn', password: 'Reviewer@123456' },
+  { label: 'Reviewer 3', email: 'reviewer3.demo@furpms.edu.vn', password: 'Reviewer@123456' },
+];
+
 export function LoginForm() {
   const { mutate: login, isPending, error } = useLogin();
 
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -30,6 +38,11 @@ export function LoginForm() {
 
   function onSubmit(data: FormData) {
     login(data);
+  }
+
+  function handleQuickLogin(account: (typeof QUICK_LOGIN_ACCOUNTS)[number]) {
+    setValue('email', account.email, { shouldValidate: true });
+    setValue('password', account.password, { shouldValidate: true });
   }
 
   const apiErrorMessage = error ? error.message || 'Login failed. Please try again.' : null;
@@ -90,6 +103,26 @@ export function LoginForm() {
           size="lg"
           fullWidth
         />
+
+        {__DEV__ && (
+          <View className="gap-2">
+            <Text className="text-neutral-400 dark:text-dark-400 text-xs font-sans text-center">
+              Quick sign in (dev only)
+            </Text>
+            <View className="flex-row flex-wrap gap-2 justify-center">
+              {QUICK_LOGIN_ACCOUNTS.map((account) => (
+                <Button
+                  key={account.email}
+                  label={account.label}
+                  variant="outline"
+                  size="sm"
+                  onPress={() => handleQuickLogin(account)}
+                  disabled={isPending}
+                />
+              ))}
+            </View>
+          </View>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
