@@ -1,4 +1,5 @@
 import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 interface ErrorStateProps {
@@ -9,11 +10,15 @@ interface ErrorStateProps {
 }
 
 export function ErrorState({
-  title = 'Something went wrong',
-  message = 'An error occurred. Please try again.',
+  title,
+  message,
   onRetry,
   fullScreen = true,
 }: ErrorStateProps) {
+  const { t } = useTranslation('common');
+  const resolvedTitle = title ?? t('states.errorTitle');
+  const resolvedMessage = message ?? t('states.errorMessage');
+
   return (
     <View
       className={`items-center justify-center gap-4 px-8 py-12 ${fullScreen ? 'flex-1' : ''}`}
@@ -23,14 +28,14 @@ export function ErrorState({
       </View>
       <View className="items-center gap-2 max-w-xs">
         <Text className="text-neutral-900 dark:text-neutral-50 text-lg font-semibold text-center">
-          {title}
+          {resolvedTitle}
         </Text>
         <Text className="text-neutral-500 dark:text-dark-500 text-sm text-center font-sans leading-5">
-          {message}
+          {resolvedMessage}
         </Text>
       </View>
       {onRetry && (
-        <Button label="Try Again" onPress={onRetry} variant="secondary" size="sm" />
+        <Button label={t('buttons.tryAgain')} onPress={onRetry} variant="secondary" size="sm" />
       )}
     </View>
   );

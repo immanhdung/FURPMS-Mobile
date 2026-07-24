@@ -1,11 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { ProfileScreen } from '@/shared/components/profile/ProfileScreen';
 
 export default function ReviewProfileScreen() {
+  const { t } = useTranslation('profile');
   return (
     <ProfileScreen
-      roleLabel="Review Committee"
+      roleLabel={t('roleReviewCommittee')}
       badgeVariant="info"
-      footerLabel="FURPMS Mobile · Review Committee"
+      footerLabel={t('footerReviewCommittee')}
     />
   );
 }

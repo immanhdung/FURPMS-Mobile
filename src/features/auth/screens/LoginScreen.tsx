@@ -1,6 +1,7 @@
 import { View, Text, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { LoginForm } from '../components/LoginForm';
 import { useTheme } from '@/hooks/useTheme';
 import { useBiometricAuth } from '../hooks/useBiometricAuth';
@@ -8,6 +9,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useRouter } from 'expo-router';
 
 export function LoginScreen() {
+  const { t } = useTranslation('auth');
   const { isDark, colors } = useTheme();
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
@@ -42,7 +44,7 @@ export function LoginScreen() {
               FURPMS
             </Text>
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans text-center leading-5">
-              FPT University Research Project{'\n'}Management System
+              {t('brandTagline')}
             </Text>
           </View>
         </View>
@@ -51,10 +53,10 @@ export function LoginScreen() {
         <View className="bg-neutral-50 dark:bg-dark-50 rounded-2xl p-6 gap-5 border border-neutral-100 dark:border-dark-200">
           <View className="gap-0.5">
             <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-semibold">
-              Sign in to your account
+              {t('signInTitle')}
             </Text>
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-              Use your FPT University email
+              {t('signInSubtitle')}
             </Text>
           </View>
 
@@ -66,7 +68,7 @@ export function LoginScreen() {
           <View className="items-center gap-3">
             <View className="flex-row items-center gap-3">
               <View className="flex-1 h-px bg-neutral-200 dark:bg-dark-200" />
-              <Text className="text-neutral-400 dark:text-dark-400 text-xs font-sans">or</Text>
+              <Text className="text-neutral-400 dark:text-dark-400 text-xs font-sans">{t('or')}</Text>
               <View className="flex-1 h-px bg-neutral-200 dark:bg-dark-200" />
             </View>
 
@@ -92,10 +94,10 @@ export function LoginScreen() {
               </View>
               <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
                 {isAuthenticating
-                  ? 'Authenticating…'
+                  ? t('authenticating')
                   : capabilities?.primaryType === 'face'
-                  ? 'Sign in with Face ID'
-                  : 'Sign in with Touch ID'}
+                  ? t('signInWithFaceId')
+                  : t('signInWithTouchId')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -103,7 +105,7 @@ export function LoginScreen() {
 
         {/* Footer */}
         <Text className="text-neutral-400 dark:text-dark-400 text-xs text-center font-sans">
-          FPT University · Academic Year 2024–2025
+          {t('footer')}
         </Text>
       </View>
     </SafeAreaView>

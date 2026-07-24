@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useDocumentDownload } from '@/shared/hooks/useDocumentDownload';
 
@@ -34,12 +35,13 @@ function buildViewerUrl(uri: string): string {
 
 export function PDFViewer({ uri, filename, title, showDownloadButton = true, onClose }: PDFViewerProps) {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation('common');
   const [webViewLoading, setWebViewLoading] = useState(true);
   const [webViewError, setWebViewError] = useState(false);
   const { download, open, isDownloading, progress } = useDocumentDownload();
 
   const viewerUrl = buildViewerUrl(uri);
-  const displayTitle = title ?? filename ?? 'Document';
+  const displayTitle = title ?? filename ?? t('pdfViewer.document');
 
   const handleDownloadAndOpen = useCallback(async () => {
     if (!filename) return;
@@ -101,7 +103,7 @@ export function PDFViewer({ uri, filename, title, showDownloadButton = true, onC
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color={colors.accent.primary} />
             <Text style={[styles.loadingText, { color: colors.text.secondary }]}>
-              Loading document…
+              {t('pdfViewer.loadingDocument')}
             </Text>
           </View>
         )}
@@ -110,10 +112,10 @@ export function PDFViewer({ uri, filename, title, showDownloadButton = true, onC
           <View style={styles.errorContainer}>
             <Ionicons name="document-outline" size={48} color={colors.icon.muted} />
             <Text style={[styles.errorTitle, { color: colors.text.primary }]}>
-              Cannot display document
+              {t('pdfViewer.cannotDisplayTitle')}
             </Text>
             <Text style={[styles.errorBody, { color: colors.text.secondary }]}>
-              The document could not be rendered in-app.
+              {t('pdfViewer.cannotDisplayBody')}
             </Text>
             {filename && (
               <TouchableOpacity
@@ -124,8 +126,8 @@ export function PDFViewer({ uri, filename, title, showDownloadButton = true, onC
               >
                 <Text style={styles.openExternalText}>
                   {isDownloading
-                    ? `Downloading… ${progress?.percentage ?? 0}%`
-                    : 'Download & Open'}
+                    ? t('pdfViewer.downloading', { percent: progress?.percentage ?? 0 })
+                    : t('pdfViewer.downloadAndOpen')}
                 </Text>
               </TouchableOpacity>
             )}

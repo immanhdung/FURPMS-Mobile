@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { useLocale } from '@/hooks/useLocale';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { Avatar } from '@/shared/components/ui/Avatar';
 import { Badge, type BadgeVariant } from '@/shared/components/ui/Badge';
 import { formatDateTime } from '@/utils/date';
 import { ChangePasswordSheet } from './ChangePasswordSheet';
+import { LanguageSheet } from './LanguageSheet';
 
 function SettingsRow({
   icon,
@@ -64,11 +67,14 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileScreenProps) {
+  const { t } = useTranslation('profile');
   const { user } = useAuth();
   const { colors, isDark, toggleTheme } = useTheme();
+  const { language } = useLocale();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
   const { data: profile, refetch, isFetching } = useProfile();
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [languageVisible, setLanguageVisible] = useState(false);
 
   if (!user) return null;
 
@@ -94,7 +100,7 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
       >
         <View className="px-5 pt-6 pb-4">
           <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">
-            Profile
+            {t('title')}
           </Text>
         </View>
 
@@ -122,7 +128,7 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
                 <View className="flex-row items-center gap-3 px-5 py-4">
                   <Ionicons name="checkmark-circle-outline" size={18} color={colors.icon.muted} />
                   <View className="flex-1">
-                    <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">Status</Text>
+                    <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">{t('status')}</Text>
                     <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans mt-0.5">
                       {status}
                     </Text>
@@ -135,7 +141,7 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
               <View className="flex-row items-center gap-3 px-5 py-4">
                 <Ionicons name="time-outline" size={18} color={colors.icon.muted} />
                 <View className="flex-1">
-                  <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">Last login</Text>
+                  <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">{t('lastLogin')}</Text>
                   <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans mt-0.5">
                     {formatDateTime(lastLoginAt)}
                   </Text>
@@ -149,14 +155,21 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
         <View className="mx-5 mt-4 bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
           <SettingsRow
             icon={isDark ? 'moon' : 'sunny-outline'}
-            label={isDark ? 'Dark Mode' : 'Light Mode'}
-            value={isDark ? 'On' : 'Off'}
+            label={isDark ? t('darkMode') : t('lightMode')}
+            value={isDark ? t('on') : t('off')}
             onPress={toggleTheme}
           />
           <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-5" />
           <SettingsRow
+            icon="language-outline"
+            label={t('language')}
+            value={language === 'vi' ? t('languageSheet.vietnamese') : t('languageSheet.english')}
+            onPress={() => setLanguageVisible(true)}
+          />
+          <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-5" />
+          <SettingsRow
             icon="key-outline"
-            label="Change Password"
+            label={t('changePassword')}
             onPress={() => setChangePasswordVisible(true)}
           />
         </View>
@@ -165,7 +178,7 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
         <View className="mx-5 mt-4 bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
           <SettingsRow
             icon="log-out-outline"
-            label={isLoggingOut ? 'Signing out…' : 'Sign Out'}
+            label={isLoggingOut ? t('signingOut') : t('signOut')}
             onPress={() => logout()}
             dangerous
             loading={isLoggingOut}
@@ -182,6 +195,7 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
         visible={changePasswordVisible}
         onClose={() => setChangePasswordVisible(false)}
       />
+      <LanguageSheet visible={languageVisible} onClose={() => setLanguageVisible(false)} />
     </SafeAreaView>
   );
 }

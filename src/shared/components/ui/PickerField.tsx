@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 
 export interface PickerOption<T> {
@@ -24,17 +25,20 @@ interface PickerFieldProps<T> {
 export function PickerField<T>({
   label,
   required,
-  placeholder = 'Select…',
+  placeholder,
   value,
   options,
   onChange,
   error,
   disabled,
-  emptyMessage = 'No options available',
+  emptyMessage,
 }: PickerFieldProps<T>) {
   const { colors } = useTheme();
+  const { t } = useTranslation('common');
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value);
+  const resolvedPlaceholder = placeholder ?? t('picker.select');
+  const resolvedEmptyMessage = emptyMessage ?? t('picker.noOptions');
 
   return (
     <View className="gap-1.5">
@@ -57,7 +61,7 @@ export function PickerField<T>({
           }`}
           numberOfLines={1}
         >
-          {selected?.label ?? placeholder}
+          {selected?.label ?? resolvedPlaceholder}
         </Text>
         <Ionicons name="chevron-down" size={16} color={colors.icon.muted} />
       </TouchableOpacity>
@@ -78,7 +82,7 @@ export function PickerField<T>({
               contentContainerStyle={{ paddingBottom: 24 }}
               ListEmptyComponent={
                 <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans text-center py-8">
-                  {emptyMessage}
+                  {resolvedEmptyMessage}
                 </Text>
               }
               renderItem={({ item }) => {

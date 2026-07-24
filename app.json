@@ -20,9 +20,14 @@
         "NSFaceIDUsageDescription": "Use Face ID to quickly and securely access FURPMS",
         "NSCameraUsageDescription": "Allow FURPMS to access your camera for document capture",
         "NSPhotoLibraryUsageDescription": "Allow FURPMS to access your photos for document upload",
-        "UIBackgroundModes": ["fetch", "remote-notification"]
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification"
+        ]
       },
-      "associatedDomains": ["applinks:furpms.fpt.edu.vn"]
+      "associatedDomains": [
+        "applinks:furpms.fpt.edu.vn"
+      ]
     },
     "android": {
       "package": "vn.edu.fpt.furpms",
@@ -51,7 +56,10 @@
               "pathPrefix": "/"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -74,7 +82,8 @@
         {
           "faceIDPermission": "Use Face ID to quickly and securely access FURPMS"
         }
-      ]
-    ],
+      ],
+      "expo-localization"
+    ]
   }
 }

@@ -1,0 +1,30 @@
+{
+  "title": "Hồ sơ",
+  "status": "Trạng thái",
+  "lastLogin": "Đăng nhập lần cuối",
+  "darkMode": "Chế độ tối",
+  "lightMode": "Chế độ sáng",
+  "on": "Bật",
+  "off": "Tắt",
+  "language": "Ngôn ngữ",
+  "changePassword": "Đổi mật khẩu",
+  "signOut": "Đăng xuất",
+  "signingOut": "Đang đăng xuất…",
+  "roleFaculty": "Giảng viên",
+  "roleReviewCommittee": "Hội đồng phản biện",
+  "footerFaculty": "FURPMS Mobile · Phiên bản Giảng viên",
+  "footerReviewCommittee": "FURPMS Mobile · Hội đồng phản biện",
+  "languageSheet": {
+    "title": "Ngôn ngữ",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  },
+  "changePasswordSheet": {
+    "title": "Đổi mật khẩu",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu mới",
+    "submit": "Cập nhật mật khẩu",
+    "genericError": "Không thể đổi mật khẩu. Vui lòng thử lại."
+  }
+}

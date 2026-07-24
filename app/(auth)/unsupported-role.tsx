@@ -1,12 +1,14 @@
 import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 import { Button } from '@/shared/components/ui/Button';
 
 export default function UnsupportedRoleScreen() {
+  const { t } = useTranslation('common');
   const { user } = useAuth();
   const { colors } = useTheme();
   const { mutate: logout, isPending } = useLogout();
@@ -17,15 +19,15 @@ export default function UnsupportedRoleScreen() {
         <Ionicons name="phone-portrait-outline" size={28} color={colors.icon.muted} />
       </View>
       <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold text-center">
-        Not available on mobile
+        {t('unsupportedRole.title')}
       </Text>
       <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans text-center mt-2 leading-relaxed">
         {user?.roles?.length
-          ? `Your account (${user.roles.join(', ')}) doesn't have a Faculty or Review Committee role. This app only supports those roles — please use the FURPMS web app instead.`
-          : 'This app only supports the Faculty and Review Committee roles. Please use the FURPMS web app instead.'}
+          ? t('unsupportedRole.bodyWithRoles', { roles: user.roles.join(', ') })
+          : t('unsupportedRole.bodyNoRoles')}
       </Text>
       <Button
-        label={isPending ? 'Signing out…' : 'Sign Out'}
+        label={isPending ? t('unsupportedRole.signingOut') : t('unsupportedRole.signOut')}
         variant="secondary"
         onPress={() => logout()}
         loading={isPending}

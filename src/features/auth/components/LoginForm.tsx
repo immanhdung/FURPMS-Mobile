@@ -2,6 +2,7 @@ import { View, Text, KeyboardAvoidingView, Platform } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
 import { useLogin } from '../hooks/useLogin';
@@ -24,6 +25,7 @@ const QUICK_LOGIN_ACCOUNTS: { label: string; email: string; password: string }[]
 ];
 
 export function LoginForm() {
+  const { t } = useTranslation('auth');
   const { mutate: login, isPending, error } = useLogin();
 
   const {
@@ -45,7 +47,7 @@ export function LoginForm() {
     setValue('password', account.password, { shouldValidate: true });
   }
 
-  const apiErrorMessage = error ? error.message || 'Login failed. Please try again.' : null;
+  const apiErrorMessage = error ? error.message || t('loginFailed') : null;
 
   return (
     <KeyboardAvoidingView
@@ -57,8 +59,8 @@ export function LoginForm() {
           name="email"
           render={({ field: { onChange, value, onBlur } }) => (
             <Input
-              label="Email"
-              placeholder="name@fpt.edu.vn"
+              label={t('emailLabel')}
+              placeholder={t('emailPlaceholder')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -76,8 +78,8 @@ export function LoginForm() {
           name="password"
           render={({ field: { onChange, value, onBlur } }) => (
             <Input
-              label="Password"
-              placeholder="Enter your password"
+              label={t('passwordLabel')}
+              placeholder={t('passwordPlaceholder')}
               secureTextEntry
               autoComplete="current-password"
               value={value}
@@ -97,7 +99,7 @@ export function LoginForm() {
         )}
 
         <Button
-          label={isPending ? 'Signing in…' : 'Sign in'}
+          label={isPending ? t('signingIn') : t('signIn')}
           onPress={handleSubmit(onSubmit)}
           loading={isPending}
           size="lg"
@@ -107,7 +109,7 @@ export function LoginForm() {
         {__DEV__ && (
           <View className="gap-2">
             <Text className="text-neutral-400 dark:text-dark-400 text-xs font-sans text-center">
-              Quick sign in (dev only)
+              {t('quickSignInDev')}
             </Text>
             <View className="flex-row flex-wrap gap-2 justify-center">
               {QUICK_LOGIN_ACCOUNTS.map((account) => (

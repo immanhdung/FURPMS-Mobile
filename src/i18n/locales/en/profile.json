@@ -1,0 +1,30 @@
+{
+  "title": "Profile",
+  "status": "Status",
+  "lastLogin": "Last login",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "on": "On",
+  "off": "Off",
+  "language": "Language",
+  "changePassword": "Change Password",
+  "signOut": "Sign Out",
+  "signingOut": "Signing out…",
+  "roleFaculty": "Faculty",
+  "roleReviewCommittee": "Review Committee",
+  "footerFaculty": "FURPMS Mobile · Faculty Edition",
+  "footerReviewCommittee": "FURPMS Mobile · Review Committee",
+  "languageSheet": {
+    "title": "Language",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  },
+  "changePasswordSheet": {
+    "title": "Change Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "submit": "Update Password",
+    "genericError": "Could not change password. Please try again."
+  }
+}

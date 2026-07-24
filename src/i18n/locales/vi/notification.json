@@ -1,0 +1,10 @@
+{
+  "title": "Hộp thư",
+  "unreadCount": "{{count}} chưa đọc",
+  "allCaughtUp": "Bạn đã xem hết",
+  "markAllRead": "Đánh dấu đã đọc tất cả",
+  "loading": "Đang tải thông báo…",
+  "loadErrorTitle": "Không thể tải thông báo",
+  "loadErrorMessage": "Kiểm tra kết nối mạng và thử lại.",
+  "emptyDescription": "Hiện chưa có thông báo nào. Chúng tôi sẽ báo khi có việc cần bạn chú ý."
+}

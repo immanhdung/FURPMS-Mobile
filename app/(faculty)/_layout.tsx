@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useNotificationStore } from '@/stores/notification.store';
 
@@ -13,33 +14,36 @@ interface TabItem {
   iconFocused: IoniconsName;
 }
 
-const TABS: TabItem[] = [
-  { name: 'index', title: 'Dashboard', icon: 'home-outline', iconFocused: 'home' },
-  {
-    name: 'proposals',
-    title: 'Proposals',
-    icon: 'document-text-outline',
-    iconFocused: 'document-text',
-  },
-  {
-    name: 'reports',
-    title: 'Reports',
-    icon: 'bar-chart-outline',
-    iconFocused: 'bar-chart',
-  },
-  {
-    name: 'notifications/index',
-    title: 'Inbox',
-    icon: 'notifications-outline',
-    iconFocused: 'notifications',
-  },
-  {
-    name: 'profile/index',
-    title: 'Profile',
-    icon: 'person-outline',
-    iconFocused: 'person',
-  },
-];
+function useTabs(): TabItem[] {
+  const { t } = useTranslation('common');
+  return [
+    { name: 'index', title: t('tabs.dashboard'), icon: 'home-outline', iconFocused: 'home' },
+    {
+      name: 'proposals',
+      title: t('tabs.proposals'),
+      icon: 'document-text-outline',
+      iconFocused: 'document-text',
+    },
+    {
+      name: 'reports',
+      title: t('tabs.reports'),
+      icon: 'bar-chart-outline',
+      iconFocused: 'bar-chart',
+    },
+    {
+      name: 'notifications/index',
+      title: t('tabs.inbox'),
+      icon: 'notifications-outline',
+      iconFocused: 'notifications',
+    },
+    {
+      name: 'profile/index',
+      title: t('tabs.profile'),
+      icon: 'person-outline',
+      iconFocused: 'person',
+    },
+  ];
+}
 
 function NotificationTabIcon({
   color,
@@ -72,6 +76,7 @@ function NotificationTabIcon({
 
 export default function FacultyLayout() {
   const { colors } = useTheme();
+  const TABS = useTabs();
 
   return (
     <Tabs

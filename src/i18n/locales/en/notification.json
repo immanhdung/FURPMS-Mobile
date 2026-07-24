@@ -1,0 +1,10 @@
+{
+  "title": "Inbox",
+  "unreadCount": "{{count}} unread",
+  "allCaughtUp": "All caught up",
+  "markAllRead": "Mark all read",
+  "loading": "Loading notifications…",
+  "loadErrorTitle": "Could not load notifications",
+  "loadErrorMessage": "Check your connection and try again.",
+  "emptyDescription": "No notifications right now. We'll notify you when something needs your attention."
+}

@@ -3,6 +3,7 @@ import { Modal, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform } f
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
@@ -15,6 +16,7 @@ interface ChangePasswordSheetProps {
 }
 
 export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetProps) {
+  const { t } = useTranslation('profile');
   const { colors } = useTheme();
   const [apiError, setApiError] = useState<string | null>(null);
   const { mutate, isPending } = useChangePassword();
@@ -42,7 +44,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
       {
         onSuccess: handleClose,
         onError: (error) => {
-          setApiError(error.message || 'Could not change password. Please try again.');
+          setApiError(error.message || t('changePasswordSheet.genericError'));
         },
       },
     );
@@ -55,7 +57,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
           <View className="bg-white dark:bg-dark-50 rounded-t-3xl px-5 pt-5 pb-8 gap-4">
             <View className="flex-row items-center justify-between">
               <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-                Change Password
+                {t('changePasswordSheet.title')}
               </Text>
               <TouchableOpacity onPress={handleClose} hitSlop={12}>
                 <Ionicons name="close" size={22} color={colors.icon.muted} />
@@ -67,7 +69,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
               name="currentPassword"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  label="Current password"
+                  label={t('changePasswordSheet.currentPassword')}
                   secureTextEntry
                   autoCapitalize="none"
                   value={value}
@@ -82,7 +84,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
               name="newPassword"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  label="New password"
+                  label={t('changePasswordSheet.newPassword')}
                   secureTextEntry
                   autoCapitalize="none"
                   value={value}
@@ -97,7 +99,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
               name="confirmPassword"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  label="Confirm new password"
+                  label={t('changePasswordSheet.confirmPassword')}
                   secureTextEntry
                   autoCapitalize="none"
                   value={value}
@@ -113,7 +115,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
             )}
 
             <Button
-              label="Update Password"
+              label={t('changePasswordSheet.submit')}
               onPress={handleSubmit(onSubmit)}
               loading={isPending}
               fullWidth

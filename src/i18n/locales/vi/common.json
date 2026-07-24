@@ -1,0 +1,58 @@
+{
+  "tabs": {
+    "dashboard": "Tổng quan",
+    "proposals": "Đề tài",
+    "reports": "Báo cáo",
+    "myReviews": "Bài chấm",
+    "meetings": "Cuộc họp",
+    "inbox": "Hộp thư",
+    "profile": "Hồ sơ"
+  },
+  "buttons": {
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "save": "Lưu",
+    "close": "Đóng",
+    "retry": "Thử lại",
+    "back": "Quay lại",
+    "tryAgain": "Thử lại"
+  },
+  "states": {
+    "loading": "Đang tải…",
+    "errorTitle": "Đã xảy ra lỗi",
+    "errorMessage": "Đã có lỗi xảy ra. Vui lòng thử lại."
+  },
+  "fileUploader": {
+    "attachDocument": "Đính kèm tài liệu",
+    "upload": "Tải lên",
+    "uploaded": "Đã tải lên",
+    "selectingFile": "Đang chọn tệp…",
+    "preparingUpload": "Đang chuẩn bị tải lên…",
+    "uploading": "Đang tải lên {{percent}}%"
+  },
+  "pdfViewer": {
+    "document": "Tài liệu",
+    "loadingDocument": "Đang tải tài liệu…",
+    "cannotDisplayTitle": "Không thể hiển thị tài liệu",
+    "cannotDisplayBody": "Không thể hiển thị tài liệu trong ứng dụng.",
+    "downloadAndOpen": "Tải xuống & Mở",
+    "downloading": "Đang tải xuống… {{percent}}%"
+  },
+  "unsupportedRole": {
+    "title": "Không khả dụng trên di động",
+    "bodyWithRoles": "Tài khoản của bạn ({{roles}}) không có vai trò Giảng viên hoặc Hội đồng phản biện. Ứng dụng này chỉ hỗ trợ các vai trò đó — vui lòng dùng ứng dụng web FURPMS.",
+    "bodyNoRoles": "Ứng dụng này chỉ hỗ trợ vai trò Giảng viên và Hội đồng phản biện. Vui lòng dùng ứng dụng web FURPMS.",
+    "signOut": "Đăng xuất",
+    "signingOut": "Đang đăng xuất…"
+  },
+  "picker": {
+    "select": "Chọn…",
+    "noOptions": "Không có tùy chọn"
+  },
+  "notFound": {
+    "stackTitle": "Không tìm thấy",
+    "title": "404",
+    "body": "Không tìm thấy màn hình này.",
+    "goHome": "Về trang chủ"
+  }
+}

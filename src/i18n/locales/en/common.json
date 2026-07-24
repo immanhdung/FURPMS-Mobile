@@ -1,0 +1,58 @@
+{
+  "tabs": {
+    "dashboard": "Dashboard",
+    "proposals": "Proposals",
+    "reports": "Reports",
+    "myReviews": "My Reviews",
+    "meetings": "Meetings",
+    "inbox": "Inbox",
+    "profile": "Profile"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "close": "Close",
+    "retry": "Retry",
+    "back": "Back",
+    "tryAgain": "Try Again"
+  },
+  "states": {
+    "loading": "Loading…",
+    "errorTitle": "Something went wrong",
+    "errorMessage": "An error occurred. Please try again."
+  },
+  "fileUploader": {
+    "attachDocument": "Attach Document",
+    "upload": "Upload",
+    "uploaded": "Uploaded",
+    "selectingFile": "Selecting file…",
+    "preparingUpload": "Preparing upload…",
+    "uploading": "Uploading {{percent}}%"
+  },
+  "pdfViewer": {
+    "document": "Document",
+    "loadingDocument": "Loading document…",
+    "cannotDisplayTitle": "Cannot display document",
+    "cannotDisplayBody": "The document could not be rendered in-app.",
+    "downloadAndOpen": "Download & Open",
+    "downloading": "Downloading… {{percent}}%"
+  },
+  "unsupportedRole": {
+    "title": "Not available on mobile",
+    "bodyWithRoles": "Your account ({{roles}}) doesn't have a Faculty or Review Committee role. This app only supports those roles — please use the FURPMS web app instead.",
+    "bodyNoRoles": "This app only supports the Faculty and Review Committee roles. Please use the FURPMS web app instead.",
+    "signOut": "Sign Out",
+    "signingOut": "Signing out…"
+  },
+  "picker": {
+    "select": "Select…",
+    "noOptions": "No options available"
+  },
+  "notFound": {
+    "stackTitle": "Not Found",
+    "title": "404",
+    "body": "This screen does not exist.",
+    "goHome": "Go home"
+  }
+}

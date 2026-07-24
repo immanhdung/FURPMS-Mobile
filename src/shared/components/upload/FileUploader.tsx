@@ -7,6 +7,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { type PickedFile, type UploadedFile, uploadService } from '@/services/upload.service';
 
@@ -35,11 +36,13 @@ export function FileUploader({
   onPick,
   onUpload,
   onRemove,
-  label = 'Attach Document',
+  label,
   hint,
   disabled = false,
 }: FileUploaderProps) {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation('common');
+  const resolvedLabel = label ?? t('fileUploader.attachDocument');
   const progressWidth = useSharedValue(0);
 
   useEffect(() => {
@@ -69,7 +72,7 @@ export function FileUploader({
             {uploadedFile.name}
           </Text>
           <Text style={[styles.fileSize, { color: colors.text.secondary }]}>
-            {uploadService.formatFileSize(uploadedFile.size)} · Uploaded
+            {uploadService.formatFileSize(uploadedFile.size)} · {t('fileUploader.uploaded')}
           </Text>
         </View>
         {onRemove && (
@@ -113,7 +116,7 @@ export function FileUploader({
                 activeOpacity={0.7}
                 style={[styles.uploadButton, { backgroundColor: colors.accent.primary }]}
               >
-                <Text style={styles.uploadButtonText}>Upload</Text>
+                <Text style={styles.uploadButtonText}>{t('fileUploader.upload')}</Text>
               </TouchableOpacity>
             )}
             {onRemove && (
@@ -159,10 +162,10 @@ export function FileUploader({
           <ActivityIndicator size="small" color={colors.accent.primary} />
           <Text style={[styles.uploadingText, { color: colors.text.secondary }]}>
             {isPickingFile
-              ? 'Selecting file…'
+              ? t('fileUploader.selectingFile')
               : progress
-              ? `Uploading ${progress.percentage}%`
-              : 'Preparing upload…'}
+              ? t('fileUploader.uploading', { percent: progress.percentage })
+              : t('fileUploader.preparingUpload')}
           </Text>
         </View>
       </View>
@@ -194,7 +197,7 @@ export function FileUploader({
           size={28}
           color={error ? colors.accent.danger : colors.accent.primary}
         />
-        <Text style={[styles.pickerLabel, { color: colors.text.primary }]}>{label}</Text>
+        <Text style={[styles.pickerLabel, { color: colors.text.primary }]}>{resolvedLabel}</Text>
         {hint && (
           <Text style={[styles.pickerHint, { color: colors.text.tertiary }]}>{hint}</Text>
         )}

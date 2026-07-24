@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useNotificationStore } from '@/stores/notification.store';
 
@@ -13,33 +14,36 @@ interface TabItem {
   iconFocused: IoniconsName;
 }
 
-const TABS: TabItem[] = [
-  { name: 'index', title: 'Dashboard', icon: 'home-outline', iconFocused: 'home' },
-  {
-    name: 'queue',
-    title: 'My Reviews',
-    icon: 'clipboard-outline',
-    iconFocused: 'clipboard',
-  },
-  {
-    name: 'meetings',
-    title: 'Meetings',
-    icon: 'calendar-outline',
-    iconFocused: 'calendar',
-  },
-  {
-    name: 'notifications',
-    title: 'Inbox',
-    icon: 'notifications-outline',
-    iconFocused: 'notifications',
-  },
-  {
-    name: 'profile',
-    title: 'Profile',
-    icon: 'person-outline',
-    iconFocused: 'person',
-  },
-];
+function useTabs(): TabItem[] {
+  const { t } = useTranslation('common');
+  return [
+    { name: 'index', title: t('tabs.dashboard'), icon: 'home-outline', iconFocused: 'home' },
+    {
+      name: 'queue',
+      title: t('tabs.myReviews'),
+      icon: 'clipboard-outline',
+      iconFocused: 'clipboard',
+    },
+    {
+      name: 'meetings',
+      title: t('tabs.meetings'),
+      icon: 'calendar-outline',
+      iconFocused: 'calendar',
+    },
+    {
+      name: 'notifications',
+      title: t('tabs.inbox'),
+      icon: 'notifications-outline',
+      iconFocused: 'notifications',
+    },
+    {
+      name: 'profile',
+      title: t('tabs.profile'),
+      icon: 'person-outline',
+      iconFocused: 'person',
+    },
+  ];
+}
 
 function NotificationTabIcon({
   color,
@@ -72,6 +76,7 @@ function NotificationTabIcon({
 
 export default function ReviewLayout() {
   const { colors } = useTheme();
+  const TABS = useTabs();
 
   return (
     <Tabs

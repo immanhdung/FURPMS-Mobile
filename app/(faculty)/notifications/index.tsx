@@ -7,6 +7,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import {
   useNotifications,
@@ -20,6 +21,7 @@ import { EmptyState } from '@/shared/components/feedback/EmptyState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
 
 export default function NotificationsScreen() {
+  const { t } = useTranslation('notification');
   const { colors } = useTheme();
   const { data, isLoading, isError, refetch, isFetching } = useNotifications();
   const { data: unreadData } = useUnreadCount();
@@ -45,10 +47,10 @@ export default function NotificationsScreen() {
       <View className="px-5 pt-6 pb-4 flex-row items-center justify-between">
         <View className="gap-0.5">
           <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">
-            Inbox
+            {t('title')}
           </Text>
           <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
+            {unreadCount > 0 ? t('unreadCount', { count: unreadCount }) : t('allCaughtUp')}
           </Text>
         </View>
         {unreadCount > 0 && (
@@ -60,18 +62,18 @@ export default function NotificationsScreen() {
             style={{ opacity: isMarkingAll ? 0.5 : 1 }}
           >
             <Text className="text-neutral-600 dark:text-dark-500 text-xs font-medium">
-              Mark all read
+              {t('markAllRead')}
             </Text>
           </TouchableOpacity>
         )}
       </View>
 
       {isLoading ? (
-        <LoadingState message="Loading notifications…" />
+        <LoadingState message={t('loading')} />
       ) : isError ? (
         <ErrorState
-          title="Could not load notifications"
-          message="Check your connection and try again."
+          title={t('loadErrorTitle')}
+          message={t('loadErrorMessage')}
           onRetry={refetch}
         />
       ) : (
@@ -100,8 +102,8 @@ export default function NotificationsScreen() {
           ListFooterComponent={<View className="h-8" />}
           ListEmptyComponent={
             <EmptyState
-              title="All caught up"
-              description="No notifications right now. We'll notify you when something needs your attention."
+              title={t('allCaughtUp')}
+              description={t('emptyDescription')}
             />
           }
         />
