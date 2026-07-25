@@ -1,10 +1,13 @@
-import { View, Text, KeyboardAvoidingView, Platform } from 'react-native';
+import { useState } from 'react';
+import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
+import { useTheme } from '@/hooks/useTheme';
 import { useLogin } from '../hooks/useLogin';
 
 const schema = z.object({
@@ -26,7 +29,9 @@ const QUICK_LOGIN_ACCOUNTS: { label: string; email: string; password: string }[]
 
 export function LoginForm() {
   const { t } = useTranslation('auth');
+  const { colors } = useTheme();
   const { mutate: login, isPending, error } = useLogin();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     control,
@@ -61,6 +66,7 @@ export function LoginForm() {
             <Input
               label={t('emailLabel')}
               placeholder={t('emailPlaceholder')}
+              iconLeft={<Ionicons name="mail-outline" size={18} color={colors.icon.muted} />}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -80,7 +86,17 @@ export function LoginForm() {
             <Input
               label={t('passwordLabel')}
               placeholder={t('passwordPlaceholder')}
-              secureTextEntry
+              iconLeft={<Ionicons name="lock-closed-outline" size={18} color={colors.icon.muted} />}
+              rightElement={
+                <TouchableOpacity onPress={() => setShowPassword((v) => !v)} hitSlop={8}>
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={18}
+                    color={colors.icon.muted}
+                  />
+                </TouchableOpacity>
+              }
+              secureTextEntry={!showPassword}
               autoComplete="current-password"
               value={value}
               onChangeText={onChange}
@@ -102,15 +118,21 @@ export function LoginForm() {
           label={isPending ? t('signingIn') : t('signIn')}
           onPress={handleSubmit(onSubmit)}
           loading={isPending}
+          iconRight={!isPending ? <Ionicons name="arrow-forward" size={18} color="#fff" /> : undefined}
           size="lg"
           fullWidth
         />
 
         {__DEV__ && (
-          <View className="gap-2">
-            <Text className="text-neutral-400 dark:text-dark-400 text-xs font-sans text-center">
-              {t('quickSignInDev')}
-            </Text>
+          <View
+            className="gap-2.5 rounded-xl border border-dashed border-neutral-200 dark:border-dark-200 px-3 py-3"
+          >
+            <View className="flex-row items-center justify-center gap-1.5">
+              <Ionicons name="flask-outline" size={13} color={colors.icon.muted} />
+              <Text className="text-neutral-400 dark:text-dark-400 text-xs font-sans">
+                {t('quickSignInDev')}
+              </Text>
+            </View>
             <View className="flex-row flex-wrap gap-2 justify-center">
               {QUICK_LOGIN_ACCOUNTS.map((account) => (
                 <Button
@@ -118,6 +140,7 @@ export function LoginForm() {
                   label={account.label}
                   variant="outline"
                   size="sm"
+                  iconLeft={<Ionicons name="person-circle-outline" size={14} color={colors.accent.primary} />}
                   onPress={() => handleQuickLogin(account)}
                   disabled={isPending}
                 />
