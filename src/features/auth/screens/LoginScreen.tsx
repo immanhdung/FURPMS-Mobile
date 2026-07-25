@@ -1,4 +1,4 @@
-import { View, Text, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -36,17 +36,14 @@ export function LoginScreen() {
       <View className="flex-1 px-6 justify-center gap-8">
         {/* Brand header */}
         <View className="items-center gap-4">
-          <View className="w-16 h-16 bg-violet-500 dark:bg-violet-400 rounded-2xl items-center justify-center">
-            <Text className="text-white text-3xl font-bold">F</Text>
-          </View>
-          <View className="items-center gap-1.5">
-            <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">
-              FURPMS
-            </Text>
-            <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans text-center leading-5">
-              {t('brandTagline')}
-            </Text>
-          </View>
+          <Image
+            source={require('../../../../assets/logo.png')}
+            style={{ width: 96, height: 118 }}
+            resizeMode="contain"
+          />
+          <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans text-center leading-5">
+            {t('brandTagline')}
+          </Text>
         </View>
 
         {/* Login card */}
