@@ -17,8 +17,9 @@ export interface ProgressReport {
   submittedAt?: string | null;
 }
 
-export interface CreateProgressReportPayload {
-  period?: string;
+// PI can only fill in content for a report slot staff already scheduled (period/dueDate are
+// staff-set and not part of this payload) — see ProgressReportsTab in app/(faculty)/reports.
+export interface UpdateProgressReportPayload {
   completedContent?: string;
   pendingContent?: string;
   overallCompletionPct?: number;

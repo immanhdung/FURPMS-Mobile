@@ -119,7 +119,7 @@
     "evaluation": "Evaluation: {{result}}",
     "noProgressReportsTitle": "No progress reports yet",
     "noProgressReportsDescription": "Reports scheduled by staff will appear here.",
-    "newProgressReport": "New Progress Report",
+    "fillReport": "Fill in report",
     "loadingFinalReport": "Loading final report…",
     "finalReportTitle": "Final Report",
     "submitted": "Submitted {{date}}",
@@ -135,16 +135,12 @@
     "noFinalReportDescription": "Submit your final report once the project is complete."
   },
   "createProgressReportSheet": {
-    "title": "New Progress Report",
-    "period": "Period",
-    "periodPlaceholder": "e.g. Q1 2026",
     "completedContent": "Completed content",
     "pendingContent": "Pending content",
     "overallCompletion": "Overall completion (%)",
     "nextPeriodPlan": "Next period plan",
-    "createAndSubmit": "Create & Submit",
-    "submitErrorMessage": "Report was saved but could not be submitted. Try submitting it again.",
-    "createErrorMessage": "Failed to create progress report. Please try again."
+    "submitReport": "Submit Report",
+    "submitErrorMessage": "Failed to submit progress report. Please try again."
   },
   "expectedProductsCard": {
     "loading": "Loading…",

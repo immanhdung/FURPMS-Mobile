@@ -119,7 +119,7 @@
     "evaluation": "Đánh giá: {{result}}",
     "noProgressReportsTitle": "Chưa có báo cáo tiến độ",
     "noProgressReportsDescription": "Các báo cáo do cán bộ lên lịch sẽ hiển thị tại đây.",
-    "newProgressReport": "Báo cáo tiến độ mới",
+    "fillReport": "Điền báo cáo",
     "loadingFinalReport": "Đang tải báo cáo cuối cùng…",
     "finalReportTitle": "Báo cáo cuối cùng",
     "submitted": "Đã nộp {{date}}",
@@ -135,16 +135,12 @@
     "noFinalReportDescription": "Nộp báo cáo cuối cùng khi dự án hoàn thành."
   },
   "createProgressReportSheet": {
-    "title": "Báo cáo tiến độ mới",
-    "period": "Kỳ báo cáo",
-    "periodPlaceholder": "VD: Quý 1 2026",
     "completedContent": "Nội dung đã hoàn thành",
     "pendingContent": "Nội dung còn lại",
     "overallCompletion": "Tỷ lệ hoàn thành chung (%)",
     "nextPeriodPlan": "Kế hoạch kỳ tiếp theo",
-    "createAndSubmit": "Tạo & Nộp",
-    "submitErrorMessage": "Báo cáo đã được lưu nhưng không thể nộp. Vui lòng thử nộp lại.",
-    "createErrorMessage": "Không thể tạo báo cáo tiến độ. Vui lòng thử lại."
+    "submitReport": "Nộp báo cáo",
+    "submitErrorMessage": "Không thể nộp báo cáo tiến độ. Vui lòng thử lại."
   },
   "expectedProductsCard": {
     "loading": "Đang tải…",

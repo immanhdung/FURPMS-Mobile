@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { progressReportService } from '../services/progress-report.service';
-import type { CreateProgressReportPayload } from '../types/progress-report.types';
+import type { UpdateProgressReportPayload } from '../types/progress-report.types';
 
 function queryKey(contractId: string) {
   return ['progress-reports', contractId] as const;
@@ -14,10 +14,11 @@ export function useProgressReports(contractId?: string) {
   });
 }
 
-export function useCreateProgressReport(contractId: string) {
+export function useUpdateProgressReport(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateProgressReportPayload) => progressReportService.create(contractId, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateProgressReportPayload }) =>
+      progressReportService.update(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKey(contractId) });
     },

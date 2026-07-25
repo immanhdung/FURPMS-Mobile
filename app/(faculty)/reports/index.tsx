@@ -12,7 +12,8 @@ import { FileUploader } from '@/shared/components/upload/FileUploader';
 import { useMyContracts } from '@/features/faculty/hooks/useContracts';
 import { useProgressReports } from '@/features/faculty/hooks/useProgressReports';
 import { useFinalReport, useSubmitFinalReport } from '@/features/faculty/hooks/useFinalReports';
-import { CreateProgressReportSheet } from '@/features/faculty/components/CreateProgressReportSheet';
+import { SubmitProgressReportSheet } from '@/features/faculty/components/SubmitProgressReportSheet';
+import type { ProgressReport } from '@/features/faculty/types/progress-report.types';
 import { finalReportService, type FinalReportDocumentType } from '@/features/faculty/services/final-report.service';
 import { uploadService, type PickedFile, type UploadedFile } from '@/services/upload.service';
 import { formatDate } from '@/utils/date';
@@ -83,46 +84,57 @@ function ReportCard({ children }: { children: React.ReactNode }) {
 function ProgressReportsTab({ contractId }: { contractId: string }) {
   const { t } = useTranslation('faculty');
   const { data: reports, isLoading } = useProgressReports(contractId);
-  const [sheetVisible, setSheetVisible] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<ProgressReport | null>(null);
 
   if (isLoading) return <LoadingState message={t('reports.loadingProgressReports')} />;
 
   return (
     <View className="gap-3">
-      {(reports ?? []).map((report) => (
-        <ReportCard key={report.id}>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-              {report.period || t('reports.progressReportFallbackTitle')}
-            </Text>
-            {report.status && <Badge label={report.status} variant={report.status === 'SUBMITTED' ? 'info' : 'default'} size="sm" />}
-          </View>
-          {report.overallCompletionPct != null && (
-            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-              {t('reports.percentComplete', { percent: report.overallCompletionPct })}
-            </Text>
-          )}
-          {report.dueDate && (
-            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('reports.due', { date: formatDate(report.dueDate) })}</Text>
-          )}
-          {report.meetingLink && (
-            <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">{t('reports.meetingScheduled')}</Text>
-          )}
-          {report.evaluationResult && (
-            <Text className="text-neutral-700 dark:text-neutral-200 text-xs font-sans">
-              {t('reports.evaluation', { result: report.evaluationResult })}
-            </Text>
-          )}
-        </ReportCard>
-      ))}
+      {(reports ?? []).map((report) => {
+        const awaitingSubmission = !report.submittedAt;
+        return (
+          <ReportCard key={report.id}>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
+                {report.period || t('reports.progressReportFallbackTitle')}
+              </Text>
+              {report.status && (
+                <Badge label={report.status} variant={awaitingSubmission ? 'warning' : 'info'} size="sm" />
+              )}
+            </View>
+            {report.overallCompletionPct != null && (
+              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
+                {t('reports.percentComplete', { percent: report.overallCompletionPct })}
+              </Text>
+            )}
+            {report.dueDate && (
+              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('reports.due', { date: formatDate(report.dueDate) })}</Text>
+            )}
+            {report.meetingLink && (
+              <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">{t('reports.meetingScheduled')}</Text>
+            )}
+            {report.evaluationResult && (
+              <Text className="text-neutral-700 dark:text-neutral-200 text-xs font-sans">
+                {t('reports.evaluation', { result: report.evaluationResult })}
+              </Text>
+            )}
+            {awaitingSubmission && (
+              <Button
+                label={t('reports.fillReport')}
+                variant="secondary"
+                size="sm"
+                onPress={() => setSelectedReport(report)}
+              />
+            )}
+          </ReportCard>
+        );
+      })}
 
       {(!reports || reports.length === 0) && (
         <EmptyState fullScreen={false} icon="📈" title={t('reports.noProgressReportsTitle')} description={t('reports.noProgressReportsDescription')} />
       )}
 
-      <Button label={t('reports.newProgressReport')} variant="secondary" onPress={() => setSheetVisible(true)} fullWidth />
-
-      <CreateProgressReportSheet visible={sheetVisible} contractId={contractId} onClose={() => setSheetVisible(false)} />
+      <SubmitProgressReportSheet contractId={contractId} report={selectedReport} onClose={() => setSelectedReport(null)} />
     </View>
   );
 }
