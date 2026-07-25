@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/components/ui/Badge';
 import { useTheme } from '@/hooks/useTheme';
 import { formatRelative } from '@/utils/date';
@@ -23,8 +24,9 @@ interface ProposalCardProps {
 }
 
 export function ProposalCard({ proposal, onPress }: ProposalCardProps) {
+  const { t } = useTranslation('faculty');
   const { colors } = useTheme();
-  const title = proposal.titleVI || proposal.titleEN || 'Untitled proposal';
+  const title = proposal.titleVI || proposal.titleEN || t('proposal.untitled');
 
   return (
     <TouchableOpacity

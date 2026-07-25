@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
@@ -12,6 +13,7 @@ interface ExpectedProductsCardProps {
 }
 
 export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsCardProps) {
+  const { t } = useTranslation('faculty');
   const { colors } = useTheme();
   const { data: products, isLoading } = useExpectedProducts(proposalId);
   const { mutate: createProduct, isPending: isCreating } = useCreateExpectedProduct(proposalId);
@@ -38,7 +40,7 @@ export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsC
   return (
     <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
       {isLoading ? (
-        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">Loading…</Text>
+        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('expectedProductsCard.loading')}</Text>
       ) : products && products.length > 0 ? (
         products.map((product, i) => (
           <View key={product.id}>
@@ -64,7 +66,7 @@ export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsC
           </View>
         ))
       ) : (
-        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">No expected products added yet.</Text>
+        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('expectedProductsCard.empty')}</Text>
       )}
 
       {editable && (
@@ -76,7 +78,7 @@ export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsC
             className="flex-row items-center justify-center gap-2 py-2"
           >
             <Ionicons name="add-circle-outline" size={18} color={colors.accent.primary} />
-            <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">Add expected product</Text>
+            <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">{t('expectedProductsCard.addExpectedProduct')}</Text>
           </TouchableOpacity>
         </>
       )}
@@ -86,21 +88,21 @@ export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsC
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View className="bg-white dark:bg-dark-50 rounded-t-3xl px-5 pt-5 pb-8 gap-4">
               <View className="flex-row items-center justify-between">
-                <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">Expected Product</Text>
+                <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t('expectedProductsCard.modalTitle')}</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)} hitSlop={12}>
                   <Ionicons name="close" size={22} color={colors.icon.muted} />
                 </TouchableOpacity>
               </View>
-              <Input label="Product name" placeholder="e.g. Journal publication" value={name} onChangeText={setName} />
+              <Input label={t('expectedProductsCard.productName')} placeholder={t('expectedProductsCard.productNamePlaceholder')} value={name} onChangeText={setName} />
               <Input
-                label="Scientific requirements (optional)"
-                placeholder="Requirements or acceptance criteria"
+                label={t('expectedProductsCard.scientificRequirements')}
+                placeholder={t('expectedProductsCard.scientificRequirementsPlaceholder')}
                 value={requirements}
                 onChangeText={setRequirements}
                 multiline
                 numberOfLines={3}
               />
-              <Button label="Add" onPress={handleAdd} loading={isCreating} disabled={!name.trim()} fullWidth />
+              <Button label={t('expectedProductsCard.add')} onPress={handleAdd} loading={isCreating} disabled={!name.trim()} fullWidth />
             </View>
           </KeyboardAvoidingView>
         </View>

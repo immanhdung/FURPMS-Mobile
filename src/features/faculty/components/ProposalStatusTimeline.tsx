@@ -1,25 +1,28 @@
 import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PROPOSAL_STATUS } from '@/constants/statuses';
 
 const HAPPY_PATH = [PROPOSAL_STATUS.DRAFT, PROPOSAL_STATUS.SUBMITTED, PROPOSAL_STATUS.UNDER_REVIEW] as const;
-
-const TERMINAL_LABEL: Record<string, string> = {
-  [PROPOSAL_STATUS.APPROVED]: 'Approved',
-  [PROPOSAL_STATUS.REJECTED]: 'Rejected',
-  [PROPOSAL_STATUS.WITHDRAWN]: 'Withdrawn',
-};
-
-const STEP_LABEL: Record<string, string> = {
-  [PROPOSAL_STATUS.DRAFT]: 'Draft',
-  [PROPOSAL_STATUS.SUBMITTED]: 'Submitted',
-  [PROPOSAL_STATUS.UNDER_REVIEW]: 'Under Review',
-};
 
 interface ProposalStatusTimelineProps {
   status?: string | null;
 }
 
 export function ProposalStatusTimeline({ status }: ProposalStatusTimelineProps) {
+  const { t } = useTranslation('faculty');
+
+  const TERMINAL_LABEL: Record<string, string> = {
+    [PROPOSAL_STATUS.APPROVED]: t('proposalsList.filters.approved'),
+    [PROPOSAL_STATUS.REJECTED]: t('proposalsList.filters.rejected'),
+    [PROPOSAL_STATUS.WITHDRAWN]: t('proposalsList.filters.withdrawn'),
+  };
+
+  const STEP_LABEL: Record<string, string> = {
+    [PROPOSAL_STATUS.DRAFT]: t('proposalsList.filters.draft'),
+    [PROPOSAL_STATUS.SUBMITTED]: t('proposalsList.filters.submitted'),
+    [PROPOSAL_STATUS.UNDER_REVIEW]: t('proposalsList.filters.underReview'),
+  };
+
   const isTerminal = status && status in TERMINAL_LABEL;
   const currentIndex = isTerminal
     ? HAPPY_PATH.length - 1

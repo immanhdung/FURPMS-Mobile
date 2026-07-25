@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { Avatar } from '@/shared/components/ui/Avatar';
@@ -25,6 +26,7 @@ const KPI_COLORS = [
 ];
 
 export default function ReviewDashboard() {
+  const { t } = useTranslation('reviewer');
   const router = useRouter();
   const { user } = useAuth();
   const { colors } = useTheme();
@@ -55,7 +57,8 @@ export default function ReviewDashboard() {
   }, [refetchDashboard, queryClient]);
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const greeting =
+    hour < 12 ? t('dashboard.greetingMorning') : hour < 18 ? t('dashboard.greetingAfternoon') : t('dashboard.greetingEvening');
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
@@ -72,20 +75,20 @@ export default function ReviewDashboard() {
           <View className="gap-0.5">
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{greeting}</Text>
             <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold tracking-tight">
-              {user?.fullName ?? 'Reviewer'}
+              {user?.fullName ?? t('dashboard.defaultName')}
             </Text>
           </View>
           <View className="items-end gap-2">
             {user && <Avatar name={user.fullName} size="md" />}
-            <Badge label="Reviewer" variant="info" size="sm" />
+            <Badge label={t('dashboard.roleBadge')} variant="info" size="sm" />
           </View>
         </View>
 
         {/* KPIs */}
         <View className="px-5 gap-3">
-          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Overview</Text>
+          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.overview')}</Text>
           {dashboardLoading ? (
-            <LoadingState message="Loading overview…" />
+            <LoadingState message={t('dashboard.loadingOverview')} />
           ) : (
             <View className="flex-row flex-wrap gap-3">
               {(dashboard?.kpis ?? []).map((kpi, i) => {
@@ -105,19 +108,19 @@ export default function ReviewDashboard() {
         {pendingInvitations.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Pending Invitations</Text>
+              <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.pendingInvitations')}</Text>
               <TouchableOpacity onPress={() => router.push('/(review)/queue')} activeOpacity={0.7}>
-                <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">View all</Text>
+                <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">{t('dashboard.viewAll')}</Text>
               </TouchableOpacity>
             </View>
             {pendingInvitations.map((m) => (
               <View key={m.memberId} className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
                 <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold" numberOfLines={2}>
-                  {m.proposalTitleVI || 'Untitled proposal'}
+                  {m.proposalTitleVI || t('dashboard.untitledProposal')}
                 </Text>
                 <View className="flex-row gap-2">
-                  <Button label="Accept" size="sm" onPress={() => respond({ memberId: m.memberId, payload: { accept: true } })} loading={isResponding} />
-                  <Button label="Decline" size="sm" variant="secondary" onPress={() => router.push('/(review)/queue')} />
+                  <Button label={t('dashboard.accept')} size="sm" onPress={() => respond({ memberId: m.memberId, payload: { accept: true } })} loading={isResponding} />
+                  <Button label={t('dashboard.decline')} size="sm" variant="secondary" onPress={() => router.push('/(review)/queue')} />
                 </View>
               </View>
             ))}
@@ -127,7 +130,7 @@ export default function ReviewDashboard() {
         {/* Review completion trend (no chart lib — simple bars) */}
         {dashboard && dashboard.reviewCompletionTrend.length > 0 && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Review Progress</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.reviewProgress')}</Text>
             <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
               {dashboard.reviewCompletionTrend.map((pt) => {
                 const total = pt.completed + pt.pending || 1;
@@ -153,14 +156,14 @@ export default function ReviewDashboard() {
         {/* Next meeting */}
         {nextMeeting && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Next Meeting</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.nextMeeting')}</Text>
             <TouchableOpacity
               onPress={() => router.push(`/(review)/meetings/${nextMeeting.id}`)}
               activeOpacity={0.7}
               className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-2"
             >
               <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold" numberOfLines={1}>
-                {nextMeeting.title || 'Council meeting'}
+                {nextMeeting.title || t('dashboard.councilMeeting')}
               </Text>
               <View className="flex-row items-center gap-1.5">
                 <Ionicons name="calendar-outline" size={13} color={colors.icon.muted} />
@@ -173,7 +176,7 @@ export default function ReviewDashboard() {
         {/* Activity */}
         {dashboard && dashboard.activity.length > 0 && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Recent Activity</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.recentActivity')}</Text>
             <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
               {dashboard.activity.slice(0, 5).map((a, i) => (
                 <View key={a.id}>
@@ -190,7 +193,7 @@ export default function ReviewDashboard() {
 
         {/* Quick actions */}
         <View className="px-5 mt-6 gap-3">
-          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Quick Actions</Text>
+          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.quickActions')}</Text>
           <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={() => router.push('/(review)/queue')}
@@ -198,7 +201,7 @@ export default function ReviewDashboard() {
               className="flex-1 bg-violet-500 dark:bg-violet-600 rounded-xl p-4 gap-2"
             >
               <Ionicons name="clipboard" size={22} color="#fff" />
-              <Text className="text-white text-sm font-semibold">My Reviews</Text>
+              <Text className="text-white text-sm font-semibold">{t('dashboard.myReviews')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/(review)/notifications')}
@@ -215,7 +218,7 @@ export default function ReviewDashboard() {
                   </View>
                 )}
               </View>
-              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">Inbox</Text>
+              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{t('dashboard.inbox')}</Text>
             </TouchableOpacity>
           </View>
         </View>

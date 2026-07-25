@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
@@ -26,6 +27,7 @@ function StatBox({ label, value }: { label: string; value: string | number }) {
 }
 
 export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelProps) {
+  const { t } = useTranslation(['reviewer', 'common']);
   const { data: decision, isLoading: decisionLoading } = useDecision(councilId);
   const { data: allScores, isLoading: scoresLoading } = useAllScores(councilId);
   const { data: feedback, isLoading: feedbackLoading } = useFeedback(councilId);
@@ -50,59 +52,59 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
   }, [decision]);
 
   function nameFor(userId?: string | null, fallback?: string | null) {
-    return councilMembers?.find((m) => m.userId === userId)?.reviewerName ?? fallback ?? 'Reviewer';
+    return councilMembers?.find((m) => m.userId === userId)?.reviewerName ?? fallback ?? t('minutesPanel.defaultReviewer');
   }
 
   function handleSaveDraft() {
     saveMinutes(
       { projectId: projectId ?? undefined, result, councilComments: councilComments || undefined, recommendations: recommendations || undefined },
       {
-        onSuccess: () => Alert.alert('Saved', 'Minutes draft has been saved.'),
-        onError: () => Alert.alert('Error', 'Failed to save minutes. Please try again.'),
+        onSuccess: () => Alert.alert(t('minutesPanel.savedTitle'), t('minutesPanel.savedMessage')),
+        onError: () => Alert.alert(t('minutesPanel.errorTitle'), t('minutesPanel.errorMessage')),
       },
     );
   }
 
   function handleApprove() {
     Alert.alert(
-      'Approve & Lock Minutes',
-      'This finalizes the council decision and changes the proposal status. This cannot be undone. Continue?',
+      t('minutesPanel.approveDialogTitle'),
+      t('minutesPanel.approveDialogMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common:buttons.cancel'), style: 'cancel' },
         {
-          text: 'Approve & Lock',
+          text: t('minutesPanel.approveAndLock'),
           style: 'destructive',
           onPress: () =>
             approveMinutes(undefined, {
-              onError: () => Alert.alert('Error', 'Failed to approve minutes. Please try again.'),
+              onError: () => Alert.alert(t('minutesPanel.errorTitle'), t('minutesPanel.approveErrorMessage')),
             }),
         },
       ],
     );
   }
 
-  if (decisionLoading) return <LoadingState message="Loading minutes…" />;
+  if (decisionLoading) return <LoadingState message={t('minutesPanel.loading')} />;
 
   return (
     <View className="gap-4">
       {/* Tally */}
       <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4">
-        <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mb-3">Reference only</Text>
+        <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mb-3">{t('minutesPanel.referenceOnly')}</Text>
         <View className="flex-row">
-          <StatBox label="Total Members" value={decision?.totalMembers ?? '—'} />
-          <StatBox label="Attending" value={decision?.attendingMembers ?? '—'} />
-          <StatBox label="Valid Ballots" value={decision?.validBallots ?? '—'} />
-          <StatBox label="Avg. Score" value={decision?.averageScore?.toFixed(1) ?? '—'} />
+          <StatBox label={t('minutesPanel.totalMembers')} value={decision?.totalMembers ?? '—'} />
+          <StatBox label={t('minutesPanel.attending')} value={decision?.attendingMembers ?? '—'} />
+          <StatBox label={t('minutesPanel.validBallots')} value={decision?.validBallots ?? '—'} />
+          <StatBox label={t('minutesPanel.avgScore')} value={decision?.averageScore?.toFixed(1) ?? '—'} />
         </View>
       </View>
 
       {/* All scores */}
       <View>
-        <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold mb-2">Reviewer Scores</Text>
+        <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold mb-2">{t('minutesPanel.reviewerScores')}</Text>
         {scoresLoading ? (
-          <LoadingState message="Loading scores…" />
+          <LoadingState message={t('minutesPanel.loadingScores')} />
         ) : allScores?.forbidden ? (
-          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans italic">Not permitted to view.</Text>
+          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans italic">{t('minutesPanel.notPermitted')}</Text>
         ) : allScores && allScores.scores.length > 0 ? (
           <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
             {allScores.scores.map((s, i) => (
@@ -116,17 +118,17 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
             ))}
           </View>
         ) : (
-          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">No scores submitted yet.</Text>
+          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('minutesPanel.noScores')}</Text>
         )}
       </View>
 
       {/* Feedback */}
       <View>
-        <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold mb-2">Feedback</Text>
+        <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold mb-2">{t('minutesPanel.feedback')}</Text>
         {feedbackLoading ? (
-          <LoadingState message="Loading feedback…" />
+          <LoadingState message={t('minutesPanel.loadingFeedback')} />
         ) : feedback?.forbidden ? (
-          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans italic">Not permitted to view.</Text>
+          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans italic">{t('minutesPanel.notPermitted')}</Text>
         ) : feedback && feedback.feedback.length > 0 ? (
           <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
             {feedback.feedback.map((f, i) => (
@@ -140,42 +142,42 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
             ))}
           </View>
         ) : (
-          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">No feedback yet.</Text>
+          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('minutesPanel.noFeedback')}</Text>
         )}
       </View>
 
       {/* Minutes body */}
       {secretary && !locked ? (
         <View className="gap-3">
-          <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">Draft Minutes</Text>
-          <Input label="Result" value={result} onChangeText={setResult} placeholder="APPROVED / REJECTED / REVISION_REQUIRED" autoCapitalize="characters" />
-          <Input label="Council comments" value={councilComments} onChangeText={setCouncilComments} multiline numberOfLines={4} />
-          <Input label="Recommendations" value={recommendations} onChangeText={setRecommendations} multiline numberOfLines={3} />
-          <Button label={decision ? 'Update Draft' : 'Save Draft'} variant="secondary" onPress={handleSaveDraft} loading={isSaving} fullWidth />
+          <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">{t('minutesPanel.draftMinutes')}</Text>
+          <Input label={t('minutesPanel.resultLabel')} value={result} onChangeText={setResult} placeholder={t('minutesPanel.resultPlaceholder')} autoCapitalize="characters" />
+          <Input label={t('minutesPanel.councilComments')} value={councilComments} onChangeText={setCouncilComments} multiline numberOfLines={4} />
+          <Input label={t('minutesPanel.recommendations')} value={recommendations} onChangeText={setRecommendations} multiline numberOfLines={3} />
+          <Button label={decision ? t('minutesPanel.updateDraft') : t('minutesPanel.saveDraft')} variant="secondary" onPress={handleSaveDraft} loading={isSaving} fullWidth />
         </View>
       ) : decision ? (
         <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
           <View className="flex-row items-center justify-between">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">Minutes</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">{t('minutesPanel.minutes')}</Text>
             <Text className={`text-xs font-semibold ${locked ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
-              {locked ? 'Locked' : 'Draft'}
+              {locked ? t('minutesPanel.locked') : t('minutesPanel.draft')}
             </Text>
           </View>
-          {decision.result && <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">Result: {decision.result}</Text>}
+          {decision.result && <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">{t('minutesPanel.resultPrefix', { result: decision.result })}</Text>}
           {decision.councilComments && <Text className="text-neutral-600 dark:text-dark-400 text-sm font-sans leading-relaxed">{decision.councilComments}</Text>}
           {decision.recommendations && (
             <View className="bg-neutral-50 dark:bg-dark-100 rounded-xl p-3">
-              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mb-1">Recommendations</Text>
+              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mb-1">{t('minutesPanel.recommendations')}</Text>
               <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-sans leading-relaxed">{decision.recommendations}</Text>
             </View>
           )}
         </View>
       ) : (
-        <EmptyState fullScreen={false} icon="🗒️" title="No minutes yet" description="The council secretary hasn't drafted minutes for this proposal yet." />
+        <EmptyState fullScreen={false} icon="🗒️" title={t('minutesPanel.noMinutesTitle')} description={t('minutesPanel.noMinutesDescription')} />
       )}
 
       {chairman && decision && !locked && (
-        <Button label={isApproving ? 'Approving…' : 'Approve & Lock'} variant="danger" onPress={handleApprove} loading={isApproving} fullWidth />
+        <Button label={isApproving ? t('minutesPanel.approving') : t('minutesPanel.approveAndLock')} variant="danger" onPress={handleApprove} loading={isApproving} fullWidth />
       )}
     </View>
   );

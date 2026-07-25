@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useMyMemberships, useRespondToInvitation } from '@/features/reviewCommittee/hooks/useMemberships';
 import { MembershipCard } from '@/features/reviewCommittee/components/MembershipCard';
@@ -14,13 +15,6 @@ import { INVITATION_STATUS, ROUND_STATUS, isAcceptedInvitation } from '@/constan
 import type { MyMembership } from '@/features/reviewCommittee/types/membership.types';
 
 type FilterTab = 'INVITATIONS' | 'ASSIGNED' | 'SCORING' | 'ALL';
-
-const FILTERS: { key: FilterTab; label: string }[] = [
-  { key: 'INVITATIONS', label: 'Invitations' },
-  { key: 'ASSIGNED', label: 'Assigned' },
-  { key: 'SCORING', label: 'Scoring Open' },
-  { key: 'ALL', label: 'All' },
-];
 
 function filterMemberships(memberships: MyMembership[], tab: FilterTab): MyMembership[] {
   switch (tab) {
@@ -37,10 +31,18 @@ function filterMemberships(memberships: MyMembership[], tab: FilterTab): MyMembe
 }
 
 export default function ReviewQueueScreen() {
+  const { t } = useTranslation('reviewer');
   const router = useRouter();
   const { colors } = useTheme();
   const [activeFilter, setActiveFilter] = useState<FilterTab>('INVITATIONS');
   const [decliningId, setDecliningId] = useState<string | null>(null);
+
+  const FILTERS: { key: FilterTab; label: string }[] = [
+    { key: 'INVITATIONS', label: t('queue.filters.invitations') },
+    { key: 'ASSIGNED', label: t('queue.filters.assigned') },
+    { key: 'SCORING', label: t('queue.filters.scoring') },
+    { key: 'ALL', label: t('queue.filters.all') },
+  ];
 
   const { data, isLoading, isError, refetch, isFetching } = useMyMemberships();
   const { mutate: respond, isPending: isResponding } = useRespondToInvitation();
@@ -66,10 +68,10 @@ export default function ReviewQueueScreen() {
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
       <View className="px-5 pt-6 pb-4 gap-0.5">
-        <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">My Reviews</Text>
+        <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">{t('queue.title')}</Text>
         {filtered.length > 0 && (
           <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-            {filtered.length} {filtered.length === 1 ? 'item' : 'items'}
+            {t('queue.itemCount', { count: filtered.length })}
           </Text>
         )}
       </View>
@@ -100,9 +102,9 @@ export default function ReviewQueueScreen() {
       </View>
 
       {isLoading ? (
-        <LoadingState message="Loading your reviews…" />
+        <LoadingState message={t('queue.loading')} />
       ) : isError ? (
-        <ErrorState title="Could not load reviews" message="Check your connection and try again." onRetry={refetch} />
+        <ErrorState title={t('queue.errorTitle')} message={t('queue.errorMessage')} onRetry={refetch} />
       ) : (
         <FlatList
           data={filtered}
@@ -116,8 +118,8 @@ export default function ReviewQueueScreen() {
                 actions={
                   isInvitation ? (
                     <>
-                      <Button label="Accept" size="sm" onPress={() => handleAccept(item.memberId)} loading={isResponding} />
-                      <Button label="Decline" size="sm" variant="secondary" onPress={() => setDecliningId(item.memberId)} />
+                      <Button label={t('queue.accept')} size="sm" onPress={() => handleAccept(item.memberId)} loading={isResponding} />
+                      <Button label={t('queue.decline')} size="sm" variant="secondary" onPress={() => setDecliningId(item.memberId)} />
                     </>
                   ) : undefined
                 }
@@ -131,13 +133,13 @@ export default function ReviewQueueScreen() {
           }
           ListEmptyComponent={
             <EmptyState
-              title="Nothing here"
+              title={t('queue.emptyTitle')}
               description={
                 activeFilter === 'INVITATIONS'
-                  ? 'No pending invitations right now.'
+                  ? t('queue.emptyInvitations')
                   : activeFilter === 'SCORING'
-                  ? 'No councils currently open for scoring.'
-                  : 'No reviews found.'
+                  ? t('queue.emptyScoring')
+                  : t('queue.emptyDefault')
               }
             />
           }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
@@ -16,6 +17,7 @@ interface RubricScoringFormProps {
 }
 
 export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricScoringFormProps) {
+  const { t } = useTranslation('reviewer');
   const { colors } = useTheme();
   const { data: templates, isLoading: templatesLoading } = useRubrics();
   const { data: myScore, isLoading: scoreLoading } = useMyScore(councilId);
@@ -45,22 +47,22 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
     setOtherRecommendations(myScore.otherRecommendations ?? '');
   }, [myScore]);
 
-  if (templatesLoading || scoreLoading) return <LoadingState message="Loading scoring form…" />;
+  if (templatesLoading || scoreLoading) return <LoadingState message={t('scoringForm.loading')} />;
 
   if (roundStatus !== ROUND_STATUS.OPEN) {
     return (
       <EmptyState
         fullScreen={false}
         icon="🔒"
-        title="Scoring not open"
-        description="This review round isn't open for scoring right now."
+        title={t('scoringForm.notOpenTitle')}
+        description={t('scoringForm.notOpenDescription')}
       />
     );
   }
 
   if (!template) {
     return (
-      <EmptyState fullScreen={false} icon="⚠️" title="No rubric found" description="No scoring rubric is configured for this round type." />
+      <EmptyState fullScreen={false} icon="⚠️" title={t('scoringForm.noRubricTitle')} description={t('scoringForm.noRubricDescription')} />
     );
   }
 
@@ -80,7 +82,7 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
     if (!template) return;
     const missing = criteria.some((c) => scores[c.id] === undefined);
     if (missing) {
-      Alert.alert('Incomplete', 'Please score every criterion before submitting.');
+      Alert.alert(t('scoringForm.incompleteTitle'), t('scoringForm.incompleteMessage'));
       return;
     }
     submitScore(
@@ -95,8 +97,8 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
         })),
       },
       {
-        onSuccess: () => Alert.alert('Saved', 'Your score has been submitted.'),
-        onError: () => Alert.alert('Error', 'Failed to submit score. Please try again.'),
+        onSuccess: () => Alert.alert(t('scoringForm.savedTitle'), t('scoringForm.savedMessage')),
+        onError: () => Alert.alert(t('scoringForm.errorTitle'), t('scoringForm.errorMessage')),
       },
     );
   }
@@ -121,25 +123,25 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
             </TouchableOpacity>
           </View>
           <Input
-            placeholder="Comments (optional)"
+            placeholder={t('scoringForm.commentsPlaceholder')}
             value={comments[criterion.id] ?? ''}
-            onChangeText={(t) => setComments((prev) => ({ ...prev, [criterion.id]: t }))}
+            onChangeText={(val) => setComments((prev) => ({ ...prev, [criterion.id]: val }))}
             multiline
           />
         </View>
       ))}
 
       <View className="bg-violet-50 dark:bg-violet-900/10 rounded-2xl border border-violet-100 dark:border-violet-900/30 p-4 flex-row items-center justify-between">
-        <Text className="text-violet-700 dark:text-violet-300 text-sm font-semibold">Total Score</Text>
+        <Text className="text-violet-700 dark:text-violet-300 text-sm font-semibold">{t('scoringForm.totalScore')}</Text>
         <Text className="text-violet-700 dark:text-violet-300 text-lg font-bold">
           {total.toFixed(1)} / {maxTotal}
         </Text>
       </View>
 
-      <Input label="General comments" value={generalComments} onChangeText={setGeneralComments} multiline numberOfLines={3} />
-      <Input label="Other recommendations" value={otherRecommendations} onChangeText={setOtherRecommendations} multiline numberOfLines={3} />
+      <Input label={t('scoringForm.generalComments')} value={generalComments} onChangeText={setGeneralComments} multiline numberOfLines={3} />
+      <Input label={t('scoringForm.otherRecommendations')} value={otherRecommendations} onChangeText={setOtherRecommendations} multiline numberOfLines={3} />
 
-      <Button label={myScore ? 'Update Score' : 'Submit Score'} onPress={handleSubmit} loading={isPending} fullWidth />
+      <Button label={myScore ? t('scoringForm.updateScore') : t('scoringForm.submitScore')} onPress={handleSubmit} loading={isPending} fullWidth />
     </View>
   );
 }

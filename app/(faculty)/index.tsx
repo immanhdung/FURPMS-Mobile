@@ -3,6 +3,7 @@ import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { Avatar } from '@/shared/components/ui/Avatar';
@@ -20,6 +21,7 @@ const KPI_COLORS = [
 ];
 
 export default function FacultyDashboard() {
+  const { t } = useTranslation('faculty');
   const { user } = useAuth();
   const { colors } = useTheme();
   const router = useRouter();
@@ -31,10 +33,10 @@ export default function FacultyDashboard() {
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
-  }, []);
+    if (hour < 12) return t('dashboard.greetingMorning');
+    if (hour < 18) return t('dashboard.greetingAfternoon');
+    return t('dashboard.greetingEvening');
+  }, [t]);
 
   const recentNotifications = notifications?.filter((n) => !n.read).slice(0, 3) ?? [];
 
@@ -62,7 +64,7 @@ export default function FacultyDashboard() {
           <View className="gap-0.5">
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{greeting}</Text>
             <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold tracking-tight">
-              {user?.fullName ?? 'Faculty'}
+              {user?.fullName ?? t('dashboard.defaultName')}
             </Text>
           </View>
           <TouchableOpacity onPress={() => router.push('/(faculty)/profile/index')} activeOpacity={0.7}>
@@ -72,9 +74,9 @@ export default function FacultyDashboard() {
 
         {/* KPIs */}
         <View className="px-5 gap-3">
-          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Research Overview</Text>
+          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.researchOverview')}</Text>
           {dashboardLoading ? (
-            <LoadingState message="Loading overview…" />
+            <LoadingState message={t('dashboard.loadingOverview')} />
           ) : (
             <View className="flex-row flex-wrap gap-3">
               {(dashboard?.kpis ?? []).map((kpi, i) => {
@@ -92,7 +94,7 @@ export default function FacultyDashboard() {
 
         {/* Quick Actions */}
         <View className="px-5 mt-5 gap-3">
-          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Quick Actions</Text>
+          <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.quickActions')}</Text>
           <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={() => router.push('/(faculty)/proposals/create')}
@@ -102,7 +104,7 @@ export default function FacultyDashboard() {
               <View className="bg-white/20 rounded-xl p-2">
                 <Ionicons name="add" size={20} color="#fff" />
               </View>
-              <Text className="text-white font-semibold text-sm">New Proposal</Text>
+              <Text className="text-white font-semibold text-sm">{t('dashboard.newProposal')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/(faculty)/reports')}
@@ -112,7 +114,7 @@ export default function FacultyDashboard() {
               <View className="bg-neutral-100 dark:bg-dark-200 rounded-xl p-2">
                 <Ionicons name="bar-chart-outline" size={20} color={colors.icon.default} />
               </View>
-              <Text className="text-neutral-900 dark:text-neutral-50 font-semibold text-sm">Reports</Text>
+              <Text className="text-neutral-900 dark:text-neutral-50 font-semibold text-sm">{t('dashboard.reports')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -120,7 +122,7 @@ export default function FacultyDashboard() {
         {/* Proposal status breakdown */}
         {dashboard && dashboard.proposalStatus.length > 0 && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Proposal Status</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.proposalStatus')}</Text>
             <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
               {dashboard.proposalStatus.map((s) => (
                 <View key={s.status} className="gap-1">
@@ -143,7 +145,7 @@ export default function FacultyDashboard() {
         {/* Upcoming deadlines */}
         {dashboard && dashboard.upcomingDeadlines.length > 0 && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Upcoming Deadlines</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.upcomingDeadlines')}</Text>
             <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
               {dashboard.upcomingDeadlines.map((d, i) => (
                 <View key={`${d.label}-${i}`}>
@@ -161,7 +163,7 @@ export default function FacultyDashboard() {
         {/* AI suggestions */}
         {dashboard && dashboard.aiSuggestions.length > 0 && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">AI Suggestions</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.aiSuggestions')}</Text>
             <View className="bg-violet-50 dark:bg-violet-900/10 rounded-2xl border border-violet-100 dark:border-violet-900/30 p-4 gap-2">
               {dashboard.aiSuggestions.map((s, i) => (
                 <View key={i} className="flex-row items-start gap-2">
@@ -176,7 +178,7 @@ export default function FacultyDashboard() {
         {/* Activity */}
         {dashboard && dashboard.activity.length > 0 && (
           <View className="px-5 mt-6 gap-3">
-            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Recent Activity</Text>
+            <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.recentActivity')}</Text>
             <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
               {dashboard.activity.slice(0, 5).map((a, i) => (
                 <View key={a.id}>
@@ -195,9 +197,9 @@ export default function FacultyDashboard() {
         {recentNotifications.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">Unread</Text>
+              <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.unread')}</Text>
               <TouchableOpacity onPress={() => router.push('/(faculty)/notifications/index')} activeOpacity={0.7}>
-                <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">See all</Text>
+                <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">{t('dashboard.seeAll')}</Text>
               </TouchableOpacity>
             </View>
             <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">

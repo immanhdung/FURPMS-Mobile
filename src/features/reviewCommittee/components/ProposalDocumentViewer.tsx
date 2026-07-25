@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useProposalDocuments } from '@/features/faculty/hooks/useProposalDocuments';
 import { proposalDocumentService } from '@/features/faculty/services/proposal-document.service';
@@ -15,6 +16,7 @@ interface ProposalDocumentViewerProps {
 }
 
 export function ProposalDocumentViewer({ proposalId }: ProposalDocumentViewerProps) {
+  const { t } = useTranslation('reviewer');
   const { colors } = useTheme();
   const { data: documents, isLoading } = useProposalDocuments(proposalId);
   const { download, open, isDownloading, progress } = useDocumentDownload();
@@ -38,9 +40,9 @@ export function ProposalDocumentViewer({ proposalId }: ProposalDocumentViewerPro
     }
   }
 
-  if (isLoading) return <LoadingState message="Loading documents…" />;
+  if (isLoading) return <LoadingState message={t('documentViewer.loading')} />;
   if (!documents || documents.length === 0) {
-    return <EmptyState fullScreen={false} icon="📄" title="No documents" description="The PI hasn't attached any documents yet." />;
+    return <EmptyState fullScreen={false} icon="📄" title={t('documentViewer.emptyTitle')} description={t('documentViewer.emptyDescription')} />;
   }
 
   return (

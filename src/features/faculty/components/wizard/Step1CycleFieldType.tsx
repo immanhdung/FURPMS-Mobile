@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { PickerField } from '@/shared/components/ui/PickerField';
 import { useOpenCycles } from '@/features/faculty/hooks/useCycles';
 import { useTracksByCycle } from '@/features/faculty/hooks/useTracks';
@@ -7,6 +8,7 @@ import { useResearchTypes } from '@/features/faculty/hooks/useResearchTypes';
 import type { ProposalWizardFormValues } from '@/utils/validators';
 
 export function Step1CycleFieldType() {
+  const { t } = useTranslation('faculty');
   const { control, watch, setValue, formState: { errors } } = useFormContext<ProposalWizardFormValues>();
   const cycleId = watch('cycleId');
 
@@ -21,9 +23,9 @@ export function Step1CycleFieldType() {
         name="cycleId"
         render={({ field: { value } }) => (
           <PickerField
-            label="Research Cycle"
+            label={t('step1.researchCycle')}
             required
-            placeholder={cyclesLoading ? 'Loading…' : 'Select an open cycle'}
+            placeholder={cyclesLoading ? t('step1.loading') : t('step1.selectOpenCycle')}
             value={value}
             options={(cycles ?? []).map((c) => ({ value: c.id, label: c.name }))}
             onChange={(v) => {
@@ -31,7 +33,7 @@ export function Step1CycleFieldType() {
               setValue('trackId', '', { shouldValidate: false });
             }}
             error={errors.cycleId?.message}
-            emptyMessage="No open cycles right now"
+            emptyMessage={t('step1.noOpenCycles')}
           />
         )}
       />
@@ -41,22 +43,22 @@ export function Step1CycleFieldType() {
         name="trackId"
         render={({ field: { value, onChange } }) => (
           <PickerField
-            label="Track"
+            label={t('fields.track')}
             required
-            placeholder={!cycleId ? 'Select a cycle first' : tracksLoading ? 'Loading…' : 'Select a track'}
+            placeholder={!cycleId ? t('step1.selectCycleFirst') : tracksLoading ? t('step1.loading') : t('step1.selectTrack')}
             value={value || undefined}
-            options={(tracks ?? []).map((t) => ({ value: t.id, label: t.name }))}
+            options={(tracks ?? []).map((track) => ({ value: track.id, label: track.name }))}
             onChange={onChange}
             error={errors.trackId?.message}
             disabled={!cycleId}
-            emptyMessage="No tracks available for this cycle"
+            emptyMessage={t('step1.noTracksAvailable')}
           />
         )}
       />
 
       <View className="gap-1.5">
         <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
-          Research Type<Text className="text-red-500"> *</Text>
+          {t('fields.researchType')}<Text className="text-red-500"> *</Text>
         </Text>
         <Controller
           control={control}
@@ -64,7 +66,7 @@ export function Step1CycleFieldType() {
           render={({ field: { value, onChange } }) => (
             <View className="gap-2">
               {typesLoading && (
-                <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">Loading research types…</Text>
+                <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('step1.loadingResearchTypes')}</Text>
               )}
               {(researchTypes ?? []).map((type) => {
                 const selected = value === type.id;
@@ -88,8 +90,8 @@ export function Step1CycleFieldType() {
                     </Text>
                     <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-0.5">
                       {type.requireOrderingUnit
-                        ? 'Based on an imported research topic'
-                        : 'Upload a document for AI-assisted extraction'}
+                        ? t('step1.typeAppliedDescription')
+                        : t('step1.typeUploadDescription')}
                     </Text>
                   </TouchableOpacity>
                 );

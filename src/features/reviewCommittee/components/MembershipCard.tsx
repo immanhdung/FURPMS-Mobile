@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/components/ui/Badge';
 import type { BadgeVariant } from '@/shared/components/ui/Badge';
 import { ROUND_TYPE_LABELS, ROUND_STATUS, type ReviewRoundType } from '@/constants/statuses';
@@ -17,6 +18,7 @@ interface MembershipCardProps {
 }
 
 export function MembershipCard({ membership, onPress, actions }: MembershipCardProps) {
+  const { t } = useTranslation('reviewer');
   const Wrapper = onPress ? TouchableOpacity : View;
 
   return (
@@ -25,7 +27,7 @@ export function MembershipCard({ membership, onPress, actions }: MembershipCardP
       className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3"
     >
       <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold leading-snug" numberOfLines={2}>
-        {membership.proposalTitleVI || 'Untitled proposal'}
+        {membership.proposalTitleVI || t('membershipCard.untitledProposal')}
       </Text>
 
       <View className="flex-row items-center gap-2 flex-wrap">

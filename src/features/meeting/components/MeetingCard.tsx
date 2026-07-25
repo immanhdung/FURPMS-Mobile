@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { formatDateTime, formatDuration, isUpcoming } from '@/utils/date';
 import { Badge } from '@/shared/components/ui/Badge';
@@ -12,6 +13,7 @@ interface MeetingCardProps {
 }
 
 export function MeetingCard({ meeting, proposalTitle, onPress }: MeetingCardProps) {
+  const { t } = useTranslation('reviewer');
   const { colors } = useTheme();
   const upcoming = isUpcoming(meeting.scheduledAt);
 
@@ -27,7 +29,7 @@ export function MeetingCard({ meeting, proposalTitle, onPress }: MeetingCardProp
             className="text-neutral-900 dark:text-neutral-50 text-base font-semibold leading-snug"
             numberOfLines={2}
           >
-            {meeting.title || 'Council meeting'}
+            {meeting.title || t('meetingCard.councilMeeting')}
           </Text>
           {proposalTitle && (
             <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium" numberOfLines={1}>

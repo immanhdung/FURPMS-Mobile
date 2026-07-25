@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useProposal, useSubmitProposal, useWithdrawProposal } from '@/features/faculty/hooks/useProposals';
 import { Badge } from '@/shared/components/ui/Badge';
@@ -53,6 +54,7 @@ function TextField({ label, value }: { label: string; value?: string | null }) {
 }
 
 export default function ProposalDetailScreen() {
+  const { t } = useTranslation(['faculty', 'common']);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { colors } = useTheme();
@@ -66,19 +68,19 @@ export default function ProposalDetailScreen() {
     await refetch();
   }, [refetch]);
 
-  if (isLoading) return <LoadingState message="Loading proposal…" />;
+  if (isLoading) return <LoadingState message={t('proposalDetail.loading')} />;
   if (isError || !proposal) {
-    return <ErrorState title="Could not load proposal" message="Check your connection and try again." onRetry={refetch} />;
+    return <ErrorState title={t('proposalDetail.errorTitle')} message={t('proposalDetail.errorMessage')} onRetry={refetch} />;
   }
 
   const isDraft = proposal.status === PROPOSAL_STATUS.DRAFT;
   const canWithdraw = proposal.status === PROPOSAL_STATUS.SUBMITTED || proposal.status === PROPOSAL_STATUS.UNDER_REVIEW;
-  const title = proposal.titleVI || proposal.titleEN || 'Untitled proposal';
+  const title = proposal.titleVI || proposal.titleEN || t('proposal.untitled');
 
   function handleWithdraw() {
-    Alert.alert('Withdraw Proposal', 'Are you sure you want to withdraw this proposal? This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Withdraw', style: 'destructive', onPress: () => withdrawProposal() },
+    Alert.alert(t('proposalDetail.withdrawAlertTitle'), t('proposalDetail.withdrawAlertMessage'), [
+      { text: t('common:buttons.cancel'), style: 'cancel' },
+      { text: t('proposalDetail.withdraw'), style: 'destructive', onPress: () => withdrawProposal() },
     ]);
   }
 
@@ -100,7 +102,7 @@ export default function ProposalDetailScreen() {
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans italic">{proposal.titleEN}</Text>
           )}
           {proposal.createdAt && (
-            <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">Created {formatDate(proposal.createdAt)}</Text>
+            <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{t('proposalDetail.created', { date: formatDate(proposal.createdAt) })}</Text>
           )}
           <ProposalStatusTimeline status={proposal.status} />
         </View>
@@ -110,9 +112,9 @@ export default function ProposalDetailScreen() {
           <View className="px-5 mb-5 flex-row gap-3">
             {isDraft && (
               <>
-                <Button label="Submit" variant="primary" size="md" onPress={() => setSubmitSheetVisible(true)} />
+                <Button label={t('proposalDetail.submit')} variant="primary" size="md" onPress={() => setSubmitSheetVisible(true)} />
                 <Button
-                  label="Edit"
+                  label={t('proposalDetail.edit')}
                   variant="secondary"
                   size="md"
                   onPress={() => router.push(`/(faculty)/proposals/create?edit=${id}`)}
@@ -120,7 +122,7 @@ export default function ProposalDetailScreen() {
               </>
             )}
             {canWithdraw && (
-              <Button label="Withdraw" variant="danger" size="md" loading={isWithdrawing} onPress={handleWithdraw} />
+              <Button label={t('proposalDetail.withdraw')} variant="danger" size="md" loading={isWithdrawing} onPress={handleWithdraw} />
             )}
           </View>
         )}
@@ -128,26 +130,26 @@ export default function ProposalDetailScreen() {
         <View className="px-5 gap-5">
           {/* Overview */}
           <View>
-            <SectionHeader title="Overview" />
+            <SectionHeader title={t('proposalDetail.overview')} />
             <InfoCard>
-              <TextField label="Abstract" value={proposal.abstractEN} />
+              <TextField label={t('fields.abstract')} value={proposal.abstractEN} />
               <View className="h-px bg-neutral-100 dark:bg-dark-200" />
-              <TextField label="Objectives" value={proposal.objectives} />
-              <TextField label="Methodology" value={proposal.methodology} />
-              <TextField label="Expected Output" value={proposal.expectedOutput} />
+              <TextField label={t('fields.objectives')} value={proposal.objectives} />
+              <TextField label={t('fields.methodology')} value={proposal.methodology} />
+              <TextField label={t('fields.expectedOutput')} value={proposal.expectedOutput} />
               <View className="h-px bg-neutral-100 dark:bg-dark-200" />
               <View className="flex-row gap-6">
                 <View className="flex-1">
-                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Duration</Text>
+                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('fields.duration')}</Text>
                   <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium mt-0.5">
-                    {proposal.durationMonths} months
+                    {t('fields.durationValue', { count: proposal.durationMonths })}
                   </Text>
                 </View>
                 {proposal.fundingMethod && (
                   <View className="flex-1">
-                    <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Funding</Text>
+                    <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('fields.funding')}</Text>
                     <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium mt-0.5">
-                      {proposal.fundingMethod === 'PARTIAL' ? 'Partial' : 'Whole'}
+                      {proposal.fundingMethod === 'PARTIAL' ? t('fields.fundingPartial') : t('fields.fundingWhole')}
                     </Text>
                   </View>
                 )}
@@ -158,13 +160,13 @@ export default function ProposalDetailScreen() {
           {/* Additional details */}
           {(proposal.urgency || proposal.novelty || proposal.applicationPotential || proposal.transferPotential || proposal.facilities) && (
             <View>
-              <SectionHeader title="Research Assessment" />
+              <SectionHeader title={t('proposalDetail.researchAssessment')} />
               <InfoCard>
-                <TextField label="Urgency" value={proposal.urgency} />
-                <TextField label="Novelty" value={proposal.novelty} />
-                <TextField label="Application Potential" value={proposal.applicationPotential} />
-                <TextField label="Transfer Potential" value={proposal.transferPotential} />
-                <TextField label="Facilities" value={proposal.facilities} />
+                <TextField label={t('fields.urgency')} value={proposal.urgency} />
+                <TextField label={t('fields.novelty')} value={proposal.novelty} />
+                <TextField label={t('fields.applicationPotential')} value={proposal.applicationPotential} />
+                <TextField label={t('fields.transferPotential')} value={proposal.transferPotential} />
+                <TextField label={t('fields.facilities')} value={proposal.facilities} />
               </InfoCard>
             </View>
           )}
@@ -172,7 +174,7 @@ export default function ProposalDetailScreen() {
           {/* Team */}
           {proposal.members && proposal.members.length > 0 && (
             <View>
-              <SectionHeader title="Research Team" />
+              <SectionHeader title={t('proposalDetail.researchTeam')} />
               <InfoCard>
                 {proposal.members.map((member, i) => (
                   <View key={`${member.email}-${i}`}>
@@ -182,7 +184,7 @@ export default function ProposalDetailScreen() {
                       <View className="flex-1">
                         <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
                           {member.fullName}
-                          {member.isSecretary ? ' (Secretary)' : ''}
+                          {member.isSecretary ? t('proposalDetail.secretarySuffix') : ''}
                         </Text>
                         <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
                           {[member.academicTitle, member.role, member.department].filter(Boolean).join(' · ')}
@@ -197,13 +199,13 @@ export default function ProposalDetailScreen() {
 
           {/* Expected Products */}
           <View>
-            <SectionHeader title="Expected Products" />
+            <SectionHeader title={t('proposalDetail.expectedProducts')} />
             <ExpectedProductsCard proposalId={id} editable={isDraft} />
           </View>
 
           {/* Documents */}
           <View>
-            <SectionHeader title="Documents" />
+            <SectionHeader title={t('proposalDetail.documents')} />
             <ProposalDocumentsCard proposalId={id} editable={isDraft} />
           </View>
 
@@ -216,7 +218,7 @@ export default function ProposalDetailScreen() {
               <View className="flex-row items-center gap-3">
                 <Ionicons name="bar-chart-outline" size={20} color={colors.accent.primary} />
                 <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-                  Progress & Final Reports
+                  {t('proposalDetail.progressAndFinalReports')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.icon.muted} />

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text } from 'react-native';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { PickerField } from '@/shared/components/ui/PickerField';
 import { FileUploader } from '@/shared/components/upload/FileUploader';
 import { Button } from '@/shared/components/ui/Button';
@@ -18,6 +19,7 @@ interface Step2ResearchContentProps {
 }
 
 export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2ResearchContentProps) {
+  const { t } = useTranslation('faculty');
   const { control, watch, setValue } = useFormContext<ProposalWizardFormValues>();
   const cycleId = watch('cycleId');
   const researchTypeId = watch('researchType');
@@ -78,13 +80,13 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
           name="orderId"
           render={({ field: { value, onChange } }) => (
             <PickerField
-              label="Research Topic"
+              label={t('step2.researchTopic')}
               required
-              placeholder={ordersLoading ? 'Loading…' : 'Select an imported topic'}
+              placeholder={ordersLoading ? t('step1.loading') : t('step2.selectImportedTopic')}
               value={value}
               options={(orders ?? []).map((o) => ({ value: o.id, label: o.title, description: o.description ?? undefined }))}
               onChange={onChange}
-              emptyMessage="No research topics imported for this cycle"
+              emptyMessage={t('step2.noResearchTopics')}
             />
           )}
         />
@@ -92,7 +94,7 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
 
       <View className="gap-2">
         <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
-          Proposal Document
+          {t('step2.proposalDocument')}
         </Text>
         <FileUploader
           pickedFile={pickedFile}
@@ -106,14 +108,14 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
             onPickedFileChange(null);
             setSimilarityResult(null);
           }}
-          label="Upload proposal document"
-          hint="PDF or DOCX — this will be attached to your proposal"
+          label={t('step2.uploadProposalDocument')}
+          hint={t('step2.uploadHint')}
         />
       </View>
 
       {!isApplied && pickedFile && (
         <Button
-          label={extractMutation.isPending ? 'Analyzing…' : 'Analyze with AI'}
+          label={extractMutation.isPending ? t('step2.analyzing') : t('step2.analyzeWithAi')}
           variant="secondary"
           onPress={handleAnalyze}
           loading={extractMutation.isPending}
@@ -124,7 +126,7 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
       {isApplied && pickedFile && watch('orderId') && (
         <View className="gap-2">
           <Button
-            label={similarityMutation.isPending ? 'Checking…' : 'Check Similarity'}
+            label={similarityMutation.isPending ? t('step2.checking') : t('step2.checkSimilarity')}
             variant="secondary"
             onPress={handleCheckSimilarity}
             loading={similarityMutation.isPending}
@@ -133,7 +135,7 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
           {similarityResult && (
             <View className="flex-row items-center gap-2">
               <Badge
-                label={`Similarity: ${Math.round(similarityResult.score * 100)}%`}
+                label={t('step2.similarityLabel', { percent: Math.round(similarityResult.score * 100) })}
                 variant={similarityResult.passed ? 'success' : 'warning'}
               />
             </View>

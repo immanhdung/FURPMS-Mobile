@@ -1,12 +1,21 @@
 import { View, Text } from 'react-native';
-
-const STEP_LABELS = ['Track', 'Content', 'Details', 'Team', 'Preview'];
+import { useTranslation } from 'react-i18next';
 
 interface WizardStepperProps {
   currentStep: number; // 1-indexed
 }
 
 export function WizardStepper({ currentStep }: WizardStepperProps) {
+  const { t } = useTranslation('faculty');
+
+  const STEP_LABELS = [
+    t('wizardStepper.track'),
+    t('wizardStepper.content'),
+    t('wizardStepper.details'),
+    t('wizardStepper.team'),
+    t('wizardStepper.preview'),
+  ];
+
   return (
     <View className="flex-row items-center px-5 pt-2 pb-4">
       {STEP_LABELS.map((label, i) => {

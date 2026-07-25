@@ -1,1 +1,177 @@
-{}
+{
+  "dashboard": {
+    "greetingMorning": "Chào buổi sáng",
+    "greetingAfternoon": "Chào buổi chiều",
+    "greetingEvening": "Chào buổi tối",
+    "defaultName": "Người phản biện",
+    "roleBadge": "Hội đồng phản biện",
+    "overview": "Tổng quan",
+    "loadingOverview": "Đang tải tổng quan…",
+    "pendingInvitations": "Lời mời đang chờ",
+    "viewAll": "Xem tất cả",
+    "untitledProposal": "Đề tài chưa có tiêu đề",
+    "accept": "Chấp nhận",
+    "decline": "Từ chối",
+    "reviewProgress": "Tiến độ chấm",
+    "nextMeeting": "Cuộc họp sắp tới",
+    "councilMeeting": "Cuộc họp hội đồng",
+    "recentActivity": "Hoạt động gần đây",
+    "quickActions": "Thao tác nhanh",
+    "myReviews": "Bài chấm",
+    "inbox": "Hộp thư"
+  },
+  "queue": {
+    "title": "Bài chấm",
+    "itemCount_other": "{{count}} mục",
+    "filters": {
+      "invitations": "Lời mời",
+      "assigned": "Đã nhận",
+      "scoring": "Đang mở chấm",
+      "all": "Tất cả"
+    },
+    "loading": "Đang tải bài chấm của bạn…",
+    "errorTitle": "Không thể tải bài chấm",
+    "errorMessage": "Vui lòng kiểm tra kết nối và thử lại.",
+    "accept": "Chấp nhận",
+    "decline": "Từ chối",
+    "emptyTitle": "Chưa có dữ liệu",
+    "emptyInvitations": "Hiện chưa có lời mời nào đang chờ.",
+    "emptyScoring": "Hiện không có hội đồng nào đang mở chấm điểm.",
+    "emptyDefault": "Không tìm thấy bài chấm nào.",
+    "stackTitle": "Chấm phản biện"
+  },
+  "workspace": {
+    "untitledProposal": "Đề tài chưa có tiêu đề",
+    "councilMeeting": "Cuộc họp hội đồng",
+    "joinMeeting": "Tham gia cuộc họp",
+    "tabs": {
+      "documents": "Tài liệu",
+      "scoring": "Chấm điểm",
+      "acceptance": "Đánh giá nghiệm thu",
+      "minutes": "Biên bản"
+    },
+    "loading": "Đang tải thông tin hội đồng…",
+    "errorTitle": "Không thể tải hội đồng",
+    "errorMessage": "Vui lòng kiểm tra kết nối và thử lại.",
+    "notFoundTitle": "Không tìm thấy",
+    "notFoundMessage": "Hội đồng này không thuộc danh sách bài chấm của bạn."
+  },
+  "meetings": {
+    "title": "Cuộc họp",
+    "subtitle": "Cuộc họp hội đồng phản biện",
+    "loading": "Đang tải cuộc họp…",
+    "errorTitle": "Không thể tải cuộc họp",
+    "errorMessage": "Vui lòng kiểm tra kết nối và thử lại.",
+    "emptyTitle": "Không tìm thấy cuộc họp",
+    "emptyDescription": "Bạn chưa có cuộc họp hội đồng nào được lên lịch.",
+    "stackTitle": "Chi tiết cuộc họp",
+    "detail": {
+      "loading": "Đang tải chi tiết cuộc họp…",
+      "errorTitle": "Không thể tải cuộc họp",
+      "errorMessage": "Vui lòng kiểm tra kết nối và thử lại.",
+      "councilMeeting": "Cuộc họp hội đồng",
+      "detailsTitle": "Chi tiết cuộc họp",
+      "dateTime": "Ngày & Giờ",
+      "duration": "Thời lượng",
+      "videoLink": "Liên kết video",
+      "joinOnline": "Tham gia họp trực tuyến",
+      "agenda": "Chương trình họp"
+    }
+  },
+  "acceptanceForm": {
+    "loading": "Đang tải đánh giá nghiệm thu…",
+    "notOpenTitle": "Chưa mở",
+    "notOpenDescription": "Vòng đánh giá nghiệm thu này hiện chưa mở.",
+    "pass": "Đạt",
+    "fail": "Không đạt",
+    "failReasonLabel": "Lý do không đạt",
+    "reasonRequiredTitle": "Cần nhập lý do",
+    "reasonRequiredMessage": "Vui lòng giải thích lý do đề tài này không đạt nghiệm thu.",
+    "savedTitle": "Đã lưu",
+    "savedMessage": "Đánh giá nghiệm thu của bạn đã được gửi.",
+    "errorTitle": "Lỗi",
+    "errorMessage": "Không thể gửi đánh giá. Vui lòng thử lại.",
+    "updateEvaluation": "Cập nhật đánh giá",
+    "submitEvaluation": "Gửi đánh giá"
+  },
+  "declineDialog": {
+    "title": "Từ chối lời mời",
+    "reasonLabel": "Lý do (không bắt buộc)",
+    "reasonPlaceholder": "Cho bộ phận hỗ trợ biết lý do bạn từ chối",
+    "confirmButton": "Từ chối lời mời"
+  },
+  "membershipCard": {
+    "untitledProposal": "Đề tài chưa có tiêu đề"
+  },
+  "minutesPanel": {
+    "loading": "Đang tải biên bản…",
+    "referenceOnly": "Chỉ mang tính tham khảo",
+    "totalMembers": "Tổng số thành viên",
+    "attending": "Có mặt",
+    "validBallots": "Phiếu hợp lệ",
+    "avgScore": "Điểm trung bình",
+    "reviewerScores": "Điểm của người phản biện",
+    "loadingScores": "Đang tải điểm số…",
+    "notPermitted": "Bạn không có quyền xem.",
+    "noScores": "Chưa có điểm nào được gửi.",
+    "feedback": "Nhận xét",
+    "loadingFeedback": "Đang tải nhận xét…",
+    "noFeedback": "Chưa có nhận xét nào.",
+    "defaultReviewer": "Người phản biện",
+    "draftMinutes": "Soạn biên bản",
+    "resultLabel": "Kết quả",
+    "resultPlaceholder": "APPROVED / REJECTED / REVISION_REQUIRED",
+    "councilComments": "Nhận xét của hội đồng",
+    "recommendations": "Khuyến nghị",
+    "updateDraft": "Cập nhật bản nháp",
+    "saveDraft": "Lưu bản nháp",
+    "savedTitle": "Đã lưu",
+    "savedMessage": "Bản nháp biên bản đã được lưu.",
+    "errorTitle": "Lỗi",
+    "errorMessage": "Không thể lưu biên bản. Vui lòng thử lại.",
+    "minutes": "Biên bản",
+    "locked": "Đã khóa",
+    "draft": "Bản nháp",
+    "resultPrefix": "Kết quả: {{result}}",
+    "noMinutesTitle": "Chưa có biên bản",
+    "noMinutesDescription": "Thư ký hội đồng chưa soạn biên bản cho đề tài này.",
+    "approving": "Đang phê duyệt…",
+    "approveAndLock": "Phê duyệt & Khóa",
+    "approveDialogTitle": "Phê duyệt & Khóa biên bản",
+    "approveDialogMessage": "Thao tác này sẽ chốt quyết định của hội đồng và thay đổi trạng thái đề tài. Không thể hoàn tác. Bạn có muốn tiếp tục?",
+    "approveErrorMessage": "Không thể phê duyệt biên bản. Vui lòng thử lại."
+  },
+  "documentViewer": {
+    "loading": "Đang tải tài liệu…",
+    "emptyTitle": "Chưa có tài liệu",
+    "emptyDescription": "Chủ nhiệm đề tài chưa đính kèm tài liệu nào."
+  },
+  "scoringForm": {
+    "loading": "Đang tải phiếu chấm điểm…",
+    "notOpenTitle": "Chưa mở chấm điểm",
+    "notOpenDescription": "Vòng chấm này hiện chưa mở để chấm điểm.",
+    "noRubricTitle": "Không tìm thấy tiêu chí chấm",
+    "noRubricDescription": "Chưa có tiêu chí chấm nào được cấu hình cho loại vòng này.",
+    "commentsPlaceholder": "Nhận xét (không bắt buộc)",
+    "totalScore": "Tổng điểm",
+    "generalComments": "Nhận xét chung",
+    "otherRecommendations": "Khuyến nghị khác",
+    "incompleteTitle": "Chưa hoàn tất",
+    "incompleteMessage": "Vui lòng chấm điểm tất cả các tiêu chí trước khi gửi.",
+    "savedTitle": "Đã lưu",
+    "savedMessage": "Điểm của bạn đã được gửi.",
+    "errorTitle": "Lỗi",
+    "errorMessage": "Không thể gửi điểm. Vui lòng thử lại.",
+    "updateScore": "Cập nhật điểm",
+    "submitScore": "Gửi điểm"
+  },
+  "meetingCard": {
+    "councilMeeting": "Cuộc họp hội đồng"
+  },
+  "videoMeetingButton": {
+    "joining": "Đang tham gia…",
+    "join": "Tham gia {{platform}}",
+    "cannotOpenTitle": "Không thể mở cuộc họp",
+    "cannotOpenMessage": "Không thể mở liên kết cuộc họp. Vui lòng sao chép liên kết theo cách thủ công."
+  }
+}

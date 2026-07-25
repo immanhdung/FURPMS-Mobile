@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { PickerField } from '@/shared/components/ui/PickerField';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/ui/Badge';
@@ -24,10 +25,11 @@ function ReportCard({ children }: { children: React.ReactNode }) {
 }
 
 function ProgressReportsTab({ contractId }: { contractId: string }) {
+  const { t } = useTranslation('faculty');
   const { data: reports, isLoading } = useProgressReports(contractId);
   const [sheetVisible, setSheetVisible] = useState(false);
 
-  if (isLoading) return <LoadingState message="Loading progress reports…" />;
+  if (isLoading) return <LoadingState message={t('reports.loadingProgressReports')} />;
 
   return (
     <View className="gap-3">
@@ -35,34 +37,34 @@ function ProgressReportsTab({ contractId }: { contractId: string }) {
         <ReportCard key={report.id}>
           <View className="flex-row items-center justify-between">
             <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-              {report.period || 'Progress Report'}
+              {report.period || t('reports.progressReportFallbackTitle')}
             </Text>
             {report.status && <Badge label={report.status} variant={report.status === 'SUBMITTED' ? 'info' : 'default'} size="sm" />}
           </View>
           {report.overallCompletionPct != null && (
             <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-              {report.overallCompletionPct}% complete
+              {t('reports.percentComplete', { percent: report.overallCompletionPct })}
             </Text>
           )}
           {report.dueDate && (
-            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Due {formatDate(report.dueDate)}</Text>
+            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('reports.due', { date: formatDate(report.dueDate) })}</Text>
           )}
           {report.meetingLink && (
-            <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">Meeting scheduled</Text>
+            <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">{t('reports.meetingScheduled')}</Text>
           )}
           {report.evaluationResult && (
             <Text className="text-neutral-700 dark:text-neutral-200 text-xs font-sans">
-              Evaluation: {report.evaluationResult}
+              {t('reports.evaluation', { result: report.evaluationResult })}
             </Text>
           )}
         </ReportCard>
       ))}
 
       {(!reports || reports.length === 0) && (
-        <EmptyState fullScreen={false} icon="📈" title="No progress reports yet" description="Reports scheduled by staff will appear here." />
+        <EmptyState fullScreen={false} icon="📈" title={t('reports.noProgressReportsTitle')} description={t('reports.noProgressReportsDescription')} />
       )}
 
-      <Button label="New Progress Report" variant="secondary" onPress={() => setSheetVisible(true)} fullWidth />
+      <Button label={t('reports.newProgressReport')} variant="secondary" onPress={() => setSheetVisible(true)} fullWidth />
 
       <CreateProgressReportSheet visible={sheetVisible} contractId={contractId} onClose={() => setSheetVisible(false)} />
     </View>
@@ -70,6 +72,7 @@ function ProgressReportsTab({ contractId }: { contractId: string }) {
 }
 
 function FinalReportTab({ contractId }: { contractId: string }) {
+  const { t } = useTranslation('faculty');
   const { data: report, isLoading } = useFinalReport(contractId);
   const { mutate: submitReport, isPending } = useSubmitFinalReport(contractId);
 
@@ -77,7 +80,7 @@ function FinalReportTab({ contractId }: { contractId: string }) {
   const [summaryFileUrl, setSummaryFileUrl] = useState('');
   const [language, setLanguage] = useState('vi');
 
-  if (isLoading) return <LoadingState message="Loading final report…" />;
+  if (isLoading) return <LoadingState message={t('reports.loadingFinalReport')} />;
 
   const editable = !report || !!report.revisionNotes;
 
@@ -86,15 +89,15 @@ function FinalReportTab({ contractId }: { contractId: string }) {
       {report && (
         <ReportCard>
           <View className="flex-row items-center justify-between">
-            <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">Final Report</Text>
+            <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{t('reports.finalReportTitle')}</Text>
             {report.status && <Badge label={report.status} size="sm" />}
           </View>
           {report.submittedAt && (
-            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Submitted {formatDate(report.submittedAt)}</Text>
+            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('reports.submitted', { date: formatDate(report.submittedAt) })}</Text>
           )}
           {report.revisionNotes && (
             <View className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 mt-1">
-              <Text className="text-amber-700 dark:text-amber-300 text-xs font-semibold">Revision requested</Text>
+              <Text className="text-amber-700 dark:text-amber-300 text-xs font-semibold">{t('reports.revisionRequested')}</Text>
               <Text className="text-amber-800 dark:text-amber-200 text-sm font-sans mt-1 leading-relaxed">{report.revisionNotes}</Text>
             </View>
           )}
@@ -103,11 +106,11 @@ function FinalReportTab({ contractId }: { contractId: string }) {
 
       {editable ? (
         <ReportCard>
-          <Input label="Report file URL" placeholder="https://…" value={reportFileUrl} onChangeText={setReportFileUrl} autoCapitalize="none" />
-          <Input label="Summary file URL (optional)" placeholder="https://…" value={summaryFileUrl} onChangeText={setSummaryFileUrl} autoCapitalize="none" />
-          <Input label="Language" placeholder="vi" value={language} onChangeText={setLanguage} autoCapitalize="none" />
+          <Input label={t('reports.reportFileUrl')} placeholder="https://…" value={reportFileUrl} onChangeText={setReportFileUrl} autoCapitalize="none" />
+          <Input label={t('reports.summaryFileUrl')} placeholder="https://…" value={summaryFileUrl} onChangeText={setSummaryFileUrl} autoCapitalize="none" />
+          <Input label={t('reports.language')} placeholder="vi" value={language} onChangeText={setLanguage} autoCapitalize="none" />
           <Button
-            label={report ? 'Resubmit' : 'Submit Final Report'}
+            label={report ? t('reports.resubmit') : t('reports.submitFinalReport')}
             onPress={() =>
               submitReport({ reportFileUrl, summaryFileUrl: summaryFileUrl || undefined, language })
             }
@@ -117,13 +120,14 @@ function FinalReportTab({ contractId }: { contractId: string }) {
           />
         </ReportCard>
       ) : (
-        !report && <EmptyState fullScreen={false} icon="📄" title="No final report yet" description="Submit your final report once the project is complete." />
+        !report && <EmptyState fullScreen={false} icon="📄" title={t('reports.noFinalReportTitle')} description={t('reports.noFinalReportDescription')} />
       )}
     </View>
   );
 }
 
 export default function ReportsScreen() {
+  const { t } = useTranslation('faculty');
   const { data: contracts, isLoading: contractsLoading } = useMyContracts();
   const [contractId, setContractId] = useState<string | undefined>();
   const [tab, setTab] = useState<Tab>('PROGRESS');
@@ -133,23 +137,23 @@ export default function ReportsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
       <View className="px-5 pt-6 pb-4 gap-0.5">
-        <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">Reports</Text>
-        <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">Progress and final reports for your contracts</Text>
+        <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">{t('reports.title')}</Text>
+        <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{t('reports.subtitle')}</Text>
       </View>
 
       {contractsLoading ? (
-        <LoadingState message="Loading contracts…" />
+        <LoadingState message={t('reports.loadingContracts')} />
       ) : !contracts || contracts.length === 0 ? (
         <EmptyState
           icon="📊"
-          title="No active contracts"
-          description="Reports become available once one of your proposals is approved and a contract is signed."
+          title={t('reports.noContractsTitle')}
+          description={t('reports.noContractsDescription')}
         />
       ) : (
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
           <View className="mb-4">
             <PickerField
-              label="Contract"
+              label={t('reports.contract')}
               value={activeContractId}
               options={contracts.map((c) => ({ value: c.id, label: c.scopeTitle || c.contractNumber || c.id }))}
               onChange={setContractId}
@@ -157,17 +161,17 @@ export default function ReportsScreen() {
           </View>
 
           <View className="flex-row gap-2 mb-4">
-            {(['PROGRESS', 'FINAL'] as Tab[]).map((t) => (
+            {(['PROGRESS', 'FINAL'] as Tab[]).map((tabKey) => (
               <TouchableOpacity
-                key={t}
-                onPress={() => setTab(t)}
+                key={tabKey}
+                onPress={() => setTab(tabKey)}
                 activeOpacity={0.7}
                 className={`flex-1 items-center py-2.5 rounded-xl border ${
-                  tab === t ? 'bg-violet-500 dark:bg-violet-600 border-violet-500 dark:border-violet-600' : 'bg-white dark:bg-dark-50 border-neutral-200 dark:border-dark-200'
+                  tab === tabKey ? 'bg-violet-500 dark:bg-violet-600 border-violet-500 dark:border-violet-600' : 'bg-white dark:bg-dark-50 border-neutral-200 dark:border-dark-200'
                 }`}
               >
-                <Text className={`text-sm font-medium ${tab === t ? 'text-white' : 'text-neutral-600 dark:text-dark-500'}`}>
-                  {t === 'PROGRESS' ? 'Progress' : 'Final'}
+                <Text className={`text-sm font-medium ${tab === tabKey ? 'text-white' : 'text-neutral-600 dark:text-dark-500'}`}>
+                  {tabKey === 'PROGRESS' ? t('reports.tabProgress') : t('reports.tabFinal')}
                 </Text>
               </TouchableOpacity>
             ))}

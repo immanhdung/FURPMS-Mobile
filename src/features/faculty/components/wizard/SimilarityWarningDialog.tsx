@@ -1,5 +1,6 @@
 import { Modal, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/shared/components/ui/Button';
 
@@ -10,6 +11,7 @@ interface SimilarityWarningDialogProps {
 }
 
 export function SimilarityWarningDialog({ visible, score, onDismiss }: SimilarityWarningDialogProps) {
+  const { t } = useTranslation('faculty');
   const { colors } = useTheme();
 
   return (
@@ -19,12 +21,11 @@ export function SimilarityWarningDialog({ visible, score, onDismiss }: Similarit
           <View className="w-11 h-11 rounded-full bg-amber-100 dark:bg-amber-900/30 items-center justify-center">
             <Ionicons name="alert-circle-outline" size={22} color={colors.accent.warning} />
           </View>
-          <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold">Low similarity detected</Text>
+          <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold">{t('similarityWarningDialog.title')}</Text>
           <Text className="text-neutral-600 dark:text-dark-400 text-sm font-sans leading-relaxed">
-            The uploaded file does not appear to match the selected research topic (similarity score{' '}
-            {Math.round(score * 100)}%). Do you want to continue submission anyway?
+            {t('similarityWarningDialog.message', { percent: Math.round(score * 100) })}
           </Text>
-          <Button label="Got it, I'll continue" onPress={onDismiss} fullWidth />
+          <Button label={t('similarityWarningDialog.gotIt')} onPress={onDismiss} fullWidth />
         </View>
       </View>
     </Modal>

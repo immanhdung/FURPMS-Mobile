@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { videoMeetingService } from '@/services/video-meeting.service';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -24,6 +25,7 @@ export function VideoMeetingButton({
   variant = 'primary',
   fullWidth = false,
 }: VideoMeetingButtonProps) {
+  const { t } = useTranslation('reviewer');
   const { colors, isDark } = useTheme();
   const [isJoining, setIsJoining] = useState(false);
 
@@ -41,8 +43,8 @@ export function VideoMeetingButton({
       await videoMeetingService.join({ url: videoUrl, preferNativeApp: true });
     } catch (err) {
       Alert.alert(
-        'Cannot Open Meeting',
-        'The meeting link could not be opened. Please copy the link manually.',
+        t('videoMeetingButton.cannotOpenTitle'),
+        t('videoMeetingButton.cannotOpenMessage'),
       );
     } finally {
       setIsJoining(false);
@@ -84,7 +86,7 @@ export function VideoMeetingButton({
         />
       )}
       <Text style={[styles.label, { color: textColor, fontSize: sizeStyles.fontSize }]}>
-        {isJoining ? 'Joining…' : `Join ${platformInfo.label}`}
+        {isJoining ? t('videoMeetingButton.joining') : t('videoMeetingButton.join', { platform: platformInfo.label })}
       </Text>
     </TouchableOpacity>
   );

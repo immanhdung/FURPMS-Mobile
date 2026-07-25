@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Linking } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useMeeting } from '@/features/meeting/hooks/useMeetings';
 import { Badge } from '@/shared/components/ui/Badge';
@@ -25,6 +26,7 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 export default function ReviewMeetingDetailScreen() {
+  const { t } = useTranslation('reviewer');
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
   const { data: meeting, isLoading, isError, refetch } = useMeeting(id);
@@ -33,9 +35,9 @@ export default function ReviewMeetingDetailScreen() {
     await refetch();
   }, [refetch]);
 
-  if (isLoading) return <LoadingState message="Loading meeting…" />;
+  if (isLoading) return <LoadingState message={t('meetings.detail.loading')} />;
   if (isError || !meeting) {
-    return <ErrorState title="Could not load meeting" message="Check your connection and try again." onRetry={refetch} />;
+    return <ErrorState title={t('meetings.detail.errorTitle')} message={t('meetings.detail.errorMessage')} onRetry={refetch} />;
   }
 
   const upcoming = isUpcoming(meeting.scheduledAt);
@@ -56,13 +58,13 @@ export default function ReviewMeetingDetailScreen() {
             {meeting.status && <Badge label={meeting.status} variant={upcoming ? 'info' : 'default'} size="md" />}
           </View>
           <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">
-            {meeting.title || 'Council meeting'}
+            {meeting.title || t('meetings.detail.councilMeeting')}
           </Text>
         </View>
 
         {/* Details */}
         <View className="mb-5">
-          <SectionHeader title="Meeting Details" />
+          <SectionHeader title={t('meetings.detail.detailsTitle')} />
           <SectionCard>
             <View className="p-4 gap-3">
               <View className="flex-row items-center gap-3">
@@ -70,7 +72,7 @@ export default function ReviewMeetingDetailScreen() {
                   <Ionicons name="calendar" size={18} color={colors.accent.primary} />
                 </View>
                 <View>
-                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Date & Time</Text>
+                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('meetings.detail.dateTime')}</Text>
                   <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">
                     {formatDateTime(meeting.scheduledAt)}
                   </Text>
@@ -84,7 +86,7 @@ export default function ReviewMeetingDetailScreen() {
                   <Ionicons name="hourglass" size={18} color={colors.accent.warning} />
                 </View>
                 <View>
-                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Duration</Text>
+                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('meetings.detail.duration')}</Text>
                   <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">
                     {formatDuration(meeting.durationMinutes)}
                   </Text>
@@ -104,10 +106,10 @@ export default function ReviewMeetingDetailScreen() {
                     </View>
                     <View className="flex-1">
                       <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-                        {meeting.platform || 'Video Link'}
+                        {meeting.platform || t('meetings.detail.videoLink')}
                       </Text>
                       <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">
-                        Join online meeting
+                        {t('meetings.detail.joinOnline')}
                       </Text>
                     </View>
                     <Ionicons name="open-outline" size={16} color={colors.icon.muted} />
@@ -121,7 +123,7 @@ export default function ReviewMeetingDetailScreen() {
         {/* Agenda */}
         {meeting.agenda ? (
           <View className="mb-5">
-            <SectionHeader title="Agenda" />
+            <SectionHeader title={t('meetings.detail.agenda')} />
             <SectionCard>
               <View className="p-4">
                 <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">

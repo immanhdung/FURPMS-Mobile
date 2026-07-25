@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
@@ -13,6 +14,7 @@ interface CreateProgressReportSheetProps {
 }
 
 export function CreateProgressReportSheet({ visible, contractId, onClose }: CreateProgressReportSheetProps) {
+  const { t } = useTranslation(['faculty', 'common']);
   const { colors } = useTheme();
   const { mutate: create, isPending: isCreating } = useCreateProgressReport(contractId);
   const { mutate: submit, isPending: isSubmitting } = useSubmitProgressReport(contractId);
@@ -53,10 +55,10 @@ export function CreateProgressReportSheet({ visible, contractId, onClose }: Crea
         onSuccess: (report) => {
           submit(report.id, {
             onSuccess: handleClose,
-            onError: () => Alert.alert('Error', 'Report was saved but could not be submitted. Try submitting it again.'),
+            onError: () => Alert.alert(t('common:states.errorTitle'), t('createProgressReportSheet.submitErrorMessage')),
           });
         },
-        onError: () => Alert.alert('Error', 'Failed to create progress report. Please try again.'),
+        onError: () => Alert.alert(t('common:states.errorTitle'), t('createProgressReportSheet.createErrorMessage')),
       },
     );
   }
@@ -67,24 +69,24 @@ export function CreateProgressReportSheet({ visible, contractId, onClose }: Crea
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View className="bg-white dark:bg-dark-50 rounded-t-3xl px-5 pt-5 pb-8 gap-4 max-h-[85%]">
             <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">New Progress Report</Text>
+              <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t('createProgressReportSheet.title')}</Text>
               <TouchableOpacity onPress={handleClose} hitSlop={12}>
                 <Ionicons name="close" size={22} color={colors.icon.muted} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View className="gap-4">
-                <Input label="Period" placeholder="e.g. Q1 2026" value={period} onChangeText={setPeriod} />
-                <Input label="Completed content" value={completedContent} onChangeText={setCompletedContent} multiline numberOfLines={3} />
-                <Input label="Pending content" value={pendingContent} onChangeText={setPendingContent} multiline numberOfLines={3} />
+                <Input label={t('createProgressReportSheet.period')} placeholder={t('createProgressReportSheet.periodPlaceholder')} value={period} onChangeText={setPeriod} />
+                <Input label={t('createProgressReportSheet.completedContent')} value={completedContent} onChangeText={setCompletedContent} multiline numberOfLines={3} />
+                <Input label={t('createProgressReportSheet.pendingContent')} value={pendingContent} onChangeText={setPendingContent} multiline numberOfLines={3} />
                 <Input
-                  label="Overall completion (%)"
+                  label={t('createProgressReportSheet.overallCompletion')}
                   value={overallCompletionPct}
-                  onChangeText={(t) => setOverallCompletionPct(t.replace(/[^0-9]/g, ''))}
+                  onChangeText={(v) => setOverallCompletionPct(v.replace(/[^0-9]/g, ''))}
                   keyboardType="numeric"
                 />
-                <Input label="Next period plan" value={nextPeriodPlan} onChangeText={setNextPeriodPlan} multiline numberOfLines={3} />
-                <Button label="Create & Submit" onPress={handleSubmit} loading={isPending} fullWidth />
+                <Input label={t('createProgressReportSheet.nextPeriodPlan')} value={nextPeriodPlan} onChangeText={setNextPeriodPlan} multiline numberOfLines={3} />
+                <Button label={t('createProgressReportSheet.createAndSubmit')} onPress={handleSubmit} loading={isPending} fullWidth />
               </View>
             </ScrollView>
           </View>

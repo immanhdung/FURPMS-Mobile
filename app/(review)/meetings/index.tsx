@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useMeetings } from '@/features/meeting/hooks/useMeetings';
 import { MeetingCard } from '@/features/meeting/components/MeetingCard';
@@ -11,6 +12,7 @@ import { ErrorState } from '@/shared/components/feedback/ErrorState';
 import { isUpcoming } from '@/utils/date';
 
 export default function ReviewMeetingsScreen() {
+  const { t } = useTranslation('reviewer');
   const router = useRouter();
   const { colors } = useTheme();
 
@@ -34,17 +36,17 @@ export default function ReviewMeetingsScreen() {
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
       <View className="px-5 pt-6 pb-4 gap-0.5">
         <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">
-          Meetings
+          {t('meetings.title')}
         </Text>
         <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-          Council review meetings
+          {t('meetings.subtitle')}
         </Text>
       </View>
 
       {isLoading ? (
-        <LoadingState message="Loading meetings…" />
+        <LoadingState message={t('meetings.loading')} />
       ) : isError ? (
-        <ErrorState title="Could not load meetings" message="Check your connection and try again." onRetry={refetch} />
+        <ErrorState title={t('meetings.errorTitle')} message={t('meetings.errorMessage')} onRetry={refetch} />
       ) : (
         <FlatList
           data={sorted}
@@ -63,7 +65,7 @@ export default function ReviewMeetingsScreen() {
             />
           }
           ListEmptyComponent={
-            <EmptyState title="No meetings found" description="You have no council meetings scheduled." />
+            <EmptyState title={t('meetings.emptyTitle')} description={t('meetings.emptyDescription')} />
           }
         />
       )}

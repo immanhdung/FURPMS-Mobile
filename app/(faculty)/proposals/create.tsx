@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useProposal, useCreateProposal, useUpdateProposal, useSubmitProposal } from '@/features/faculty/hooks/useProposals';
 import { Button } from '@/shared/components/ui/Button';
@@ -50,6 +51,7 @@ const DEFAULT_VALUES: ProposalWizardFormValues = {
 };
 
 export default function ProposalWizardScreen() {
+  const { t } = useTranslation(['faculty', 'common']);
   const router = useRouter();
   const { edit: editId } = useLocalSearchParams<{ edit?: string }>();
   const { colors } = useTheme();
@@ -114,7 +116,7 @@ export default function ProposalWizardScreen() {
       await uploadService.uploadProposalDocument(targetProposalId, pickedFile);
       setDocumentAttached(true);
     } catch {
-      Alert.alert('Document not attached', 'Your proposal was saved, but the document could not be uploaded. You can retry from the proposal detail page.');
+      Alert.alert(t('proposalWizard.documentNotAttachedTitle'), t('proposalWizard.documentNotAttachedMessage'));
     }
   }
 
@@ -149,7 +151,7 @@ export default function ProposalWizardScreen() {
           await attachPickedFileIfNeeded(proposalId);
           onDone?.(proposalId);
         },
-        onError: () => Alert.alert('Error', 'Failed to save changes. Please try again.'),
+        onError: () => Alert.alert(t('common:states.errorTitle'), t('proposalWizard.saveErrorMessage')),
       });
     } else {
       createProposal(payload, {
@@ -158,7 +160,7 @@ export default function ProposalWizardScreen() {
           await attachPickedFileIfNeeded(created.id);
           onDone?.(created.id);
         },
-        onError: () => Alert.alert('Error', 'Failed to create proposal. Please try again.'),
+        onError: () => Alert.alert(t('common:states.errorTitle'), t('proposalWizard.createErrorMessage')),
       });
     }
   }
@@ -180,7 +182,7 @@ export default function ProposalWizardScreen() {
 
   function handleSaveDraft() {
     saveDraft(() => {
-      Alert.alert('Draft Saved', 'Your proposal has been saved as a draft.');
+      Alert.alert(t('proposalWizard.draftSavedTitle'), t('proposalWizard.draftSavedMessage'));
     });
   }
 
@@ -193,13 +195,13 @@ export default function ProposalWizardScreen() {
             setSubmitSheetVisible(false);
             router.replace(`/(faculty)/proposals/${id}`);
           },
-          onError: () => Alert.alert('Error', 'Failed to submit proposal. Please try again.'),
+          onError: () => Alert.alert(t('common:states.errorTitle'), t('proposalWizard.submitErrorMessage')),
         },
       );
     });
   }
 
-  if (isEditing && loadingExisting) return <LoadingState message="Loading proposal…" />;
+  if (isEditing && loadingExisting) return <LoadingState message={t('proposalWizard.loading')} />;
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['bottom']}>
@@ -225,11 +227,11 @@ export default function ProposalWizardScreen() {
                   <Ionicons name="chevron-back" size={18} color={colors.icon.default} />
                 </TouchableOpacity>
               )}
-              <Button label="Save Draft" variant="secondary" onPress={handleSaveDraft} loading={isPending} />
+              <Button label={t('proposalWizard.saveDraft')} variant="secondary" onPress={handleSaveDraft} loading={isPending} />
               {currentStep < 5 ? (
-                <Button label="Next" onPress={handleNext} fullWidth />
+                <Button label={t('proposalWizard.next')} onPress={handleNext} fullWidth />
               ) : (
-                <Button label="Review & Submit" onPress={() => setSubmitSheetVisible(true)} fullWidth />
+                <Button label={t('proposalWizard.reviewAndSubmit')} onPress={() => setSubmitSheetVisible(true)} fullWidth />
               )}
             </View>
           </View>

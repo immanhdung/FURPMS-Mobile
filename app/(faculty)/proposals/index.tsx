@@ -3,6 +3,7 @@ import { View, Text, TextInput, ScrollView, FlatList, TouchableOpacity, RefreshC
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useMyProposals } from '@/features/faculty/hooks/useProposals';
 import { ProposalCard } from '@/features/faculty/components/ProposalCard';
@@ -13,19 +14,20 @@ import { PROPOSAL_STATUS } from '@/constants/statuses';
 
 type FilterTab = 'ALL' | (typeof PROPOSAL_STATUS)[keyof typeof PROPOSAL_STATUS];
 
-const FILTERS: { key: FilterTab; label: string }[] = [
-  { key: 'ALL', label: 'All' },
-  { key: PROPOSAL_STATUS.DRAFT, label: 'Draft' },
-  { key: PROPOSAL_STATUS.SUBMITTED, label: 'Submitted' },
-  { key: PROPOSAL_STATUS.UNDER_REVIEW, label: 'Under Review' },
-  { key: PROPOSAL_STATUS.APPROVED, label: 'Approved' },
-  { key: PROPOSAL_STATUS.REJECTED, label: 'Rejected' },
-  { key: PROPOSAL_STATUS.WITHDRAWN, label: 'Withdrawn' },
-];
-
 export default function ProposalsScreen() {
+  const { t } = useTranslation('faculty');
   const router = useRouter();
   const { colors } = useTheme();
+
+  const FILTERS: { key: FilterTab; label: string }[] = [
+    { key: 'ALL', label: t('proposalsList.filters.all') },
+    { key: PROPOSAL_STATUS.DRAFT, label: t('proposalsList.filters.draft') },
+    { key: PROPOSAL_STATUS.SUBMITTED, label: t('proposalsList.filters.submitted') },
+    { key: PROPOSAL_STATUS.UNDER_REVIEW, label: t('proposalsList.filters.underReview') },
+    { key: PROPOSAL_STATUS.APPROVED, label: t('proposalsList.filters.approved') },
+    { key: PROPOSAL_STATUS.REJECTED, label: t('proposalsList.filters.rejected') },
+    { key: PROPOSAL_STATUS.WITHDRAWN, label: t('proposalsList.filters.withdrawn') },
+  ];
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -58,11 +60,11 @@ export default function ProposalsScreen() {
       <View className="px-5 pt-6 pb-4 flex-row items-center justify-between">
         <View className="gap-0.5">
           <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">
-            My Proposals
+            {t('proposalsList.title')}
           </Text>
           {data && (
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">
-              {data.length} {data.length === 1 ? 'proposal' : 'proposals'}
+              {t('proposalsList.count', { count: data.length })}
             </Text>
           )}
         </View>
@@ -82,7 +84,7 @@ export default function ProposalsScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Search proposals…"
+            placeholder={t('proposalsList.searchPlaceholder')}
             placeholderTextColor={colors.text.tertiary}
             className="flex-1 text-neutral-900 dark:text-neutral-50 text-sm font-sans"
             returnKeyType="search"
@@ -123,9 +125,9 @@ export default function ProposalsScreen() {
 
       {/* List */}
       {isLoading ? (
-        <LoadingState message="Loading proposals…" />
+        <LoadingState message={t('proposalsList.loading')} />
       ) : isError ? (
-        <ErrorState title="Could not load proposals" message="Check your connection and try again." onRetry={refetch} />
+        <ErrorState title={t('proposalsList.errorTitle')} message={t('proposalsList.errorMessage')} onRetry={refetch} />
       ) : (
         <FlatList
           data={filtered}
@@ -140,9 +142,9 @@ export default function ProposalsScreen() {
           }
           ListEmptyComponent={
             <EmptyState
-              title={search ? 'No results found' : 'No proposals yet'}
-              description={search ? `No proposals match "${search}"` : 'Start by creating your first research proposal.'}
-              action={{ label: 'New Proposal', onPress: () => router.push('/(faculty)/proposals/create') }}
+              title={search ? t('proposalsList.noResultsTitle') : t('proposalsList.emptyTitle')}
+              description={search ? t('proposalsList.noResultsDescription', { query: search }) : t('proposalsList.emptyDescription')}
+              action={{ label: t('proposalsList.newProposal'), onPress: () => router.push('/(faculty)/proposals/create') }}
             />
           }
         />

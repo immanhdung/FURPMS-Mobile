@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useProposalDocuments, useDeleteProposalDocument } from '@/features/faculty/hooks/useProposalDocuments';
 import { proposalDocumentService } from '@/features/faculty/services/proposal-document.service';
@@ -16,6 +17,7 @@ interface ProposalDocumentsCardProps {
 }
 
 export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocumentsCardProps) {
+  const { t } = useTranslation(['faculty', 'common']);
   const { colors } = useTheme();
   const { data: documents, isLoading, refetch } = useProposalDocuments(proposalId);
   const { mutate: deleteDocument, variables: deletingId, isPending: isDeleting } = useDeleteProposalDocument(proposalId);
@@ -48,9 +50,9 @@ export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocument
       setProgress(null);
       refetch();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Upload failed';
+      const message = err instanceof Error ? err.message : t('proposalDocumentsCard.uploadFailedGeneric');
       setUploadError(message);
-      Alert.alert('Upload Failed', message);
+      Alert.alert(t('proposalDocumentsCard.uploadFailedTitle'), message);
     } finally {
       setIsUploading(false);
     }
@@ -62,16 +64,16 @@ export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocument
   }
 
   function handleDelete(documentId: string, fileName: string) {
-    Alert.alert('Delete document', `Remove "${fileName}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteDocument(documentId) },
+    Alert.alert(t('proposalDocumentsCard.deleteTitle'), t('proposalDocumentsCard.deleteMessage', { fileName }), [
+      { text: t('common:buttons.cancel'), style: 'cancel' },
+      { text: t('proposalDocumentsCard.delete'), style: 'destructive', onPress: () => deleteDocument(documentId) },
     ]);
   }
 
   return (
     <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
       {isLoading ? (
-        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">Loading documents…</Text>
+        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('proposalDocumentsCard.loading')}</Text>
       ) : documents && documents.length > 0 ? (
         documents.map((doc, i) => (
           <View key={doc.id}>
@@ -101,7 +103,7 @@ export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocument
           </View>
         ))
       ) : (
-        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">No documents attached yet.</Text>
+        <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('proposalDocumentsCard.empty')}</Text>
       )}
 
       {editable && (
@@ -117,8 +119,8 @@ export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocument
             onPick={handlePick}
             onUpload={handleUpload}
             onRemove={() => setPickedFile(null)}
-            label="Attach Document"
-            hint="Thuyết minh, lý lịch khoa học, or other supporting files"
+            label={t('common:fileUploader.attachDocument')}
+            hint={t('proposalDocumentsCard.hint')}
           />
         </>
       )}
