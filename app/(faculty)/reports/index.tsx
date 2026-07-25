@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -8,13 +8,69 @@ import { Badge } from '@/shared/components/ui/Badge';
 import { Input } from '@/shared/components/ui/Input';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
+import { FileUploader } from '@/shared/components/upload/FileUploader';
 import { useMyContracts } from '@/features/faculty/hooks/useContracts';
 import { useProgressReports } from '@/features/faculty/hooks/useProgressReports';
 import { useFinalReport, useSubmitFinalReport } from '@/features/faculty/hooks/useFinalReports';
 import { CreateProgressReportSheet } from '@/features/faculty/components/CreateProgressReportSheet';
+import { finalReportService, type FinalReportDocumentType } from '@/features/faculty/services/final-report.service';
+import { uploadService, type PickedFile, type UploadedFile } from '@/services/upload.service';
 import { formatDate } from '@/utils/date';
 
 type Tab = 'PROGRESS' | 'FINAL';
+
+const REPORT_FILE_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
+function useDocumentUpload(contractId: string, documentType: FinalReportDocumentType) {
+  const [pickedFile, setPickedFile] = useState<PickedFile | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const [isPickingFile, setIsPickingFile] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState<{ percentage: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const pick = useCallback(async () => {
+    setIsPickingFile(true);
+    setError(null);
+    try {
+      const file = await uploadService.pickFile(REPORT_FILE_TYPES);
+      if (file) setPickedFile(file);
+    } finally {
+      setIsPickingFile(false);
+    }
+  }, []);
+
+  const upload = useCallback(async () => {
+    if (!pickedFile) return;
+    setIsUploading(true);
+    setError(null);
+    try {
+      const result = await finalReportService.uploadDocument(contractId, pickedFile, documentType, (p) =>
+        setProgress(p),
+      );
+      setUploadedFile(result);
+      setPickedFile(null);
+      setProgress(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setIsUploading(false);
+    }
+  }, [pickedFile, contractId, documentType]);
+
+  const remove = useCallback(() => {
+    setPickedFile(null);
+    setUploadedFile(null);
+    setProgress(null);
+    setError(null);
+  }, []);
+
+  return { pickedFile, uploadedFile, isPickingFile, isUploading, progress, error, pick, upload, remove };
+}
 
 function ReportCard({ children }: { children: React.ReactNode }) {
   return (
@@ -76,9 +132,9 @@ function FinalReportTab({ contractId }: { contractId: string }) {
   const { data: report, isLoading } = useFinalReport(contractId);
   const { mutate: submitReport, isPending } = useSubmitFinalReport(contractId);
 
-  const [reportFileUrl, setReportFileUrl] = useState('');
-  const [summaryFileUrl, setSummaryFileUrl] = useState('');
   const [language, setLanguage] = useState('vi');
+  const reportUpload = useDocumentUpload(contractId, 'REPORT');
+  const summaryUpload = useDocumentUpload(contractId, 'SUMMARY');
 
   if (isLoading) return <LoadingState message={t('reports.loadingFinalReport')} />;
 
@@ -106,16 +162,44 @@ function FinalReportTab({ contractId }: { contractId: string }) {
 
       {editable ? (
         <ReportCard>
-          <Input label={t('reports.reportFileUrl')} placeholder="https://…" value={reportFileUrl} onChangeText={setReportFileUrl} autoCapitalize="none" />
-          <Input label={t('reports.summaryFileUrl')} placeholder="https://…" value={summaryFileUrl} onChangeText={setSummaryFileUrl} autoCapitalize="none" />
+          <FileUploader
+            pickedFile={reportUpload.pickedFile}
+            uploadedFile={reportUpload.uploadedFile}
+            isPickingFile={reportUpload.isPickingFile}
+            isUploading={reportUpload.isUploading}
+            progress={reportUpload.progress}
+            error={reportUpload.error}
+            onPick={reportUpload.pick}
+            onUpload={reportUpload.upload}
+            onRemove={reportUpload.remove}
+            label={t('reports.reportFile')}
+            hint={t('reports.reportFileHint')}
+          />
+          <FileUploader
+            pickedFile={summaryUpload.pickedFile}
+            uploadedFile={summaryUpload.uploadedFile}
+            isPickingFile={summaryUpload.isPickingFile}
+            isUploading={summaryUpload.isUploading}
+            progress={summaryUpload.progress}
+            error={summaryUpload.error}
+            onPick={summaryUpload.pick}
+            onUpload={summaryUpload.upload}
+            onRemove={summaryUpload.remove}
+            label={t('reports.summaryFile')}
+            hint={t('reports.summaryFileHint')}
+          />
           <Input label={t('reports.language')} placeholder="vi" value={language} onChangeText={setLanguage} autoCapitalize="none" />
           <Button
             label={report ? t('reports.resubmit') : t('reports.submitFinalReport')}
             onPress={() =>
-              submitReport({ reportFileUrl, summaryFileUrl: summaryFileUrl || undefined, language })
+              submitReport({
+                reportFileUrl: reportUpload.uploadedFile!.url,
+                summaryFileUrl: summaryUpload.uploadedFile?.url,
+                language,
+              })
             }
             loading={isPending}
-            disabled={!reportFileUrl.trim()}
+            disabled={!reportUpload.uploadedFile}
             fullWidth
           />
         </ReportCard>
