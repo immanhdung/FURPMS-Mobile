@@ -5,12 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { PickerField } from '@/shared/components/ui/PickerField';
 import { FileUploader } from '@/shared/components/upload/FileUploader';
 import { Button } from '@/shared/components/ui/Button';
-import { Badge } from '@/shared/components/ui/Badge';
 import { useResearchTypes } from '@/features/faculty/hooks/useResearchTypes';
 import { useResearchOrders } from '@/features/faculty/hooks/useResearchOrders';
-import { useExtractProposalMutation, useSimilarityCheckMutation } from '@/features/faculty/hooks/useProposalAi';
+import { useExtractProposalMutation } from '@/features/faculty/hooks/useProposalAi';
 import { uploadService, type PickedFile } from '@/services/upload.service';
-import { SimilarityWarningDialog } from './SimilarityWarningDialog';
 import type { ProposalWizardFormValues } from '@/utils/validators';
 
 interface Step2ResearchContentProps {
@@ -31,11 +29,8 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
   const { data: orders, isLoading: ordersLoading } = useResearchOrders({ cycleId });
 
   const [isPicking, setIsPicking] = useState(false);
-  const [similarityResult, setSimilarityResult] = useState<{ score: number; passed: boolean } | null>(null);
-  const [warningVisible, setWarningVisible] = useState(false);
 
   const extractMutation = useExtractProposalMutation();
-  const similarityMutation = useSimilarityCheckMutation();
 
   async function handlePick() {
     setIsPicking(true);
@@ -47,6 +42,8 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
     }
   }
 
+  // Gemini extracts whatever it finds in the uploaded document; fields it didn't find are absent
+  // from the result, so those form fields are simply left untouched (blank) for the PI to fill in.
   function handleAnalyze() {
     if (!pickedFile) return;
     extractMutation.mutate(pickedFile, {
@@ -54,22 +51,16 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
         setValue('titleEN', result.titleEN, { shouldValidate: true });
         if (result.titleVI) setValue('titleVI', result.titleVI, { shouldValidate: true });
         setValue('abstractEN', result.abstractEN, { shouldValidate: true });
+        if (result.objectives) setValue('objectives', result.objectives, { shouldValidate: true });
+        if (result.methodology) setValue('methodology', result.methodology);
+        if (result.expectedOutput) setValue('expectedOutput', result.expectedOutput);
+        if (result.urgency) setValue('urgency', result.urgency);
+        if (result.novelty) setValue('novelty', result.novelty);
+        if (result.applicationPotential) setValue('applicationPotential', result.applicationPotential);
+        if (result.transferPotential) setValue('transferPotential', result.transferPotential);
+        if (result.facilities) setValue('facilities', result.facilities);
       },
     });
-  }
-
-  function handleCheckSimilarity() {
-    const topicId = watch('orderId');
-    if (!pickedFile || !topicId) return;
-    similarityMutation.mutate(
-      { file: pickedFile, topicId },
-      {
-        onSuccess: (result) => {
-          setSimilarityResult(result);
-          if (!result.passed) setWarningVisible(true);
-        },
-      },
-    );
   }
 
   return (
@@ -104,16 +95,13 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
           progress={null}
           error={null}
           onPick={handlePick}
-          onRemove={() => {
-            onPickedFileChange(null);
-            setSimilarityResult(null);
-          }}
+          onRemove={() => onPickedFileChange(null)}
           label={t('step2.uploadProposalDocument')}
           hint={t('step2.uploadHint')}
         />
       </View>
 
-      {!isApplied && pickedFile && (
+      {pickedFile && (
         <Button
           label={extractMutation.isPending ? t('step2.analyzing') : t('step2.analyzeWithAi')}
           variant="secondary"
@@ -122,32 +110,6 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
           fullWidth
         />
       )}
-
-      {isApplied && pickedFile && watch('orderId') && (
-        <View className="gap-2">
-          <Button
-            label={similarityMutation.isPending ? t('step2.checking') : t('step2.checkSimilarity')}
-            variant="secondary"
-            onPress={handleCheckSimilarity}
-            loading={similarityMutation.isPending}
-            fullWidth
-          />
-          {similarityResult && (
-            <View className="flex-row items-center gap-2">
-              <Badge
-                label={t('step2.similarityLabel', { percent: Math.round(similarityResult.score * 100) })}
-                variant={similarityResult.passed ? 'success' : 'warning'}
-              />
-            </View>
-          )}
-        </View>
-      )}
-
-      <SimilarityWarningDialog
-        visible={warningVisible}
-        score={similarityResult?.score ?? 0}
-        onDismiss={() => setWarningVisible(false)}
-      />
     </View>
   );
 }

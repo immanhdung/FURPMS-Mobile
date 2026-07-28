@@ -7,9 +7,3 @@ export function useExtractProposalMutation() {
     mutationFn: (file: PickedFile) => aiService.extractFromFile(file),
   });
 }
-
-export function useSimilarityCheckMutation() {
-  return useMutation({
-    mutationFn: ({ file, topicId }: { file: PickedFile; topicId: number }) => aiService.checkSimilarity(file, topicId),
-  });
-}

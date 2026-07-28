@@ -170,11 +170,6 @@
     "cvConfirmText": "Tôi xác nhận lý lịch khoa học lưu trữ của tôi đã được cập nhật.",
     "submitForReview": "Nộp để phản biện"
   },
-  "similarityWarningDialog": {
-    "title": "Phát hiện độ tương đồng thấp",
-    "message": "Tệp đã tải lên có vẻ không khớp với chủ đề nghiên cứu đã chọn (điểm tương đồng {{percent}}%). Bạn có muốn tiếp tục nộp không?",
-    "gotIt": "Đã hiểu, tôi sẽ tiếp tục"
-  },
   "step1": {
     "researchCycle": "Chu kỳ nghiên cứu",
     "loading": "Đang tải…",
@@ -194,11 +189,8 @@
     "proposalDocument": "Tài liệu đề tài",
     "uploadProposalDocument": "Tải lên tài liệu đề tài",
     "uploadHint": "PDF hoặc DOCX — tệp này sẽ được đính kèm vào đề tài của bạn",
-    "analyzing": "Đang phân tích…",
-    "analyzeWithAi": "Phân tích bằng AI",
-    "checking": "Đang kiểm tra…",
-    "checkSimilarity": "Kiểm tra độ tương đồng",
-    "similarityLabel": "Độ tương đồng: {{percent}}%"
+    "analyzing": "Đang trích xuất nội dung…",
+    "analyzeWithAi": "AI trích xuất nội dung"
   },
   "step3": {
     "fundingWholeOption": "Tài trợ toàn phần",

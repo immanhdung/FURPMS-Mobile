@@ -170,11 +170,6 @@
     "cvConfirmText": "I confirm my scientific CV (lý lịch khoa học) on file is up to date.",
     "submitForReview": "Submit for Review"
   },
-  "similarityWarningDialog": {
-    "title": "Low similarity detected",
-    "message": "The uploaded file does not appear to match the selected research topic (similarity score {{percent}}%). Do you want to continue submission anyway?",
-    "gotIt": "Got it, I'll continue"
-  },
   "step1": {
     "researchCycle": "Research Cycle",
     "loading": "Loading…",
@@ -194,11 +189,8 @@
     "proposalDocument": "Proposal Document",
     "uploadProposalDocument": "Upload proposal document",
     "uploadHint": "PDF or DOCX — this will be attached to your proposal",
-    "analyzing": "Analyzing…",
-    "analyzeWithAi": "Analyze with AI",
-    "checking": "Checking…",
-    "checkSimilarity": "Check Similarity",
-    "similarityLabel": "Similarity: {{percent}}%"
+    "analyzing": "Extracting content…",
+    "analyzeWithAi": "AI Extract Content"
   },
   "step3": {
     "fundingWholeOption": "Whole funding",
