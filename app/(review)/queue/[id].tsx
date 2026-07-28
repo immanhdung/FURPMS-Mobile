@@ -49,7 +49,7 @@ export default function CouncilWorkspaceScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['bottom']}>
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="px-5 pt-4 pb-4 gap-3">
           <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">

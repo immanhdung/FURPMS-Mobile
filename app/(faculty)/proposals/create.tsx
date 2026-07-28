@@ -216,7 +216,10 @@ export default function ProposalWizardScreen() {
             {currentStep === 5 && <Step5Preview />}
           </ScrollView>
 
-          <View className="px-5 pt-3 pb-4 border-t border-neutral-100 dark:border-dark-200 bg-neutral-50 dark:bg-dark-0 gap-3">
+          <View
+            className="px-5 pt-3 border-t border-neutral-100 dark:border-dark-200 bg-neutral-50 dark:bg-dark-0 gap-3"
+            style={{ paddingBottom: 76 }}
+          >
             <View className="flex-row gap-3">
               {currentStep > 1 && (
                 <TouchableOpacity
@@ -228,11 +231,13 @@ export default function ProposalWizardScreen() {
                 </TouchableOpacity>
               )}
               <Button label={t('proposalWizard.saveDraft')} variant="secondary" onPress={handleSaveDraft} loading={isPending} />
-              {currentStep < 5 ? (
-                <Button label={t('proposalWizard.next')} onPress={handleNext} fullWidth />
-              ) : (
-                <Button label={t('proposalWizard.reviewAndSubmit')} onPress={() => setSubmitSheetVisible(true)} fullWidth />
-              )}
+              <View className="flex-1">
+                {currentStep < 5 ? (
+                  <Button label={t('proposalWizard.next')} onPress={handleNext} fullWidth />
+                ) : (
+                  <Button label={t('proposalWizard.reviewAndSubmit')} onPress={() => setSubmitSheetVisible(true)} fullWidth />
+                )}
+              </View>
             </View>
           </View>
         </KeyboardAvoidingView>

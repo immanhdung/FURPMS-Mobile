@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -77,6 +78,7 @@ function NotificationTabIcon({
 
 export default function ReviewLayout() {
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
   const TABS = useTabs();
 
   return (
@@ -89,8 +91,8 @@ export default function ReviewLayout() {
           borderTopWidth: StyleSheet.hairlineWidth,
           borderTopColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.5)',
           elevation: 0,
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom + 8,
           paddingTop: 8,
         },
         tabBarBackground: () => (

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 export default function ReviewMeetingsStackLayout() {
   const { t } = useTranslation('reviewer');
   return (
-    <Stack>
+    <Stack screenOptions={{ headerBackTitle: '', headerBackButtonDisplayMode: 'minimal' }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ title: t('meetings.stackTitle') }} />
     </Stack>

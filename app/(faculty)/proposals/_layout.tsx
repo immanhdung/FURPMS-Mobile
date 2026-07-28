@@ -14,6 +14,7 @@ export default function ProposalsLayout() {
         headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 17 },
         headerShadowVisible: false,
         headerBackTitle: '',
+        headerBackButtonDisplayMode: 'minimal',
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
