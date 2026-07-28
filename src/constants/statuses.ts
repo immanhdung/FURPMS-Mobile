@@ -18,6 +18,12 @@ export const CYCLE_STATUS = {
 } as const;
 export type CycleStatus = (typeof CYCLE_STATUS)[keyof typeof CYCLE_STATUS];
 
+/** Confirmed live: the backend returns Title-case ("Open"/"Planning"/"Closed"), not the upper-case
+ *  values above — compare case-insensitively rather than against `CYCLE_STATUS.OPEN` directly. */
+export function isOpenCycle(status?: string | null): boolean {
+  return status?.trim().toLowerCase() === 'open';
+}
+
 /** Confirmed live: the backend returns "INVITED" for an awaiting-response invitation, not "PENDING". */
 export const INVITATION_STATUS = {
   PENDING: 'INVITED',
