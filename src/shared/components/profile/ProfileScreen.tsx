@@ -87,7 +87,7 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 110 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

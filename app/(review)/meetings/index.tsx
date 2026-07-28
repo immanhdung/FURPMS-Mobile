@@ -54,7 +54,7 @@ export default function ReviewMeetingsScreen() {
           renderItem={({ item }) => (
             <MeetingCard meeting={item} onPress={() => router.push(`/(review)/meetings/${item.id}`)} />
           )}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32, gap: 12, flexGrow: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 110, gap: 12, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl

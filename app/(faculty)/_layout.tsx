@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -75,7 +76,7 @@ function NotificationTabIcon({
 }
 
 export default function FacultyLayout() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const TABS = useTabs();
 
   return (
@@ -83,13 +84,18 @@ export default function FacultyLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.tab.bar,
-          borderTopColor: colors.tab.border,
-          borderTopWidth: 1,
+          position: 'absolute',
+          backgroundColor: 'transparent',
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.5)',
+          elevation: 0,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
         },
+        tabBarBackground: () => (
+          <BlurView intensity={70} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
+        ),
         tabBarActiveTintColor: colors.tab.active,
         tabBarInactiveTintColor: colors.tab.inactive,
         tabBarLabelStyle: {

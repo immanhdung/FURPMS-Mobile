@@ -85,7 +85,7 @@ export default function ReviewNotificationsScreen() {
               onPress={() => handlePress(item.id, item.read)}
             />
           )}
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 90 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl

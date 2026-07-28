@@ -246,7 +246,7 @@ export default function ReportsScreen() {
           description={t('reports.noContractsDescription')}
         />
       ) : (
-        <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+        <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
           <View className="mb-4">
             <PickerField
               label={t('reports.contract')}

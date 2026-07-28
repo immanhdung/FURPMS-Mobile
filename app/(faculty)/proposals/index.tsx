@@ -135,7 +135,7 @@ export default function ProposalsScreen() {
           renderItem={({ item }) => (
             <ProposalCard proposal={item} onPress={() => router.push(`/(faculty)/proposals/${item.id}`)} />
           )}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32, gap: 12, flexGrow: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 110, gap: 12, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={isFetching && !isLoading} onRefresh={onRefresh} tintColor={colors.accent.primary} colors={[colors.accent.primary]} />

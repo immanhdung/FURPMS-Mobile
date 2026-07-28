@@ -53,7 +53,7 @@ export default function FacultyDashboard() {
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: 110 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent.primary} colors={[colors.accent.primary]} />
