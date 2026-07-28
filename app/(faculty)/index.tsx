@@ -68,7 +68,7 @@ export default function FacultyDashboard() {
               {user?.fullName ?? t('dashboard.defaultName')}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/(faculty)/profile/index')} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => router.push('/(faculty)/profile')} activeOpacity={0.7}>
             <Avatar name={user?.fullName ?? ''} size="md" />
           </TouchableOpacity>
         </View>
@@ -197,7 +197,7 @@ export default function FacultyDashboard() {
           <View className="px-5 mt-6 gap-3">
             <View className="flex-row items-center justify-between">
               <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.unread')}</Text>
-              <TouchableOpacity onPress={() => router.push('/(faculty)/notifications/index')} activeOpacity={0.7}>
+              <TouchableOpacity onPress={() => router.push('/(faculty)/notifications')} activeOpacity={0.7}>
                 <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">{t('dashboard.seeAll')}</Text>
               </TouchableOpacity>
             </View>

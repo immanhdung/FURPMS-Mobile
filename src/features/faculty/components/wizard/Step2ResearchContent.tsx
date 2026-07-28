@@ -84,7 +84,7 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
               required
               placeholder={ordersLoading ? t('step1.loading') : t('step2.selectImportedTopic')}
               value={value}
-              options={(orders ?? []).map((o) => ({ value: o.id, label: o.title, description: o.description ?? undefined }))}
+              options={(orders ?? []).map((o) => ({ value: o.id, label: o.researchArea, description: o.problemDescription ?? undefined }))}
               onChange={onChange}
               emptyMessage={t('step2.noResearchTopics')}
             />
