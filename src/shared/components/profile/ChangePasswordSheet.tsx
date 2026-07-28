@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useChangePassword } from '@/features/profile/hooks/useProfile';
 import { changePasswordSchema, type ChangePasswordFormValues } from '@/utils/validators';
 
@@ -54,7 +55,12 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View className="flex-1 justify-end bg-black/40">
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View className="bg-white dark:bg-dark-50 rounded-t-3xl px-5 pt-5 pb-8 gap-4">
+          <GlassSurface
+            intensity={65}
+            rounded={0}
+            style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0 }}
+            className="px-5 pt-5 pb-8 gap-4"
+          >
             <View className="flex-row items-center justify-between">
               <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
                 {t('changePasswordSheet.title')}
@@ -120,7 +126,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
               loading={isPending}
               fullWidth
             />
-          </View>
+          </GlassSurface>
         </KeyboardAvoidingView>
       </View>
     </Modal>

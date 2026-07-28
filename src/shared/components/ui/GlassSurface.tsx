@@ -1,9 +1,9 @@
-import { View, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { View, StyleSheet, type StyleProp, type ViewStyle, type ViewProps } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/hooks/useTheme';
 
-interface GlassSurfaceProps {
+interface GlassSurfaceProps extends Omit<ViewProps, 'style' | 'className'> {
   /** Blur strength, 0-100. Higher reads "thicker" glass. */
   intensity?: number;
   tint?: 'light' | 'dark' | 'auto';
@@ -27,6 +27,7 @@ export function GlassSurface({
   className = '',
   style,
   children,
+  ...rest
 }: GlassSurfaceProps) {
   const { isDark } = useTheme();
   const resolvedTint = tint === 'auto' ? (isDark ? 'dark' : 'light') : tint;
@@ -35,6 +36,7 @@ export function GlassSurface({
     <BlurView
       intensity={intensity}
       tint={resolvedTint}
+      {...rest}
       style={[
         {
           borderRadius: rounded,

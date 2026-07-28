@@ -2,6 +2,7 @@ import { Modal, View, Text, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useLocale, type Language } from '@/hooks/useLocale';
 
 interface LanguageSheetProps {
@@ -22,7 +23,12 @@ export function LanguageSheet({ visible, onClose }: LanguageSheetProps) {
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/40">
-        <View className="bg-white dark:bg-dark-50 rounded-t-3xl px-5 pt-5 pb-8 gap-2">
+        <GlassSurface
+          intensity={65}
+          rounded={0}
+          style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0 }}
+          className="px-5 pt-5 pb-8 gap-2"
+        >
           <View className="flex-row items-center justify-between mb-2">
             <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
               {t('languageSheet.title')}
@@ -53,7 +59,7 @@ export function LanguageSheet({ visible, onClose }: LanguageSheetProps) {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </GlassSurface>
       </View>
     </Modal>
   );

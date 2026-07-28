@@ -74,7 +74,7 @@ export const videoMeetingService = {
       ms_teams: { label: 'Microsoft Teams', icon: 'people', color: '#6264A7' },
       zoom: { label: 'Zoom', icon: 'camera', color: '#2D8CFF' },
       webex: { label: 'Cisco Webex', icon: 'videocam-outline', color: '#00BEF3' },
-      generic: { label: 'Join Meeting', icon: 'videocam-outline', color: '#7C3AED' },
+      generic: { label: 'Join Meeting', icon: 'videocam-outline', color: '#2358D6' },
     };
     return info[platform];
   },

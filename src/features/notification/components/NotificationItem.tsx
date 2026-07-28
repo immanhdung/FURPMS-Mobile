@@ -6,7 +6,7 @@ import type { AppNotification, NotificationType } from '../types/notification.ty
 
 const typeConfig: Record<NotificationType, { icon: string; bg: string; color: string }> = {
   PROPOSAL: { icon: 'document-text', bg: 'bg-blue-100 dark:bg-blue-900/30', color: '#3B82F6' },
-  REVIEW: { icon: 'clipboard', bg: 'bg-violet-100 dark:bg-violet-900/30', color: '#5E6AD2' },
+  REVIEW: { icon: 'clipboard', bg: 'bg-violet-100 dark:bg-violet-900/30', color: '#2358D6' },
   COUNCIL: { icon: 'people', bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: '#22C55E' },
   MEETING: { icon: 'calendar', bg: 'bg-amber-100 dark:bg-amber-900/30', color: '#F59E0B' },
   CONTRACT: { icon: 'document-lock', bg: 'bg-orange-100 dark:bg-orange-900/30', color: '#F97316' },

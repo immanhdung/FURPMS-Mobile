@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { LoginForm } from '../components/LoginForm';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useTheme } from '@/hooks/useTheme';
 import { useBiometricAuth } from '../hooks/useBiometricAuth';
 import { useAuthStore } from '@/stores/auth.store';
@@ -84,12 +85,11 @@ export function LoginScreen() {
 
         {/* Floating brand badge */}
         <View style={{ alignItems: 'center', marginTop: -54 }}>
-          <View
-            className="bg-white dark:bg-dark-50"
+          <GlassSurface
+            intensity={60}
+            rounded={24}
+            className="py-3.5 px-[18px]"
             style={{
-              borderRadius: 24,
-              paddingVertical: 14,
-              paddingHorizontal: 18,
               shadowColor: '#000',
               shadowOpacity: 0.18,
               shadowRadius: 16,
@@ -102,14 +102,16 @@ export function LoginScreen() {
               style={{ width: 60, height: 74 }}
               resizeMode="contain"
             />
-          </View>
+          </GlassSurface>
         </View>
 
         {/* Content */}
         <View className="flex-1 px-6 pt-5 gap-6">
           {/* Login card */}
-          <View
-            className="bg-white dark:bg-dark-50 rounded-2xl p-6 gap-5 border border-neutral-100 dark:border-dark-200"
+          <GlassSurface
+            intensity={55}
+            rounded={24}
+            className="p-6 gap-5"
             style={{
               shadowColor: '#000',
               shadowOpacity: isDark ? 0 : 0.06,
@@ -128,7 +130,7 @@ export function LoginScreen() {
             </View>
 
             <LoginForm />
-          </View>
+          </GlassSurface>
 
           {/* Biometric login — only shown when available and enabled by user */}
           {showBiometric && (
@@ -147,7 +149,7 @@ export function LoginScreen() {
               >
                 <View
                   className="w-14 h-14 rounded-2xl items-center justify-center"
-                  style={{ backgroundColor: isDark ? '#1c1c1e' : '#f3f0ff', borderWidth: 1, borderColor: isDark ? '#2a2a2a' : '#ddd6fe' }}
+                  style={{ backgroundColor: isDark ? '#1c1c1e' : '#eaf0fd', borderWidth: 1, borderColor: isDark ? '#2a2a2a' : '#c7d7fa' }}
                 >
                   {isAuthenticating ? (
                     <ActivityIndicator size="small" color={colors.accent.primary} />

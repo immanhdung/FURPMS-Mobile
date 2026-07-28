@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
+import { GlassSurface } from './GlassSurface';
 
 export interface PickerOption<T> {
   value: T;
@@ -69,7 +70,12 @@ export function PickerField<T>({
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
         <TouchableOpacity className="flex-1 justify-end bg-black/40" activeOpacity={1} onPress={() => setOpen(false)}>
-          <View className="bg-white dark:bg-dark-50 rounded-t-3xl max-h-[70%]" onStartShouldSetResponder={() => true}>
+          <GlassSurface
+            intensity={65}
+            rounded={0}
+            style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0, maxHeight: '70%' }}
+            onStartShouldSetResponder={() => true}
+          >
             <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
               <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{label}</Text>
               <TouchableOpacity onPress={() => setOpen(false)} hitSlop={12}>
@@ -113,7 +119,7 @@ export function PickerField<T>({
                 );
               }}
             />
-          </View>
+          </GlassSurface>
         </TouchableOpacity>
       </Modal>
     </View>

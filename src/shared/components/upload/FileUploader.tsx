@@ -96,7 +96,7 @@ export function FileUploader({
           <View
             style={[
               styles.fileIconContainer,
-              { backgroundColor: isDark ? '#27272a' : '#ede9fe' },
+              { backgroundColor: isDark ? '#27272a' : '#dce6fc' },
             ]}
           >
             <Ionicons name="document-text-outline" size={20} color={colors.accent.primary} />

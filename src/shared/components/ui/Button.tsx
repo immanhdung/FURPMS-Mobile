@@ -71,7 +71,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'secondary' ? '#5E6AD2' : '#FFFFFF'}
+          color={variant === 'secondary' ? '#2358D6' : '#FFFFFF'}
         />
       ) : (
         iconLeft && <View>{iconLeft}</View>

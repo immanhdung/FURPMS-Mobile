@@ -26,7 +26,7 @@ async function ensureAndroidChannels(): Promise<void> {
     name: 'General',
     importance: Notifications.AndroidImportance.DEFAULT,
     vibrationPattern: [0, 250, 250, 250],
-    lightColor: '#7C3AED',
+    lightColor: '#2358D6',
   });
 
   await Notifications.setNotificationChannelAsync('reviews', {
