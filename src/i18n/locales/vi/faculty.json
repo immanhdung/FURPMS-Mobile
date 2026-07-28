@@ -190,7 +190,8 @@
     "uploadProposalDocument": "Tải lên tài liệu đề tài",
     "uploadHint": "PDF hoặc DOCX — tệp này sẽ được đính kèm vào đề tài của bạn",
     "analyzing": "Đang trích xuất nội dung…",
-    "analyzeWithAi": "AI trích xuất nội dung"
+    "analyzeWithAi": "AI trích xuất nội dung",
+    "extractErrorMessage": "Không thể trích xuất nội dung từ tài liệu này. Vui lòng thử lại."
   },
   "step3": {
     "fundingWholeOption": "Tài trợ toàn phần",

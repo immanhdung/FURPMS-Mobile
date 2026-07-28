@@ -210,7 +210,13 @@ export default function ProposalWizardScreen() {
           <WizardStepper currentStep={currentStep} />
           <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {currentStep === 1 && <Step1CycleFieldType />}
-            {currentStep === 2 && <Step2ResearchContent pickedFile={pickedFile} onPickedFileChange={(f) => { setPickedFile(f); setDocumentAttached(false); }} />}
+            {currentStep === 2 && (
+              <Step2ResearchContent
+                pickedFile={pickedFile}
+                onPickedFileChange={(f) => { setPickedFile(f); setDocumentAttached(false); }}
+                onExtracted={() => setCurrentStep(3)}
+              />
+            )}
             {currentStep === 3 && <Step3Details />}
             {currentStep === 4 && <Step4TeamMembers />}
             {currentStep === 5 && <Step5Preview />}

@@ -190,7 +190,8 @@
     "uploadProposalDocument": "Upload proposal document",
     "uploadHint": "PDF or DOCX — this will be attached to your proposal",
     "analyzing": "Extracting content…",
-    "analyzeWithAi": "AI Extract Content"
+    "analyzeWithAi": "AI Extract Content",
+    "extractErrorMessage": "Could not extract content from this document. Please try again."
   },
   "step3": {
     "fundingWholeOption": "Whole funding",

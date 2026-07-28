@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { PickerField } from '@/shared/components/ui/PickerField';
@@ -14,10 +14,12 @@ import type { ProposalWizardFormValues } from '@/utils/validators';
 interface Step2ResearchContentProps {
   pickedFile: PickedFile | null;
   onPickedFileChange: (file: PickedFile | null) => void;
+  /** Called after a successful extraction so the wizard can jump the PI straight to the filled-in step 3. */
+  onExtracted?: () => void;
 }
 
-export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2ResearchContentProps) {
-  const { t } = useTranslation('faculty');
+export function Step2ResearchContent({ pickedFile, onPickedFileChange, onExtracted }: Step2ResearchContentProps) {
+  const { t } = useTranslation(['faculty', 'common']);
   const { control, watch, setValue } = useFormContext<ProposalWizardFormValues>();
   const cycleId = watch('cycleId');
   const researchTypeId = watch('researchType');
@@ -59,6 +61,10 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange }: Step2Re
         if (result.applicationPotential) setValue('applicationPotential', result.applicationPotential);
         if (result.transferPotential) setValue('transferPotential', result.transferPotential);
         if (result.facilities) setValue('facilities', result.facilities);
+        onExtracted?.();
+      },
+      onError: (error) => {
+        Alert.alert(t('common:states.errorTitle'), error.message || t('step2.extractErrorMessage'));
       },
     });
   }
