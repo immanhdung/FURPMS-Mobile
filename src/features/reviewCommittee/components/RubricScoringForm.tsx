@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
 import { useRubrics, useMyScore, useSubmitScore } from '@/features/reviewCommittee/hooks/useReviewScoring';
@@ -106,7 +107,7 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
   return (
     <View className="gap-4">
       {criteria.map((criterion) => (
-        <View key={criterion.id} className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+        <GlassSurface key={criterion.id} rounded={24} className="p-4 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="flex-1 text-neutral-900 dark:text-neutral-50 text-sm font-semibold pr-3">{criterion.criterionName}</Text>
             <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">/ {criterion.maxScore}</Text>
@@ -128,7 +129,7 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
             onChangeText={(val) => setComments((prev) => ({ ...prev, [criterion.id]: val }))}
             multiline
           />
-        </View>
+        </GlassSurface>
       ))}
 
       <View className="bg-violet-50 dark:bg-violet-900/10 rounded-2xl border border-violet-100 dark:border-violet-900/30 p-4 flex-row items-center justify-between">

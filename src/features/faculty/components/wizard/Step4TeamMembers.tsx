@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import type { ProposalWizardFormValues } from '@/utils/validators';
 
 export function Step4TeamMembers() {
@@ -21,7 +22,7 @@ export function Step4TeamMembers() {
       )}
 
       {fields.map((field, index) => (
-        <View key={field.id} className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+        <GlassSurface key={field.id} rounded={24} className="p-4 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{t('step4.member', { index: index + 1 })}</Text>
             <TouchableOpacity onPress={() => remove(index)} hitSlop={8}>
@@ -102,7 +103,7 @@ export function Step4TeamMembers() {
               </TouchableOpacity>
             )}
           />
-        </View>
+        </GlassSurface>
       ))}
 
       <TouchableOpacity

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useExpectedProducts, useCreateExpectedProduct, useDeleteExpectedProduct } from '@/features/faculty/hooks/useExpectedProducts';
 
 interface ExpectedProductsCardProps {
@@ -38,7 +39,7 @@ export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsC
   }
 
   return (
-    <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+    <GlassSurface rounded={24} className="p-4 gap-3">
       {isLoading ? (
         <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('expectedProductsCard.loading')}</Text>
       ) : products && products.length > 0 ? (
@@ -86,7 +87,12 @@ export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsC
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
         <View className="flex-1 justify-end bg-black/40">
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <View className="bg-white dark:bg-dark-50 rounded-t-3xl px-5 pt-5 pb-8 gap-4">
+            <GlassSurface
+              intensity={65}
+              rounded={0}
+              style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0 }}
+              className="px-5 pt-5 pb-8 gap-4"
+            >
               <View className="flex-row items-center justify-between">
                 <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t('expectedProductsCard.modalTitle')}</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)} hitSlop={12}>
@@ -103,10 +109,10 @@ export function ExpectedProductsCard({ proposalId, editable }: ExpectedProductsC
                 numberOfLines={3}
               />
               <Button label={t('expectedProductsCard.add')} onPress={handleAdd} loading={isCreating} disabled={!name.trim()} fullWidth />
-            </View>
+            </GlassSurface>
           </KeyboardAvoidingView>
         </View>
       </Modal>
-    </View>
+    </GlassSurface>
   );
 }

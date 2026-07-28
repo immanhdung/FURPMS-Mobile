@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useProposalDocuments, useDeleteProposalDocument } from '@/features/faculty/hooks/useProposalDocuments';
 import { proposalDocumentService } from '@/features/faculty/services/proposal-document.service';
 import { uploadService, type PickedFile } from '@/services/upload.service';
@@ -71,7 +72,7 @@ export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocument
   }
 
   return (
-    <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+    <GlassSurface rounded={24} className="p-4 gap-3">
       {isLoading ? (
         <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('proposalDocumentsCard.loading')}</Text>
       ) : documents && documents.length > 0 ? (
@@ -124,6 +125,6 @@ export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocument
           />
         </>
       )}
-    </View>
+    </GlassSurface>
   );
 }

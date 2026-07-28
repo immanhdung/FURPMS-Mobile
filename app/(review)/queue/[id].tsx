@@ -8,6 +8,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useMyMemberships } from '@/features/reviewCommittee/hooks/useMemberships';
 import { useCouncilMeetings } from '@/features/meeting/hooks/useMeetings';
 import { Badge } from '@/shared/components/ui/Badge';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
 import { ProposalDocumentViewer } from '@/features/reviewCommittee/components/ProposalDocumentViewer';
@@ -68,7 +69,7 @@ export default function CouncilWorkspaceScreen() {
         {meetings && meetings.length > 0 && (
           <View className="px-5 mb-4 gap-2">
             {meetings.map((m) => (
-              <View key={m.id} className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-1.5">
+              <GlassSurface key={m.id} rounded={24} className="p-4 gap-1.5">
                 <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{m.title || t('workspace.councilMeeting')}</Text>
                 <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{formatDateTime(m.scheduledAt)}</Text>
                 {m.meetingLink && (
@@ -77,7 +78,7 @@ export default function CouncilWorkspaceScreen() {
                     <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">{t('workspace.joinMeeting')}</Text>
                   </TouchableOpacity>
                 )}
-              </View>
+              </GlassSurface>
             ))}
           </View>
         )}

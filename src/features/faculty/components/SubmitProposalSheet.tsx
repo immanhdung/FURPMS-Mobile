@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/shared/components/ui/Button';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 
 interface SubmitProposalSheetProps {
   visible: boolean;
@@ -25,7 +26,12 @@ export function SubmitProposalSheet({ visible, isSubmitting, onClose, onConfirm 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View className="flex-1 justify-end bg-black/40">
-        <View className="bg-white dark:bg-dark-50 rounded-t-3xl px-5 pt-5 pb-8 gap-4">
+        <GlassSurface
+          intensity={65}
+          rounded={0}
+          style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0 }}
+          className="px-5 pt-5 pb-8 gap-4"
+        >
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t('submitProposalSheet.title')}</Text>
             <TouchableOpacity onPress={handleClose} hitSlop={12}>
@@ -55,7 +61,7 @@ export function SubmitProposalSheet({ visible, isSubmitting, onClose, onConfirm 
           </TouchableOpacity>
 
           <Button label={t('submitProposalSheet.submitForReview')} onPress={() => onConfirm(confirmCv)} loading={isSubmitting} fullWidth />
-        </View>
+        </GlassSurface>
       </View>
     </Modal>
   );

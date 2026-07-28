@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useMyProposals } from '@/features/faculty/hooks/useProposals';
 import { ProposalCard } from '@/features/faculty/components/ProposalCard';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
@@ -79,7 +80,7 @@ export default function ProposalsScreen() {
 
       {/* Search */}
       <View className="px-5 mb-3">
-        <View className="flex-row items-center gap-3 bg-white dark:bg-dark-50 rounded-xl border border-neutral-100 dark:border-dark-200 px-3 h-11">
+        <GlassSurface rounded={16} className="flex-row items-center gap-3 px-3 h-11">
           <Ionicons name="search-outline" size={18} color={colors.icon.muted} />
           <TextInput
             value={search}
@@ -95,7 +96,7 @@ export default function ProposalsScreen() {
               <Ionicons name="close-circle" size={16} color={colors.icon.muted} />
             </TouchableOpacity>
           )}
-        </View>
+        </GlassSurface>
       </View>
 
       {/* Filter chips */}

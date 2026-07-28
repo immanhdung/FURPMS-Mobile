@@ -11,6 +11,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
 import { Avatar } from '@/shared/components/ui/Avatar';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { ProposalStatusTimeline } from '@/features/faculty/components/ProposalStatusTimeline';
 import { ProposalDocumentsCard } from '@/features/faculty/components/ProposalDocumentsCard';
 import { ExpectedProductsCard } from '@/features/faculty/components/ExpectedProductsCard';
@@ -37,9 +38,9 @@ function SectionHeader({ title }: { title: string }) {
 
 function InfoCard({ children }: { children: React.ReactNode }) {
   return (
-    <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+    <GlassSurface rounded={24} className="p-4 gap-3">
       {children}
-    </View>
+    </GlassSurface>
   );
 }
 
@@ -210,18 +211,16 @@ export default function ProposalDetailScreen() {
           </View>
 
           {proposal.status === PROPOSAL_STATUS.APPROVED && (
-            <TouchableOpacity
-              onPress={() => router.push('/(faculty)/reports')}
-              activeOpacity={0.7}
-              className="flex-row items-center justify-between bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4"
-            >
-              <View className="flex-row items-center gap-3">
-                <Ionicons name="bar-chart-outline" size={20} color={colors.accent.primary} />
-                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-                  {t('proposalDetail.progressAndFinalReports')}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.icon.muted} />
+            <TouchableOpacity onPress={() => router.push('/(faculty)/reports')} activeOpacity={0.7}>
+              <GlassSurface rounded={24} className="flex-row items-center justify-between p-4">
+                <View className="flex-row items-center gap-3">
+                  <Ionicons name="bar-chart-outline" size={20} color={colors.accent.primary} />
+                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
+                    {t('proposalDetail.progressAndFinalReports')}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.icon.muted} />
+              </GlassSurface>
             </TouchableOpacity>
           )}
         </View>

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { Avatar } from '@/shared/components/ui/Avatar';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { useFacultyDashboard } from '@/shared/hooks/useAnalytics';
 import { useNotifications, useUnreadCount } from '@/features/notification/hooks/useNotifications';
@@ -106,15 +107,13 @@ export default function FacultyDashboard() {
               </View>
               <Text className="text-white font-semibold text-sm">{t('dashboard.newProposal')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push('/(faculty)/reports')}
-              activeOpacity={0.7}
-              className="flex-1 bg-white dark:bg-dark-50 border border-neutral-100 dark:border-dark-200 rounded-2xl p-4 flex-row items-center gap-3"
-            >
-              <View className="bg-neutral-100 dark:bg-dark-200 rounded-xl p-2">
-                <Ionicons name="bar-chart-outline" size={20} color={colors.icon.default} />
-              </View>
-              <Text className="text-neutral-900 dark:text-neutral-50 font-semibold text-sm">{t('dashboard.reports')}</Text>
+            <TouchableOpacity onPress={() => router.push('/(faculty)/reports')} activeOpacity={0.7} className="flex-1">
+              <GlassSurface rounded={24} className="p-4 flex-row items-center gap-3">
+                <View className="bg-neutral-100 dark:bg-dark-200 rounded-xl p-2">
+                  <Ionicons name="bar-chart-outline" size={20} color={colors.icon.default} />
+                </View>
+                <Text className="text-neutral-900 dark:text-neutral-50 font-semibold text-sm">{t('dashboard.reports')}</Text>
+              </GlassSurface>
             </TouchableOpacity>
           </View>
         </View>
@@ -123,7 +122,7 @@ export default function FacultyDashboard() {
         {dashboard && dashboard.proposalStatus.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.proposalStatus')}</Text>
-            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+            <GlassSurface rounded={24} className="p-4 gap-3">
               {dashboard.proposalStatus.map((s) => (
                 <View key={s.status} className="gap-1">
                   <View className="flex-row items-center justify-between">
@@ -138,7 +137,7 @@ export default function FacultyDashboard() {
                   </View>
                 </View>
               ))}
-            </View>
+            </GlassSurface>
           </View>
         )}
 
@@ -146,7 +145,7 @@ export default function FacultyDashboard() {
         {dashboard && dashboard.upcomingDeadlines.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.upcomingDeadlines')}</Text>
-            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
+            <GlassSurface rounded={24}>
               {dashboard.upcomingDeadlines.map((d, i) => (
                 <View key={`${d.label}-${i}`}>
                   {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-4" />}
@@ -156,7 +155,7 @@ export default function FacultyDashboard() {
                   </View>
                 </View>
               ))}
-            </View>
+            </GlassSurface>
           </View>
         )}
 
@@ -179,7 +178,7 @@ export default function FacultyDashboard() {
         {dashboard && dashboard.activity.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.recentActivity')}</Text>
-            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
+            <GlassSurface rounded={24}>
               {dashboard.activity.slice(0, 5).map((a, i) => (
                 <View key={a.id}>
                   {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-4" />}
@@ -189,7 +188,7 @@ export default function FacultyDashboard() {
                   </View>
                 </View>
               ))}
-            </View>
+            </GlassSurface>
           </View>
         )}
 
@@ -202,7 +201,7 @@ export default function FacultyDashboard() {
                 <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">{t('dashboard.seeAll')}</Text>
               </TouchableOpacity>
             </View>
-            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
+            <GlassSurface rounded={24}>
               {recentNotifications.map((n, i) => (
                 <View key={n.id}>
                   {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-4" />}
@@ -219,7 +218,7 @@ export default function FacultyDashboard() {
                   </View>
                 </View>
               ))}
-            </View>
+            </GlassSurface>
           </View>
         )}
       </ScrollView>

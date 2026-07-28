@@ -6,6 +6,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useProposalDocuments } from '@/features/faculty/hooks/useProposalDocuments';
 import { proposalDocumentService } from '@/features/faculty/services/proposal-document.service';
 import { useDocumentDownload } from '@/shared/hooks/useDocumentDownload';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { PDFViewer } from '@/shared/components/pdf/PDFViewer';
 import { downloadService } from '@/services/download.service';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
@@ -53,25 +54,26 @@ export function ProposalDocumentViewer({ proposalId }: ProposalDocumentViewerPro
           onPress={() => handleView(doc.id, doc.fileName)}
           activeOpacity={0.7}
           disabled={isDownloading}
-          className="flex-row items-center gap-3 bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4"
         >
-          <View className="bg-violet-100 dark:bg-violet-900/30 w-9 h-9 rounded-xl items-center justify-center">
-            <Ionicons name="document-text-outline" size={18} color={colors.accent.primary} />
-          </View>
-          <View className="flex-1">
-            <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium" numberOfLines={1}>
-              {doc.fileName}
-            </Text>
-            <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-              {downloadService.formatFileSize(doc.fileSizeBytes)}
-              {doc.documentType ? ` · ${doc.documentType}` : ''}
-            </Text>
-          </View>
-          {openingId === doc.id && isDownloading ? (
-            <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">{progress?.percentage ?? 0}%</Text>
-          ) : (
-            <Ionicons name="eye-outline" size={18} color={colors.icon.muted} />
-          )}
+          <GlassSurface rounded={24} className="flex-row items-center gap-3 p-4">
+            <View className="bg-violet-100 dark:bg-violet-900/30 w-9 h-9 rounded-xl items-center justify-center">
+              <Ionicons name="document-text-outline" size={18} color={colors.accent.primary} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium" numberOfLines={1}>
+                {doc.fileName}
+              </Text>
+              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
+                {downloadService.formatFileSize(doc.fileSizeBytes)}
+                {doc.documentType ? ` · ${doc.documentType}` : ''}
+              </Text>
+            </View>
+            {openingId === doc.id && isDownloading ? (
+              <Text className="text-neutral-400 dark:text-dark-500 text-xs font-sans">{progress?.percentage ?? 0}%</Text>
+            ) : (
+              <Ionicons name="eye-outline" size={18} color={colors.icon.muted} />
+            )}
+          </GlassSurface>
         </TouchableOpacity>
       ))}
 

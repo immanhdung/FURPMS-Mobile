@@ -7,16 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useMeeting } from '@/features/meeting/hooks/useMeetings';
 import { Badge } from '@/shared/components/ui/Badge';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
 import { formatDateTime, formatDuration, isUpcoming } from '@/utils/date';
 
 function SectionCard({ children }: { children: React.ReactNode }) {
-  return (
-    <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
-      {children}
-    </View>
-  );
+  return <GlassSurface rounded={24}>{children}</GlassSurface>;
 }
 
 function SectionHeader({ title }: { title: string }) {

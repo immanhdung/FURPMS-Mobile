@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { PickerField } from '@/shared/components/ui/PickerField';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Input } from '@/shared/components/ui/Input';
@@ -75,9 +76,9 @@ function useDocumentUpload(contractId: string, documentType: FinalReportDocument
 
 function ReportCard({ children }: { children: React.ReactNode }) {
   return (
-    <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-2">
+    <GlassSurface rounded={24} className="p-4 gap-2">
       {children}
-    </View>
+    </GlassSurface>
   );
 }
 

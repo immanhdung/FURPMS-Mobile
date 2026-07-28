@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useOpenCycles } from '@/features/faculty/hooks/useCycles';
 import { useTracksByCycle } from '@/features/faculty/hooks/useTracks';
 import { useResearchTypes } from '@/features/faculty/hooks/useResearchTypes';
@@ -18,9 +19,9 @@ function PreviewField({ label, value }: { label: string; value?: string | number
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+    <GlassSurface rounded={24} className="p-4 gap-3">
       {children}
-    </View>
+    </GlassSurface>
   );
 }
 

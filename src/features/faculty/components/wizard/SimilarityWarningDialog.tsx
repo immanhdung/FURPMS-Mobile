@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/shared/components/ui/Button';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 
 interface SimilarityWarningDialogProps {
   visible: boolean;
@@ -17,7 +18,7 @@ export function SimilarityWarningDialog({ visible, score, onDismiss }: Similarit
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onDismiss}>
       <View className="flex-1 items-center justify-center bg-black/40 px-8">
-        <View className="bg-white dark:bg-dark-50 rounded-2xl p-5 gap-3 w-full">
+        <GlassSurface rounded={24} className="p-5 gap-3 w-full">
           <View className="w-11 h-11 rounded-full bg-amber-100 dark:bg-amber-900/30 items-center justify-center">
             <Ionicons name="alert-circle-outline" size={22} color={colors.accent.warning} />
           </View>
@@ -26,7 +27,7 @@ export function SimilarityWarningDialog({ visible, score, onDismiss }: Similarit
             {t('similarityWarningDialog.message', { percent: Math.round(score * 100) })}
           </Text>
           <Button label={t('similarityWarningDialog.gotIt')} onPress={onDismiss} fullWidth />
-        </View>
+        </GlassSurface>
       </View>
     </Modal>
   );

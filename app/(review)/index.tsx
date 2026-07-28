@@ -9,6 +9,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Avatar } from '@/shared/components/ui/Avatar';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Button } from '@/shared/components/ui/Button';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { useReviewerDashboard } from '@/shared/hooks/useAnalytics';
 import { useMyMemberships, useRespondToInvitation } from '@/features/reviewCommittee/hooks/useMemberships';
@@ -114,7 +115,7 @@ export default function ReviewDashboard() {
               </TouchableOpacity>
             </View>
             {pendingInvitations.map((m) => (
-              <View key={m.memberId} className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+              <GlassSurface key={m.memberId} rounded={24} className="p-4 gap-3">
                 <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold" numberOfLines={2}>
                   {m.proposalTitleVI || t('dashboard.untitledProposal')}
                 </Text>
@@ -122,7 +123,7 @@ export default function ReviewDashboard() {
                   <Button label={t('dashboard.accept')} size="sm" onPress={() => respond({ memberId: m.memberId, payload: { accept: true } })} loading={isResponding} />
                   <Button label={t('dashboard.decline')} size="sm" variant="secondary" onPress={() => router.push('/(review)/queue')} />
                 </View>
-              </View>
+              </GlassSurface>
             ))}
           </View>
         )}
@@ -131,7 +132,7 @@ export default function ReviewDashboard() {
         {dashboard && dashboard.reviewCompletionTrend.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.reviewProgress')}</Text>
-            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-3">
+            <GlassSurface rounded={24} className="p-4 gap-3">
               {dashboard.reviewCompletionTrend.map((pt) => {
                 const total = pt.completed + pt.pending || 1;
                 return (
@@ -149,7 +150,7 @@ export default function ReviewDashboard() {
                   </View>
                 );
               })}
-            </View>
+            </GlassSurface>
           </View>
         )}
 
@@ -160,15 +161,16 @@ export default function ReviewDashboard() {
             <TouchableOpacity
               onPress={() => router.push(`/(review)/meetings/${nextMeeting.id}`)}
               activeOpacity={0.7}
-              className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 p-4 gap-2"
             >
-              <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold" numberOfLines={1}>
-                {nextMeeting.title || t('dashboard.councilMeeting')}
-              </Text>
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="calendar-outline" size={13} color={colors.icon.muted} />
-                <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{formatDateTime(nextMeeting.scheduledAt)}</Text>
-              </View>
+              <GlassSurface rounded={24} className="p-4 gap-2">
+                <Text className="text-neutral-900 dark:text-neutral-50 text-base font-semibold" numberOfLines={1}>
+                  {nextMeeting.title || t('dashboard.councilMeeting')}
+                </Text>
+                <View className="flex-row items-center gap-1.5">
+                  <Ionicons name="calendar-outline" size={13} color={colors.icon.muted} />
+                  <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{formatDateTime(nextMeeting.scheduledAt)}</Text>
+                </View>
+              </GlassSurface>
             </TouchableOpacity>
           </View>
         )}
@@ -177,7 +179,7 @@ export default function ReviewDashboard() {
         {dashboard && dashboard.activity.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.recentActivity')}</Text>
-            <View className="bg-white dark:bg-dark-50 rounded-2xl border border-neutral-100 dark:border-dark-200 overflow-hidden">
+            <GlassSurface rounded={24}>
               {dashboard.activity.slice(0, 5).map((a, i) => (
                 <View key={a.id}>
                   {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-4" />}
@@ -187,7 +189,7 @@ export default function ReviewDashboard() {
                   </View>
                 </View>
               ))}
-            </View>
+            </GlassSurface>
           </View>
         )}
 
@@ -206,19 +208,21 @@ export default function ReviewDashboard() {
             <TouchableOpacity
               onPress={() => router.push('/(review)/notifications')}
               activeOpacity={0.7}
-              className="flex-1 bg-white dark:bg-dark-50 border border-neutral-100 dark:border-dark-200 rounded-xl p-4 gap-2"
+              className="flex-1"
             >
-              <View className="relative self-start">
-                <Ionicons name="notifications-outline" size={22} color={colors.icon.default} />
-                {unreadCount > 0 && (
-                  <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-4 h-4 items-center justify-center">
-                    <Text className="text-white text-xs font-bold" style={{ lineHeight: 14 }}>
-                      {unreadCount > 9 ? '9+' : String(unreadCount)}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{t('dashboard.inbox')}</Text>
+              <GlassSurface rounded={16} className="p-4 gap-2">
+                <View className="relative self-start">
+                  <Ionicons name="notifications-outline" size={22} color={colors.icon.default} />
+                  {unreadCount > 0 && (
+                    <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-4 h-4 items-center justify-center">
+                      <Text className="text-white text-xs font-bold" style={{ lineHeight: 14 }}>
+                        {unreadCount > 9 ? '9+' : String(unreadCount)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{t('dashboard.inbox')}</Text>
+              </GlassSurface>
             </TouchableOpacity>
           </View>
         </View>
