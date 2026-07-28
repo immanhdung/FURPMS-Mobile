@@ -23,12 +23,14 @@ export const palette = {
   dark400: '#5A5A6B',
   dark500: '#8C8C9E',
 
-  violet100: '#D8DAFD',
-  violet200: '#B8BBFB',
-  violet400: '#7C85E8',
-  violet500: '#5E6AD2',
-  violet600: '#4A55C0',
-  violet700: '#3A44A8',
+  // Deep blue brand color — keep the "violet*" key names (see tailwind.config.js) so every
+  // existing `colors.accent.primary` / `palette.violet*` reference updates from these values alone.
+  violet100: '#DCE6FC',
+  violet200: '#B3C9F7',
+  violet400: '#4C7EE8',
+  violet500: '#2358D6',
+  violet600: '#1A44AC',
+  violet700: '#132F7E',
 
   emerald100: '#D1FAE5',
   emerald400: '#4ADE80',
@@ -53,6 +55,13 @@ export const palette = {
   blue500: '#3B82F6',
   blue600: '#2563EB',
   blue700: '#1D4ED8',
+
+  // Secondary accent for "info" surfaces — distinct from the blue primary above.
+  cyan100: '#CFFAFE',
+  cyan400: '#22D3EE',
+  cyan500: '#06B6D4',
+  cyan600: '#0891B2',
+  cyan700: '#0E7490',
 } as const;
 
 // Semantic tokens — use these in StyleSheet and programmatic styling
@@ -81,8 +90,8 @@ export const lightColors = {
     warningLight: palette.amber100,
     danger: palette.red600,
     dangerLight: palette.red100,
-    info: palette.blue600,
-    infoLight: palette.blue100,
+    info: palette.cyan600,
+    infoLight: palette.cyan100,
   },
   border: {
     default: '#E5E5EA',
@@ -154,8 +163,8 @@ export const darkColors = {
     warningLight: '#2A1F0A',
     danger: palette.red400,
     dangerLight: '#2A0F0F',
-    info: palette.blue400,
-    infoLight: '#0F1F35',
+    info: palette.cyan400,
+    infoLight: '#0A2A2F',
   },
   border: {
     default: '#2A2A32',

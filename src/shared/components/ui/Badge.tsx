@@ -26,8 +26,8 @@ const styles: Record<BadgeVariant, { bg: string; text: string }> = {
     text: 'text-red-700 dark:text-red-100',
   },
   info: {
-    bg: 'bg-blue-100 dark:bg-blue-700',
-    text: 'text-blue-700 dark:text-blue-100',
+    bg: 'bg-cyan-100 dark:bg-cyan-700',
+    text: 'text-cyan-700 dark:text-cyan-100',
   },
   purple: {
     bg: 'bg-violet-100 dark:bg-violet-700',

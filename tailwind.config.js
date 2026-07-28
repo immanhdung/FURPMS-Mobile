@@ -39,14 +39,16 @@ module.exports = {
           400: '#5A5A6B',
           500: '#8C8C9E',
         },
-        // Accent — Linear-inspired violet
+        // Accent — deep blue brand color. Token key stays "violet" (matches src/constants/colors.ts
+        // palette.violet* and every existing `violet-*` className in the app) so the whole app's
+        // primary color updates from this one place without touching 25+ screen files.
         violet: {
-          100: '#D8DAFD',
-          200: '#B8BBFB',
-          400: '#7C85E8',
-          500: '#5E6AD2',
-          600: '#4A55C0',
-          700: '#3A44A8',
+          100: '#DCE6FC',
+          200: '#B3C9F7',
+          400: '#4C7EE8',
+          500: '#2358D6',
+          600: '#1A44AC',
+          700: '#132F7E',
         },
         // Success
         emerald: {
@@ -72,7 +74,15 @@ module.exports = {
           600: '#DC2626',
           700: '#991B1B',
         },
-        // Info
+        // Secondary accent — used for "info" surfaces (Badge info variant etc). Distinct from the
+        // blue primary above so info states don't visually collide with the brand color.
+        cyan: {
+          100: '#CFFAFE',
+          400: '#22D3EE',
+          500: '#06B6D4',
+          600: '#0891B2',
+          700: '#0E7490',
+        },
         blue: {
           100: '#DBEAFE',
           400: '#60A5FA',
