@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
+import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useMyMemberships, useRespondToInvitation } from '@/features/reviewCommittee/hooks/useMemberships';
 import { MembershipCard } from '@/features/reviewCommittee/components/MembershipCard';
 import { DeclineInvitationDialog } from '@/features/reviewCommittee/components/DeclineInvitationDialog';
@@ -83,21 +84,23 @@ export default function ReviewQueueScreen() {
           data={FILTERS}
           keyExtractor={(f) => f.key}
           contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
-          renderItem={({ item: { key, label } }) => (
-            <TouchableOpacity
-              onPress={() => setActiveFilter(key)}
-              activeOpacity={0.7}
-              className={`px-3.5 py-2 rounded-full border ${
-                activeFilter === key
-                  ? 'bg-violet-500 dark:bg-violet-600 border-violet-500 dark:border-violet-600'
-                  : 'bg-white dark:bg-dark-50 border-neutral-200 dark:border-dark-200'
-              }`}
-            >
-              <Text className={`text-sm font-medium ${activeFilter === key ? 'text-white' : 'text-neutral-600 dark:text-dark-500'}`}>
-                {label}
-              </Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item: { key, label } }) =>
+            activeFilter === key ? (
+              <TouchableOpacity
+                onPress={() => setActiveFilter(key)}
+                activeOpacity={0.7}
+                className="px-3.5 py-2 rounded-full bg-violet-500 dark:bg-violet-600"
+              >
+                <Text className="text-sm font-medium text-white">{label}</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => setActiveFilter(key)} activeOpacity={0.7}>
+                <GlassSurface rounded={999} className="px-3.5 py-2">
+                  <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{label}</Text>
+                </GlassSurface>
+              </TouchableOpacity>
+            )
+          }
         />
       </View>
 

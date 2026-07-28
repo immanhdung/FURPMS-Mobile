@@ -258,20 +258,28 @@ export default function ReportsScreen() {
           </View>
 
           <View className="flex-row gap-2 mb-4">
-            {(['PROGRESS', 'FINAL'] as Tab[]).map((tabKey) => (
-              <TouchableOpacity
-                key={tabKey}
-                onPress={() => setTab(tabKey)}
-                activeOpacity={0.7}
-                className={`flex-1 items-center py-2.5 rounded-xl border ${
-                  tab === tabKey ? 'bg-violet-500 dark:bg-violet-600 border-violet-500 dark:border-violet-600' : 'bg-white dark:bg-dark-50 border-neutral-200 dark:border-dark-200'
-                }`}
-              >
-                <Text className={`text-sm font-medium ${tab === tabKey ? 'text-white' : 'text-neutral-600 dark:text-dark-500'}`}>
-                  {tabKey === 'PROGRESS' ? t('reports.tabProgress') : t('reports.tabFinal')}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {(['PROGRESS', 'FINAL'] as Tab[]).map((tabKey) =>
+              tab === tabKey ? (
+                <TouchableOpacity
+                  key={tabKey}
+                  onPress={() => setTab(tabKey)}
+                  activeOpacity={0.7}
+                  className="flex-1 items-center py-2.5 rounded-xl bg-violet-500 dark:bg-violet-600"
+                >
+                  <Text className="text-sm font-medium text-white">
+                    {tabKey === 'PROGRESS' ? t('reports.tabProgress') : t('reports.tabFinal')}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity key={tabKey} onPress={() => setTab(tabKey)} activeOpacity={0.7} className="flex-1">
+                  <GlassSurface rounded={12} className="items-center py-2.5">
+                    <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+                      {tabKey === 'PROGRESS' ? t('reports.tabProgress') : t('reports.tabFinal')}
+                    </Text>
+                  </GlassSurface>
+                </TouchableOpacity>
+              ),
+            )}
           </View>
 
           {activeContractId && (tab === 'PROGRESS' ? <ProgressReportsTab contractId={activeContractId} /> : <FinalReportTab contractId={activeContractId} />)}

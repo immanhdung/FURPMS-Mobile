@@ -85,18 +85,22 @@ export default function CouncilWorkspaceScreen() {
 
         {/* Tabs */}
         <View className="flex-row gap-2 px-5 mb-4">
-          {tabs.map((t) => {
-            const active = t.key === activeTab;
-            return (
+          {tabs.map((tabItem) => {
+            const active = tabItem.key === activeTab;
+            return active ? (
               <TouchableOpacity
-                key={t.key}
-                onPress={() => setTab(t.key)}
+                key={tabItem.key}
+                onPress={() => setTab(tabItem.key)}
                 activeOpacity={0.7}
-                className={`flex-1 items-center py-2.5 rounded-xl border ${
-                  active ? 'bg-violet-500 dark:bg-violet-600 border-violet-500 dark:border-violet-600' : 'bg-white dark:bg-dark-50 border-neutral-200 dark:border-dark-200'
-                }`}
+                className="flex-1 items-center py-2.5 rounded-xl bg-violet-500 dark:bg-violet-600"
               >
-                <Text className={`text-xs font-medium ${active ? 'text-white' : 'text-neutral-600 dark:text-dark-500'}`}>{t.label}</Text>
+                <Text className="text-xs font-medium text-white">{tabItem.label}</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity key={tabItem.key} onPress={() => setTab(tabItem.key)} activeOpacity={0.7} className="flex-1">
+                <GlassSurface rounded={12} className="items-center py-2.5">
+                  <Text className="text-xs font-medium text-neutral-700 dark:text-neutral-200">{tabItem.label}</Text>
+                </GlassSurface>
               </TouchableOpacity>
             );
           })}
