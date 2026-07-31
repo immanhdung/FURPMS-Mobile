@@ -12,6 +12,7 @@ import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
 import { Avatar } from '@/shared/components/ui/Avatar';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
+import { ListRow } from '@/shared/components/ui/ListRow';
 import { ProposalStatusTimeline } from '@/features/faculty/components/ProposalStatusTimeline';
 import { ProposalDocumentsCard } from '@/features/faculty/components/ProposalDocumentsCard';
 import { ExpectedProductsCard } from '@/features/faculty/components/ExpectedProductsCard';
@@ -211,17 +212,11 @@ export default function ProposalDetailScreen() {
           </View>
 
           {proposal.status === PROPOSAL_STATUS.APPROVED && (
-            <TouchableOpacity onPress={() => router.push('/(faculty)/reports')} activeOpacity={0.7}>
-              <GlassSurface rounded={24} className="flex-row items-center justify-between p-4">
-                <View className="flex-row items-center gap-3">
-                  <Ionicons name="bar-chart-outline" size={20} color={colors.accent.primary} />
-                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">
-                    {t('proposalDetail.progressAndFinalReports')}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color={colors.icon.muted} />
-              </GlassSurface>
-            </TouchableOpacity>
+            <ListRow
+              icon="bar-chart-outline"
+              label={t('proposalDetail.progressAndFinalReports')}
+              onPress={() => router.push('/(faculty)/reports')}
+            />
           )}
         </View>
       </ScrollView>

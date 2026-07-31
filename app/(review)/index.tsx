@@ -10,6 +10,7 @@ import { Avatar } from '@/shared/components/ui/Avatar';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Button } from '@/shared/components/ui/Button';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
+import { TrendChart } from '@/shared/components/ui/TrendChart';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { useReviewerDashboard } from '@/shared/hooks/useAnalytics';
 import { useMyMemberships, useRespondToInvitation } from '@/features/reviewCommittee/hooks/useMemberships';
@@ -128,28 +129,27 @@ export default function ReviewDashboard() {
           </View>
         )}
 
-        {/* Review completion trend (no chart lib — simple bars) */}
+        {/* Review completion trend */}
         {dashboard && dashboard.reviewCompletionTrend.length > 0 && (
           <View className="px-5 mt-6 gap-3">
             <Text className="text-neutral-700 dark:text-neutral-200 text-base font-semibold">{t('dashboard.reviewProgress')}</Text>
-            <GlassSurface rounded={24} className="p-4 gap-3">
-              {dashboard.reviewCompletionTrend.map((pt) => {
-                const total = pt.completed + pt.pending || 1;
-                return (
-                  <View key={pt.label} className="gap-1">
-                    <View className="flex-row items-center justify-between">
-                      <Text className="text-neutral-700 dark:text-neutral-200 text-xs font-medium">{pt.label}</Text>
-                      <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-                        {pt.completed}/{pt.completed + pt.pending}
-                      </Text>
-                    </View>
-                    <View className="h-2 rounded-full bg-neutral-100 dark:bg-dark-200 overflow-hidden flex-row">
-                      <View className="h-full bg-emerald-500" style={{ width: `${(pt.completed / total) * 100}%` }} />
-                      <View className="h-full bg-amber-400" style={{ width: `${(pt.pending / total) * 100}%` }} />
-                    </View>
-                  </View>
-                );
-              })}
+            <GlassSurface rounded={24} className="p-4 gap-2">
+              <TrendChart
+                data={dashboard.reviewCompletionTrend.map((pt) => {
+                  const total = pt.completed + pt.pending || 1;
+                  return Math.round((pt.completed / total) * 100);
+                })}
+              />
+              <View className="flex-row">
+                {dashboard.reviewCompletionTrend.map((pt) => (
+                  <Text
+                    key={pt.label}
+                    className="flex-1 text-center text-neutral-400 dark:text-dark-500 text-[10px] font-sans"
+                  >
+                    {pt.label}
+                  </Text>
+                ))}
+              </View>
             </GlassSurface>
           </View>
         )}
