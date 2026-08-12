@@ -17,3 +17,4 @@ export interface AiExtractionResult {
 }
 
 export interface SemanticSearchResult { id: string; title: string; snippet: string; relevance: number; type: 'proposal' | 'topic'; }
+export interface ProposalSummaryAi { summaryText: string; editedText?: string | null; title?: string | null; strengths?: string[] | null; weaknesses?: string[] | null; generatedAt?: string | null; }

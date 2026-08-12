@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
@@ -11,6 +11,7 @@ import { useAllScores } from '@/features/reviewCommittee/hooks/useReviewScoring'
 import { useFeedback } from '@/features/reviewCommittee/hooks/useFeedback';
 import { useCouncilMembers } from '@/features/reviewCommittee/hooks/useCouncilMembers';
 import { isChairmanRole, isSecretaryRole } from '@/constants/statuses';
+import type { MemberOpinion, QaEntry } from '../types/decision.types';
 
 interface MinutesPanelProps {
   councilId: string;
@@ -44,12 +45,16 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
   const [result, setResult] = useState('APPROVED');
   const [councilComments, setCouncilComments] = useState('');
   const [recommendations, setRecommendations] = useState('');
+  const [qaEntries, setQaEntries] = useState<QaEntry[]>([]);
+  const [opinions, setOpinions] = useState<MemberOpinion[]>([]);
 
   useEffect(() => {
     if (!decision) return;
     if (decision.result) setResult(decision.result);
     setCouncilComments(decision.councilComments ?? '');
     setRecommendations(decision.recommendations ?? '');
+    setQaEntries(decision.qaEntries ?? []);
+    setOpinions(decision.memberOpinions ?? []);
   }, [decision]);
 
   function nameFor(userId?: string | null, fallback?: string | null) {
@@ -58,7 +63,7 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
 
   function handleSaveDraft() {
     saveMinutes(
-      { projectId: projectId ?? undefined, result, councilComments: councilComments || undefined, recommendations: recommendations || undefined },
+      { projectId: projectId ?? undefined, result, councilComments: councilComments || undefined, recommendations: recommendations || undefined, qaEntries: qaEntries.filter((q) => q.question.trim()).map((q, order) => ({ ...q, order })), memberOpinions: opinions.filter((o) => o.memberName.trim()).map((o, order) => ({ ...o, order })) },
       {
         onSuccess: () => Alert.alert(t('minutesPanel.savedTitle'), t('minutesPanel.savedMessage')),
         onError: () => Alert.alert(t('minutesPanel.errorTitle'), t('minutesPanel.errorMessage')),
@@ -154,6 +159,8 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
           <Input label={t('minutesPanel.resultLabel')} value={result} onChangeText={setResult} placeholder={t('minutesPanel.resultPlaceholder')} autoCapitalize="characters" />
           <Input label={t('minutesPanel.councilComments')} value={councilComments} onChangeText={setCouncilComments} multiline numberOfLines={4} />
           <Input label={t('minutesPanel.recommendations')} value={recommendations} onChangeText={setRecommendations} multiline numberOfLines={3} />
+          <MinutesEntries title="Hỏi đáp tại phiên họp" rows={qaEntries} onChange={setQaEntries} kind="qa" />
+          <MinutesEntries title="Ý kiến từng thành viên" rows={opinions} onChange={setOpinions} kind="opinion" />
           <Button label={decision ? t('minutesPanel.updateDraft') : t('minutesPanel.saveDraft')} variant="secondary" onPress={handleSaveDraft} loading={isSaving} fullWidth />
         </View>
       ) : decision ? (
@@ -172,6 +179,8 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
               <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-sans leading-relaxed">{decision.recommendations}</Text>
             </View>
           )}
+          {!!decision.qaEntries?.length && <View className="gap-2"><Text className="text-neutral-500 dark:text-dark-500 text-xs">Hỏi đáp</Text>{decision.qaEntries.map((q) => <Text key={q.order} className="text-neutral-700 dark:text-neutral-200 text-sm">H: {q.question}{q.answer ? `\nĐ: ${q.answer}` : ''}</Text>)}</View>}
+          {!!decision.memberOpinions?.length && <View className="gap-2"><Text className="text-neutral-500 dark:text-dark-500 text-xs">Ý kiến thành viên</Text>{decision.memberOpinions.map((o) => <Text key={o.order} className="text-neutral-700 dark:text-neutral-200 text-sm">{o.memberName}: {o.academicComment || o.budgetComment || '—'}</Text>)}</View>}
         </GlassSurface>
       ) : (
         <EmptyState fullScreen={false} icon="🗒️" title={t('minutesPanel.noMinutesTitle')} description={t('minutesPanel.noMinutesDescription')} />
@@ -182,4 +191,9 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
       )}
     </View>
   );
+}
+
+function MinutesEntries({ title, rows, onChange, kind }: { title: string; rows: QaEntry[] | MemberOpinion[]; onChange: (v: any) => void; kind: 'qa' | 'opinion' }) {
+  const add = () => onChange([...rows, kind === 'qa' ? { question: '', order: rows.length } : { memberName: '', order: rows.length }]);
+  return <View className="gap-2"><View className="flex-row items-center justify-between"><Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">{title}</Text><TouchableOpacity onPress={add}><Text className="text-violet-600 dark:text-violet-400 text-sm">+ Thêm</Text></TouchableOpacity></View>{rows.map((row: any, index) => <GlassSurface key={index} rounded={16} className="p-3 gap-2">{kind === 'qa' ? <><Input placeholder="Người hỏi" value={row.askedBy ?? ''} onChangeText={(askedBy) => onChange(rows.map((r: any, i) => i === index ? { ...r, askedBy } : r))} /><Input placeholder="Câu hỏi" value={row.question} onChangeText={(question) => onChange(rows.map((r: any, i) => i === index ? { ...r, question } : r))} multiline /><Input placeholder="Câu trả lời" value={row.answer ?? ''} onChangeText={(answer) => onChange(rows.map((r: any, i) => i === index ? { ...r, answer } : r))} multiline /></> : <><Input placeholder="Tên thành viên" value={row.memberName} onChangeText={(memberName) => onChange(rows.map((r: any, i) => i === index ? { ...r, memberName } : r))} /><Input placeholder="Ý kiến chuyên môn" value={row.academicComment ?? ''} onChangeText={(academicComment) => onChange(rows.map((r: any, i) => i === index ? { ...r, academicComment } : r))} multiline /><Input placeholder="Ý kiến kinh phí" value={row.budgetComment ?? ''} onChangeText={(budgetComment) => onChange(rows.map((r: any, i) => i === index ? { ...r, budgetComment } : r))} multiline /></>}<TouchableOpacity onPress={() => onChange(rows.filter((_, i) => i !== index))}><Text className="text-red-500 text-xs">Xóa</Text></TouchableOpacity></GlassSurface>)}</View>;
 }

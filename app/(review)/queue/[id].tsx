@@ -16,10 +16,11 @@ import { RubricScoringForm } from '@/features/reviewCommittee/components/RubricS
 import { AcceptanceEvaluationForm } from '@/features/reviewCommittee/components/AcceptanceEvaluationForm';
 import { MinutesPanel } from '@/features/reviewCommittee/components/MinutesPanel';
 import { AcceptanceDossierPanel } from '@/features/reviewCommittee/components/AcceptanceDossierPanel';
+import { ReviewContextPanel } from '@/features/reviewCommittee/components/ReviewContextPanel';
 import { formatDateTime } from '@/utils/date';
-import { REVIEW_ROUND_TYPE, isSecretaryRole, ROUND_TYPE_LABELS, type ReviewRoundType } from '@/constants/statuses';
+import { REVIEW_ROUND_TYPE, ROUND_TYPE_LABELS, type ReviewRoundType } from '@/constants/statuses';
 
-type Tab = 'DOCUMENTS' | 'SCORING' | 'DOSSIER' | 'ACCEPTANCE' | 'MINUTES';
+type Tab = 'INFO' | 'DOCUMENTS' | 'SCORING' | 'DOSSIER' | 'ACCEPTANCE' | 'MINUTES';
 
 export default function CouncilWorkspaceScreen() {
   const { t } = useTranslation('reviewer');
@@ -31,12 +32,12 @@ export default function CouncilWorkspaceScreen() {
 
   const membership = useMemo(() => memberships?.find((m) => m.councilId === councilId), [memberships, councilId]);
 
-  const isSecretary = isSecretaryRole(membership?.memberRole);
   const isAcceptanceRound = membership?.roundType === REVIEW_ROUND_TYPE.ACCEPTANCE;
 
   const tabs: { key: Tab; label: string }[] = [
+    { key: 'INFO', label: 'Đề cương' },
     { key: 'DOCUMENTS', label: t('workspace.tabs.documents') },
-    ...(!isSecretary ? [{ key: 'SCORING' as Tab, label: t('workspace.tabs.scoring') }] : []),
+    { key: 'SCORING' as Tab, label: t('workspace.tabs.scoring') },
     ...(isAcceptanceRound ? [{ key: 'DOSSIER' as Tab, label: 'Hồ sơ' }] : []),
     ...(isAcceptanceRound ? [{ key: 'ACCEPTANCE' as Tab, label: t('workspace.tabs.acceptance') }] : []),
     { key: 'MINUTES', label: t('workspace.tabs.minutes') },
@@ -86,7 +87,7 @@ export default function CouncilWorkspaceScreen() {
         )}
 
         {/* Tabs */}
-        <View className="flex-row gap-2 px-5 mb-4">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }} className="mb-4">
           {tabs.map((tabItem) => {
             const active = tabItem.key === activeTab;
             return active ? (
@@ -94,21 +95,22 @@ export default function CouncilWorkspaceScreen() {
                 key={tabItem.key}
                 onPress={() => setTab(tabItem.key)}
                 activeOpacity={0.7}
-                className="flex-1 items-center py-2.5 rounded-xl bg-violet-500 dark:bg-violet-600"
+                className="items-center px-4 py-2.5 rounded-xl bg-violet-500 dark:bg-violet-600"
               >
                 <Text className="text-xs font-medium text-white">{tabItem.label}</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity key={tabItem.key} onPress={() => setTab(tabItem.key)} activeOpacity={0.7} className="flex-1">
-                <GlassSurface rounded={12} className="items-center py-2.5">
+              <TouchableOpacity key={tabItem.key} onPress={() => setTab(tabItem.key)} activeOpacity={0.7}>
+                <GlassSurface rounded={12} className="items-center px-4 py-2.5">
                   <Text className="text-xs font-medium text-neutral-700 dark:text-neutral-200">{tabItem.label}</Text>
                 </GlassSurface>
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
 
         <View className="px-5">
+          {activeTab === 'INFO' && <ReviewContextPanel proposalId={membership.proposalId} />}
           {activeTab === 'DOCUMENTS' && <ProposalDocumentViewer proposalId={membership.proposalId} />}
           {activeTab === 'SCORING' && (
             <RubricScoringForm councilId={councilId} roundType={membership.roundType} roundStatus={membership.roundStatus} />

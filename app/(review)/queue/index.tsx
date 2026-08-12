@@ -12,6 +12,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
+import { Input } from '@/shared/components/ui/Input';
 import { INVITATION_STATUS, ROUND_STATUS, isAcceptedInvitation } from '@/constants/statuses';
 import type { MyMembership } from '@/features/reviewCommittee/types/membership.types';
 
@@ -37,6 +38,7 @@ export default function ReviewQueueScreen() {
   const { colors } = useTheme();
   const [activeFilter, setActiveFilter] = useState<FilterTab>('INVITATIONS');
   const [decliningId, setDecliningId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const FILTERS: { key: FilterTab; label: string }[] = [
     { key: 'INVITATIONS', label: t('queue.filters.invitations') },
@@ -48,7 +50,10 @@ export default function ReviewQueueScreen() {
   const { data, isLoading, isError, refetch, isFetching } = useMyMemberships();
   const { mutate: respond, isPending: isResponding } = useRespondToInvitation();
 
-  const filtered = useMemo(() => filterMemberships(data ?? [], activeFilter), [data, activeFilter]);
+  const filtered = useMemo(() => {
+    const term = search.trim().toLocaleLowerCase();
+    return filterMemberships(data ?? [], activeFilter).filter((m) => !term || [m.proposalTitleVI, m.memberRole, m.roundType].some((value) => value?.toLocaleLowerCase().includes(term)));
+  }, [data, activeFilter, search]);
 
   const onRefresh = useCallback(async () => {
     await refetch();
@@ -103,6 +108,7 @@ export default function ReviewQueueScreen() {
           }
         />
       </View>
+      <View className="px-5 mb-3"><Input value={search} onChangeText={setSearch} placeholder="Tìm theo đề cương, vai trò hoặc vòng xét duyệt" /></View>
 
       {isLoading ? (
         <LoadingState message={t('queue.loading')} />
