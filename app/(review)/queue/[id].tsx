@@ -15,10 +15,11 @@ import { ProposalDocumentViewer } from '@/features/reviewCommittee/components/Pr
 import { RubricScoringForm } from '@/features/reviewCommittee/components/RubricScoringForm';
 import { AcceptanceEvaluationForm } from '@/features/reviewCommittee/components/AcceptanceEvaluationForm';
 import { MinutesPanel } from '@/features/reviewCommittee/components/MinutesPanel';
+import { AcceptanceDossierPanel } from '@/features/reviewCommittee/components/AcceptanceDossierPanel';
 import { formatDateTime } from '@/utils/date';
 import { REVIEW_ROUND_TYPE, isSecretaryRole, ROUND_TYPE_LABELS, type ReviewRoundType } from '@/constants/statuses';
 
-type Tab = 'DOCUMENTS' | 'SCORING' | 'ACCEPTANCE' | 'MINUTES';
+type Tab = 'DOCUMENTS' | 'SCORING' | 'DOSSIER' | 'ACCEPTANCE' | 'MINUTES';
 
 export default function CouncilWorkspaceScreen() {
   const { t } = useTranslation('reviewer');
@@ -36,6 +37,7 @@ export default function CouncilWorkspaceScreen() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'DOCUMENTS', label: t('workspace.tabs.documents') },
     ...(!isSecretary ? [{ key: 'SCORING' as Tab, label: t('workspace.tabs.scoring') }] : []),
+    ...(isAcceptanceRound ? [{ key: 'DOSSIER' as Tab, label: 'Hồ sơ' }] : []),
     ...(isAcceptanceRound ? [{ key: 'ACCEPTANCE' as Tab, label: t('workspace.tabs.acceptance') }] : []),
     { key: 'MINUTES', label: t('workspace.tabs.minutes') },
   ];
@@ -111,6 +113,7 @@ export default function CouncilWorkspaceScreen() {
           {activeTab === 'SCORING' && (
             <RubricScoringForm councilId={councilId} roundType={membership.roundType} roundStatus={membership.roundStatus} />
           )}
+          {activeTab === 'DOSSIER' && <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />}
           {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} roundStatus={membership.roundStatus} />}
           {activeTab === 'MINUTES' && (
             <MinutesPanel councilId={councilId} projectId={membership.projectId} memberRole={membership.memberRole} />

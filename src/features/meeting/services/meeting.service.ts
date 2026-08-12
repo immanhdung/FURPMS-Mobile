@@ -4,12 +4,18 @@ import type { Meeting } from '../types/meeting.types';
 
 export interface MeetingService {
   list(): Promise<Meeting[]>;
+  mine(): Promise<Meeting[]>;
   listByCouncil(councilId: string): Promise<Meeting[]>;
 }
 
 const realMeetingService: MeetingService = {
   async list() {
     const { data } = await httpClient.get<ApiResponse<Meeting[]>>('/meetings');
+    return data.data;
+  },
+
+  async mine() {
+    const { data } = await httpClient.get<ApiResponse<Meeting[]>>('/meetings/my');
     return data.data;
   },
 

@@ -30,8 +30,8 @@ export function Input({
   const borderClass = error
     ? 'border-red-500 dark:border-red-400'
     : isFocused
-    ? 'border-violet-500 dark:border-violet-400'
-    : 'border-neutral-200 dark:border-dark-200';
+      ? 'border-violet-500 dark:border-violet-400'
+      : 'border-neutral-200 dark:border-dark-200';
 
   return (
     <View className="gap-1.5">

@@ -7,3 +7,5 @@ export function useExtractProposalMutation() {
     mutationFn: (file: PickedFile) => aiService.extractFromFile(file),
   });
 }
+
+export function useSemanticSearch() { return useMutation({ mutationFn: (query: string) => aiService.semanticSearch(query) }); }

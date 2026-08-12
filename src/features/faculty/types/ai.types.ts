@@ -15,3 +15,5 @@ export interface AiExtractionResult {
   transferPotential?: string | null;
   facilities?: string | null;
 }
+
+export interface SemanticSearchResult { id: string; title: string; snippet: string; relevance: number; type: 'proposal' | 'topic'; }

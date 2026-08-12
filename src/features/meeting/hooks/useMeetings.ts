@@ -9,6 +9,10 @@ export function useMeetings() {
   });
 }
 
+export function useMyMeetings() {
+  return useQuery({ queryKey: ['meetings', 'mine'], queryFn: () => meetingService.mine() });
+}
+
 /** No GET /meetings/{id} exists on the real backend — select out of the already-fetched list. */
 export function useMeeting(id: string) {
   const query = useMeetings();

@@ -1,0 +1,3 @@
+export interface DossierProgressReport { reportRound: number; roundName?: string | null; overallCompletionPct: number; evaluationResult?: string | null; evaluationComments?: string | null; submittedAt?: string | null; }
+export interface DossierDeliverable { id: number; productName: string; description?: string | null; acceptanceStatus?: string | null; qualityAssessment?: string | null; submittedAt?: string | null; hasFile: boolean; }
+export interface AcceptanceDossier { contractNumber?: string | null; progressReports: DossierProgressReport[]; deliverables: DossierDeliverable[]; finalReport?: { status: string; submittedAt?: string | null; hasFile: boolean } | null; deliverablesPassed: number; deliverablesTotal: number; }

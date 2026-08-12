@@ -115,19 +115,19 @@ export default function FacultyLayout() {
             tabBarIcon:
               name === 'notifications/index'
                 ? ({ color, focused, size }) => (
-                    <NotificationTabIcon
-                      color={color}
-                      focused={focused}
-                      size={size}
-                    />
-                  )
+                  <NotificationTabIcon
+                    color={color}
+                    focused={focused}
+                    size={size}
+                  />
+                )
                 : ({ color, focused, size }) => (
-                    <Ionicons
-                      name={focused ? iconFocused : icon}
-                      size={size}
-                      color={color}
-                    />
-                  ),
+                  <Ionicons
+                    name={focused ? iconFocused : icon}
+                    size={size}
+                    color={color}
+                  />
+                ),
           }}
         />
       ))}
