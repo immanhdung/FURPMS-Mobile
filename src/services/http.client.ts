@@ -1,7 +1,7 @@
 import axios, { type AxiosError } from 'axios';
 import type { ApiError } from '@/types/common';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpms-be-1.onrender.com/api';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpmsbev2-production.up.railway.app/api';
 
 export const httpClient = axios.create({
   baseURL: BASE_URL,

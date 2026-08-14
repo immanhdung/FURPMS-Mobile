@@ -4,7 +4,7 @@ import { SECURE_KEYS } from '@/constants/storageKeys';
 import type { ApiResponse } from '@/types/common';
 import type { ProposalDocument } from '@/features/faculty/types/proposal-document.types';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpms-be-1.onrender.com/api';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpmsbev2-production.up.railway.app/api';
 
 export interface PickedFile {
   uri: string;
