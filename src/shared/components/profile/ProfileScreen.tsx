@@ -16,6 +16,7 @@ import { ListRow } from '@/shared/components/ui/ListRow';
 import { formatDateTime } from '@/utils/date';
 import { ChangePasswordSheet } from './ChangePasswordSheet';
 import { LanguageSheet } from './LanguageSheet';
+import { ROLES } from '@/constants/roles';
 
 interface ProfileScreenProps {
   roleLabel: string;
@@ -25,7 +26,7 @@ interface ProfileScreenProps {
 
 export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileScreenProps) {
   const { t } = useTranslation('profile');
-  const { user } = useAuth();
+  const { user, activeRole, setActiveRole } = useAuth();
   const { colors, isDark, toggleTheme } = useTheme();
   const { language } = useLocale();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
@@ -34,6 +35,16 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
   const [languageVisible, setLanguageVisible] = useState(false);
 
   if (!user) return null;
+
+  const roles = user.roles ?? [];
+  const hasFaculty = roles.includes(ROLES.FACULTY);
+  const hasReviewer = roles.includes(ROLES.REVIEW_COMMITTEE);
+  const canSwitchRole = hasFaculty && hasReviewer;
+
+  async function handleSwitchRole() {
+    const nextRole = activeRole === ROLES.FACULTY ? ROLES.REVIEW_COMMITTEE : ROLES.FACULTY;
+    await setActiveRole(nextRole);
+  }
 
   const displayName = profile?.fullName ?? user.fullName;
   const displayEmail = profile?.email ?? user.email;
@@ -123,6 +134,14 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
 
         {/* Settings */}
         <View className="mx-5 mt-4 gap-3">
+          {canSwitchRole && (
+            <ListRow
+              icon="swap-horizontal-outline"
+              label={t('switchRole')}
+              value={activeRole === ROLES.FACULTY ? t('roleReviewCommittee') : t('roleFaculty')}
+              onPress={handleSwitchRole}
+            />
+          )}
           <ListRow
             icon={isDark ? 'moon' : 'sunny-outline'}
             label={isDark ? t('darkMode') : t('lightMode')}

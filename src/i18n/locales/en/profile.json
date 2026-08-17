@@ -8,6 +8,7 @@
   "off": "Off",
   "language": "Language",
   "changePassword": "Change Password",
+  "switchRole": "Switch role",
   "signOut": "Sign Out",
   "signingOut": "Signing out…",
   "roleFaculty": "Faculty",
