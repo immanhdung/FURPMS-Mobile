@@ -49,7 +49,7 @@ export function Input({
         )}
         <TextInput
           className={[
-            'bg-neutral-50 dark:bg-dark-100 rounded-xl py-3',
+            'bg-neutral-50 dark:bg-dark-100 rounded-xl py-3.5',
             iconLeft ? 'pl-11' : 'pl-4',
             rightElement ? 'pr-11' : 'pr-4',
             'text-neutral-900 dark:text-neutral-50 font-sans text-base',

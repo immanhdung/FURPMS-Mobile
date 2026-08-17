@@ -27,7 +27,13 @@ function useTabs(): TabItem[] {
       iconFocused: 'document-text',
     },
     {
-      name: 'reports',
+      name: 'projects',
+      title: t('tabs.projects'),
+      icon: 'briefcase-outline',
+      iconFocused: 'briefcase',
+    },
+    {
+      name: 'reports/index',
       title: t('tabs.reports'),
       icon: 'bar-chart-outline',
       iconFocused: 'bar-chart',

@@ -1,6 +1,7 @@
 export const SECURE_KEYS = {
   ACCESS_TOKEN: 'furpms_access_token',
   USER: 'furpms_user',
+  ACTIVE_ROLE: 'furpms_active_role',
 } as const;
 
 export const MMKV_KEYS = {

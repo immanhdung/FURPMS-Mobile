@@ -8,6 +8,8 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,15 +43,19 @@ export function LoginScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white dark:bg-dark-0">
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
+      <View className="flex-1 bg-white dark:bg-dark-0">
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 32 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 32 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
         {/* Hero */}
         <ImageBackground
           source={require('../../../../public/loginbg.jpeg')}
@@ -171,13 +177,9 @@ export function LoginScreen() {
               </TouchableOpacity>
             </View>
           )}
-
-          {/* Footer */}
-          <Text className="text-neutral-400 dark:text-dark-400 text-xs text-center font-sans">
-            {t('footer')}
-          </Text>
         </View>
       </ScrollView>
     </View>
+  </KeyboardAvoidingView>
   );
 }

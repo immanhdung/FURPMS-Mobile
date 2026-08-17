@@ -33,13 +33,13 @@ function useTabs(): TabItem[] {
       iconFocused: 'calendar',
     },
     {
-      name: 'notifications',
+      name: 'notifications/index',
       title: t('tabs.inbox'),
       icon: 'notifications-outline',
       iconFocused: 'notifications',
     },
     {
-      name: 'profile',
+      name: 'profile/index',
       title: t('tabs.profile'),
       icon: 'person-outline',
       iconFocused: 'person',
@@ -113,7 +113,7 @@ export default function ReviewLayout() {
           options={{
             title,
             tabBarIcon:
-              name === 'notifications'
+              name === 'notifications/index'
                 ? ({ color, focused, size }) => (
                   <NotificationTabIcon
                     color={color}

@@ -10,7 +10,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { isInitializing, isAuthenticated, user, initialize, clearAuth } = useAuthStore();
+  const { isInitializing, isAuthenticated, user, initialize, clearAuth, activeRole } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
   const queryClient = useQueryClient();
@@ -41,9 +41,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const roles = user?.roles ?? [];
-    const isFaculty = roles.includes(ROLES.FACULTY);
-    const isReviewer = roles.includes(ROLES.REVIEW_COMMITTEE);
-    // Faculty wins if a user holds both mobile-relevant roles (matches web's ROLE_PRIORITY order).
+    const hasFaculty = roles.includes(ROLES.FACULTY);
+    const hasReviewer = roles.includes(ROLES.REVIEW_COMMITTEE);
+
+    if (!hasFaculty && !hasReviewer) {
+      router.replace('/(auth)/unsupported-role');
+      return;
+    }
+
+    const currentRole = activeRole ?? (hasFaculty ? ROLES.FACULTY : ROLES.REVIEW_COMMITTEE);
+    const isFaculty = currentRole === ROLES.FACULTY;
+    const isReviewer = currentRole === ROLES.REVIEW_COMMITTEE;
     const homeRoute = isFaculty ? '/(faculty)' : isReviewer ? '/(review)' : '/(auth)/unsupported-role';
 
     if (inAuthGroup) {
@@ -51,18 +59,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
-    if (!isFaculty && !isReviewer) {
-      router.replace('/(auth)/unsupported-role');
-      return;
-    }
-
-    if (isFaculty && !isReviewer && inReviewGroup) {
+    if (isFaculty && inReviewGroup) {
       router.replace('/(faculty)');
     }
-    if (isReviewer && !isFaculty && inFacultyGroup) {
+    if (isReviewer && inFacultyGroup) {
       router.replace('/(review)');
     }
-  }, [isInitializing, isAuthenticated, user, segments]);
+  }, [isInitializing, isAuthenticated, user, segments, activeRole]);
 
   return <>{children}</>;
 }
