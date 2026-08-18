@@ -8,8 +8,15 @@ export const PROPOSAL_STATUS = {
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
   WITHDRAWN: 'WITHDRAWN',
+  // Post-approval lifecycle
+  IN_PROGRESS_REPORT: 'IN_PROGRESS_REPORT',   // Đang báo cáo tiến độ
+  IN_FINAL_REPORT: 'IN_FINAL_REPORT',         // Đang báo cáo tổng kết
+  IN_ACCEPTANCE: 'IN_ACCEPTANCE',             // Đang nghiệm thu
+  ACCEPTANCE_PASSED: 'ACCEPTANCE_PASSED',     // Đã nghiệm thu — đạt (hoàn thành)
+  ACCEPTANCE_FAILED: 'ACCEPTANCE_FAILED',     // Đã nghiệm thu — không đạt
 } as const;
 export type ProposalStatus = (typeof PROPOSAL_STATUS)[keyof typeof PROPOSAL_STATUS];
+
 
 export const CYCLE_STATUS = {
   PLANNING: 'PLANNING',

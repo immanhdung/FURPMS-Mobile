@@ -26,6 +26,11 @@ export default function ProposalsScreen() {
     { key: PROPOSAL_STATUS.SUBMITTED, label: t('proposalsList.filters.submitted') },
     { key: PROPOSAL_STATUS.UNDER_REVIEW, label: t('proposalsList.filters.underReview') },
     { key: PROPOSAL_STATUS.APPROVED, label: t('proposalsList.filters.approved') },
+    { key: PROPOSAL_STATUS.IN_PROGRESS_REPORT, label: t('proposalsList.filters.inProgressReport') },
+    { key: PROPOSAL_STATUS.IN_FINAL_REPORT, label: t('proposalsList.filters.inFinalReport') },
+    { key: PROPOSAL_STATUS.IN_ACCEPTANCE, label: t('proposalsList.filters.inAcceptance') },
+    { key: PROPOSAL_STATUS.ACCEPTANCE_PASSED, label: t('proposalsList.filters.acceptancePassed') },
+    { key: PROPOSAL_STATUS.ACCEPTANCE_FAILED, label: t('proposalsList.filters.acceptanceFailed') },
     { key: PROPOSAL_STATUS.REJECTED, label: t('proposalsList.filters.rejected') },
     { key: PROPOSAL_STATUS.WITHDRAWN, label: t('proposalsList.filters.withdrawn') },
   ];

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, Pressable, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,12 +23,17 @@ import { PROPOSAL_STATUS } from '@/constants/statuses';
 import type { BadgeVariant } from '@/shared/components/ui/Badge';
 
 const statusVariant: Record<string, BadgeVariant> = {
-  [PROPOSAL_STATUS.DRAFT]: 'default',
-  [PROPOSAL_STATUS.SUBMITTED]: 'info',
-  [PROPOSAL_STATUS.UNDER_REVIEW]: 'warning',
-  [PROPOSAL_STATUS.APPROVED]: 'success',
-  [PROPOSAL_STATUS.REJECTED]: 'danger',
-  [PROPOSAL_STATUS.WITHDRAWN]: 'default',
+  [PROPOSAL_STATUS.DRAFT]:              'default',
+  [PROPOSAL_STATUS.SUBMITTED]:          'info',
+  [PROPOSAL_STATUS.UNDER_REVIEW]:       'warning',
+  [PROPOSAL_STATUS.APPROVED]:           'success',
+  [PROPOSAL_STATUS.REJECTED]:           'danger',
+  [PROPOSAL_STATUS.WITHDRAWN]:          'default',
+  [PROPOSAL_STATUS.IN_PROGRESS_REPORT]: 'purple',
+  [PROPOSAL_STATUS.IN_FINAL_REPORT]:    'info',
+  [PROPOSAL_STATUS.IN_ACCEPTANCE]:      'warning',
+  [PROPOSAL_STATUS.ACCEPTANCE_PASSED]:  'success',
+  [PROPOSAL_STATUS.ACCEPTANCE_FAILED]:  'danger',
 };
 
 function SectionHeader({ title }: { title: string }) {
@@ -55,6 +60,95 @@ function TextField({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
+/** Màn hình chúc mừng khi đề tài nghiệm thu đạt */
+function CongratulatoryBanner({ title, onClose }: { title: string; onClose: () => void }) {
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      <Pressable
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'center', alignItems: 'center', padding: 24 }}
+        onPress={onClose}
+      >
+        <Pressable
+          onPress={(e) => e.stopPropagation()}
+          style={{
+            width: '100%',
+            backgroundColor: '#FFFFFF',
+            borderRadius: 32,
+            overflow: 'hidden',
+          }}
+        >
+          {/* Gradient header */}
+          <View
+            style={{
+              backgroundColor: '#7C3AED',
+              paddingVertical: 40,
+              paddingHorizontal: 24,
+              alignItems: 'center',
+              gap: 16,
+            }}
+          >
+            {/* Trophy emoji large */}
+            <Text style={{ fontSize: 64, textAlign: 'center' }}>🏆</Text>
+            <Text style={{ fontSize: 26, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', lineHeight: 34 }}>
+              Chúc mừng!
+            </Text>
+            <Text style={{ fontSize: 16, color: 'rgba(255,255,255,0.85)', textAlign: 'center', lineHeight: 24, fontWeight: '500' }}>
+              Đề tài của bạn đã hoàn thành{'\n'}toàn bộ vòng nghiệm thu
+            </Text>
+          </View>
+
+          <View style={{ padding: 24, gap: 16 }}>
+            {/* Proposal title */}
+            <View style={{ backgroundColor: '#F5F3FF', borderRadius: 16, padding: 16, alignItems: 'center' }}>
+              <Text style={{ fontSize: 11, color: '#7C3AED', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+                ĐỀ TÀI
+              </Text>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: '#1F1F2E', textAlign: 'center', lineHeight: 24 }}>
+                {title}
+              </Text>
+            </View>
+
+            {/* Stats row */}
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              {[
+                { icon: '✅', label: 'Vòng đánh giá', sub: 'Đạt' },
+                { icon: '📄', label: 'Báo cáo', sub: 'Hoàn thành' },
+                { icon: '🎯', label: 'Nghiệm thu', sub: 'Đạt' },
+              ].map((item) => (
+                <View
+                  key={item.label}
+                  style={{ flex: 1, backgroundColor: '#F9FAFB', borderRadius: 12, padding: 12, alignItems: 'center', gap: 4 }}
+                >
+                  <Text style={{ fontSize: 22 }}>{item.icon}</Text>
+                  <Text style={{ fontSize: 10, color: '#6B7280', textAlign: 'center', fontWeight: '500' }}>{item.label}</Text>
+                  <Text style={{ fontSize: 11, color: '#059669', textAlign: 'center', fontWeight: '700' }}>{item.sub}</Text>
+                </View>
+              ))}
+            </View>
+
+            <Text style={{ fontSize: 13, color: '#6B7280', textAlign: 'center', lineHeight: 20 }}>
+              Đây là thành tích đáng tự hào! Đề tài đã hoàn thành tất cả các vòng xét duyệt và nghiệm thu thành công.
+            </Text>
+
+            <TouchableOpacity
+              onPress={onClose}
+              activeOpacity={0.85}
+              style={{
+                backgroundColor: '#7C3AED',
+                borderRadius: 16,
+                paddingVertical: 16,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '700' }}>🎉  Tuyệt vời!</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 export default function ProposalDetailScreen() {
   const { t } = useTranslation(['faculty', 'common']);
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -65,6 +159,7 @@ export default function ProposalDetailScreen() {
   const { mutate: submitProposal, isPending: isSubmitting } = useSubmitProposal();
   const { mutate: withdrawProposal, isPending: isWithdrawing } = useWithdrawProposal(id);
   const [submitSheetVisible, setSubmitSheetVisible] = useState(false);
+  const [congratsVisible, setCongratsVisible] = useState(true);
 
   const onRefresh = useCallback(async () => {
     await refetch();
@@ -77,6 +172,7 @@ export default function ProposalDetailScreen() {
 
   const isDraft = proposal.status === PROPOSAL_STATUS.DRAFT;
   const canWithdraw = proposal.status === PROPOSAL_STATUS.SUBMITTED || proposal.status === PROPOSAL_STATUS.UNDER_REVIEW;
+  const isAcceptancePassed = proposal.status === PROPOSAL_STATUS.ACCEPTANCE_PASSED;
   const title = proposal.titleVI || proposal.titleEN || t('proposal.untitled');
 
   function handleWithdraw() {
@@ -126,6 +222,28 @@ export default function ProposalDetailScreen() {
             {canWithdraw && (
               <Button label={t('proposalDetail.withdraw')} variant="danger" size="md" loading={isWithdrawing} onPress={handleWithdraw} />
             )}
+          </View>
+        )}
+
+        {/* Acceptance passed banner */}
+        {isAcceptancePassed && (
+          <View className="px-5 mb-5">
+            <TouchableOpacity
+              onPress={() => setCongratsVisible(true)}
+              activeOpacity={0.85}
+              className="rounded-2xl overflow-hidden"
+            >
+              <View style={{ backgroundColor: '#7C3AED', padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Text style={{ fontSize: 32 }}>🏆</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '700' }}>Nghiệm thu đạt!</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 2 }}>
+                    Đề tài đã hoàn thành toàn bộ vòng nghiệm thu. Nhấn để xem chi tiết.
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
+              </View>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -232,6 +350,14 @@ export default function ProposalDetailScreen() {
           )
         }
       />
+
+      {/* Congratulations modal for acceptance_passed */}
+      {isAcceptancePassed && (
+        <CongratulatoryBanner
+          title={title}
+          onClose={() => setCongratsVisible(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }

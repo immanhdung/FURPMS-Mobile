@@ -36,10 +36,15 @@
       "all": "Tất cả",
       "draft": "Bản nháp",
       "submitted": "Đã nộp",
-      "underReview": "Đang phản biện",
+      "underReview": "Vòng đánh giá",
       "approved": "Đã duyệt",
-      "rejected": "Bị từ chối",
-      "withdrawn": "Đã rút"
+      "rejected": "Không đạt",
+      "withdrawn": "Đã rút",
+      "inProgressReport": "BC Tiến độ",
+      "inFinalReport": "BC Tổng kết",
+      "inAcceptance": "Nghiệm thu",
+      "acceptancePassed": "Nghiệm thu đạt",
+      "acceptanceFailed": "NT không đạt"
     }
   },
   "proposalDetail": {

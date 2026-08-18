@@ -11,12 +11,17 @@ import type { BadgeVariant } from '@/shared/components/ui/Badge';
 import type { ProposalSummary } from '../types/proposal.types';
 
 const statusVariant: Record<string, BadgeVariant> = {
-  [PROPOSAL_STATUS.DRAFT]: 'default',
-  [PROPOSAL_STATUS.SUBMITTED]: 'info',
-  [PROPOSAL_STATUS.UNDER_REVIEW]: 'warning',
-  [PROPOSAL_STATUS.APPROVED]: 'success',
-  [PROPOSAL_STATUS.REJECTED]: 'danger',
-  [PROPOSAL_STATUS.WITHDRAWN]: 'default',
+  [PROPOSAL_STATUS.DRAFT]:              'default',
+  [PROPOSAL_STATUS.SUBMITTED]:          'info',
+  [PROPOSAL_STATUS.UNDER_REVIEW]:       'warning',
+  [PROPOSAL_STATUS.APPROVED]:           'success',
+  [PROPOSAL_STATUS.REJECTED]:           'danger',
+  [PROPOSAL_STATUS.WITHDRAWN]:          'default',
+  [PROPOSAL_STATUS.IN_PROGRESS_REPORT]: 'purple',
+  [PROPOSAL_STATUS.IN_FINAL_REPORT]:    'info',
+  [PROPOSAL_STATUS.IN_ACCEPTANCE]:      'warning',
+  [PROPOSAL_STATUS.ACCEPTANCE_PASSED]:  'success',
+  [PROPOSAL_STATUS.ACCEPTANCE_FAILED]:  'danger',
 };
 
 interface ProposalCardProps {
