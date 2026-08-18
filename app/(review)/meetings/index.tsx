@@ -1,10 +1,12 @@
 import { useCallback, useMemo } from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useMeetings } from '@/features/meeting/hooks/useMeetings';
+import { useMyMemberships } from '@/features/reviewCommittee/hooks/useMemberships';
+import { isAcceptedInvitation } from '@/constants/statuses';
 import { MeetingCard } from '@/features/meeting/components/MeetingCard';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
@@ -16,21 +18,43 @@ export default function ReviewMeetingsScreen() {
   const router = useRouter();
   const { colors } = useTheme();
 
-  const { data, isLoading, isError, refetch, isFetching } = useMeetings();
+  const { data: meetings, isLoading: meetingsLoading, isError: meetingsError, refetch: refetchMeetings, isFetching: meetingsFetching } = useMeetings();
+  const { data: memberships, isLoading: membershipsLoading, refetch: refetchMemberships } = useMyMemberships();
+
+  const isLoading = meetingsLoading || membershipsLoading;
+  const isError = meetingsError;
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchMeetings();
+      refetchMemberships();
+    }, [refetchMeetings, refetchMemberships])
+  );
+
+  const acceptedCouncilIds = useMemo(() => {
+    return new Set(
+      (memberships ?? [])
+        .filter((m) => isAcceptedInvitation(m.status))
+        .map((m) => m.councilId)
+    );
+  }, [memberships]);
 
   const sorted = useMemo(() => {
-    return [...(data ?? [])].sort((a, b) => {
+    const filteredMeetings = (meetings ?? []).filter((m) => acceptedCouncilIds.has(m.councilId));
+    return [...filteredMeetings].sort((a, b) => {
       const aUpcoming = isUpcoming(a.scheduledAt);
       const bUpcoming = isUpcoming(b.scheduledAt);
       if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
       const diff = new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime();
       return aUpcoming ? diff : -diff;
     });
-  }, [data]);
+  }, [meetings, acceptedCouncilIds]);
 
   const onRefresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+    await Promise.all([refetchMeetings(), refetchMemberships()]);
+  }, [refetchMeetings, refetchMemberships]);
+
+  const isFetching = meetingsFetching;
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
@@ -46,7 +70,7 @@ export default function ReviewMeetingsScreen() {
       {isLoading ? (
         <LoadingState message={t('meetings.loading')} />
       ) : isError ? (
-        <ErrorState title={t('meetings.errorTitle')} message={t('meetings.errorMessage')} onRetry={refetch} />
+        <ErrorState title={t('meetings.errorTitle')} message={t('meetings.errorMessage')} onRetry={onRefresh} />
       ) : (
         <FlatList
           data={sorted}

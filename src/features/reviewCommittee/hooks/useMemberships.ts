@@ -8,6 +8,8 @@ export function useMyMemberships() {
   return useQuery({
     queryKey: QUERY_KEYS.memberships.mine,
     queryFn: () => membershipService.mine(),
+    staleTime: 0,
+    gcTime: 0,
   });
 }
 

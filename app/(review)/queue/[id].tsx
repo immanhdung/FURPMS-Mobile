@@ -18,7 +18,7 @@ import { MinutesPanel } from '@/features/reviewCommittee/components/MinutesPanel
 import { AcceptanceDossierPanel } from '@/features/reviewCommittee/components/AcceptanceDossierPanel';
 import { ReviewContextPanel } from '@/features/reviewCommittee/components/ReviewContextPanel';
 import { formatDateTime } from '@/utils/date';
-import { REVIEW_ROUND_TYPE, ROUND_TYPE_LABELS, type ReviewRoundType } from '@/constants/statuses';
+import { REVIEW_ROUND_TYPE, ROUND_TYPE_LABELS, isAcceptedInvitation, type ReviewRoundType } from '@/constants/statuses';
 
 type Tab = 'INFO' | 'DOCUMENTS' | 'SCORING' | 'DOSSIER' | 'ACCEPTANCE' | 'MINUTES';
 
@@ -48,7 +48,9 @@ export default function CouncilWorkspaceScreen() {
 
   if (isLoading) return <LoadingState message={t('workspace.loading')} />;
   if (isError) return <ErrorState title={t('workspace.errorTitle')} message={t('workspace.errorMessage')} onRetry={refetch} />;
-  if (!membership) return <ErrorState title={t('workspace.notFoundTitle')} message={t('workspace.notFoundMessage')} onRetry={refetch} />;
+  if (!membership || !isAcceptedInvitation(membership.status)) {
+    return <ErrorState title={t('workspace.notFoundTitle')} message={t('workspace.notFoundMessage')} onRetry={refetch} />;
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['bottom']}>

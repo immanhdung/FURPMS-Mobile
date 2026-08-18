@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
@@ -48,6 +48,12 @@ export default function ReviewQueueScreen() {
   ];
 
   const { data, isLoading, isError, refetch, isFetching } = useMyMemberships();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
   const { mutate: respond, isPending: isResponding } = useRespondToInvitation();
 
   const filtered = useMemo(() => {

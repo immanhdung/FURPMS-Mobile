@@ -6,11 +6,18 @@ export function useMeetings() {
   return useQuery({
     queryKey: QUERY_KEYS.meetings.all,
     queryFn: () => meetingService.list(),
+    staleTime: 0,
+    gcTime: 0,
   });
 }
 
 export function useMyMeetings() {
-  return useQuery({ queryKey: ['meetings', 'mine'], queryFn: () => meetingService.mine() });
+  return useQuery({
+    queryKey: ['meetings', 'mine'],
+    queryFn: () => meetingService.mine(),
+    staleTime: 0,
+    gcTime: 0,
+  });
 }
 
 /** No GET /meetings/{id} exists on the real backend — select out of the already-fetched list. */
