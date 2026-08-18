@@ -22,6 +22,7 @@ export interface ScoreDetailPayload {
 
 export interface SubmitScorePayload {
   templateId: string;
+  projectId?: string | null;
   generalComments?: string;
   otherRecommendations?: string;
   scoreDetails: ScoreDetailPayload[];

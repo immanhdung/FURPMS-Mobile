@@ -120,7 +120,12 @@ export default function CouncilWorkspaceScreen() {
           <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
             {activeTab === 'INFO' && <ReviewContextPanel proposalId={membership.proposalId} />}
             {activeTab === 'SCORING' && (
-              <RubricScoringForm councilId={councilId} roundType={membership.roundType} roundStatus={membership.roundStatus} />
+              <RubricScoringForm
+                councilId={councilId}
+                projectId={membership.projectId}
+                roundType={membership.roundType}
+                roundStatus={membership.roundStatus}
+              />
             )}
             {activeTab === 'DOSSIER' && <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />}
             {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} roundStatus={membership.roundStatus} />}

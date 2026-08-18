@@ -13,11 +13,12 @@ import { ROUND_STATUS } from '@/constants/statuses';
 
 interface RubricScoringFormProps {
   councilId: string;
+  projectId?: string | null;
   roundType?: string | null;
   roundStatus?: string | null;
 }
 
-export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricScoringFormProps) {
+export function RubricScoringForm({ councilId, projectId, roundType, roundStatus }: RubricScoringFormProps) {
   const { t } = useTranslation('reviewer');
   const { colors } = useTheme();
   const { data: templates, isLoading: templatesLoading } = useRubrics();
@@ -127,6 +128,7 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
     submitScore(
       {
         templateId: template.id,
+        projectId: projectId || undefined,
         generalComments: generalComments || undefined,
         otherRecommendations: otherRecommendations || undefined,
         scoreDetails: criteria.map((c) => ({
@@ -137,7 +139,7 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
       },
       {
         onSuccess: () => Alert.alert(t('scoringForm.savedTitle'), t('scoringForm.savedMessage')),
-        onError: () => Alert.alert(t('scoringForm.errorTitle'), t('scoringForm.errorMessage')),
+        onError: (err: any) => Alert.alert(t('scoringForm.errorTitle'), err.message || t('scoringForm.errorMessage')),
       },
     );
   }
