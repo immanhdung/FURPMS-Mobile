@@ -14,6 +14,16 @@ module.exports = {
         semibold: ['Inter_600SemiBold'],
         bold: ['Inter_700Bold'],
       },
+      fontSize: {
+        xs: ['14px', { lineHeight: '20px' }],
+        sm: ['16px', { lineHeight: '22px' }],
+        base: ['18px', { lineHeight: '26px' }],
+        lg: ['20px', { lineHeight: '28px' }],
+        xl: ['22px', { lineHeight: '30px' }],
+        '2xl': ['26px', { lineHeight: '34px' }],
+        '3xl': ['32px', { lineHeight: '40px' }],
+        '4xl': ['38px', { lineHeight: '48px' }],
+      },
       colors: {
         // Neutral scale
         neutral: {
