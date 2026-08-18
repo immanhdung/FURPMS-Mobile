@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -16,9 +16,11 @@ import {
   useMarkAllAsRead,
 } from '@/features/notification/hooks/useNotifications';
 import { NotificationItem } from '@/features/notification/components/NotificationItem';
+import { NotificationDetailModal } from '@/features/notification/components/NotificationDetailModal';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
 import { ErrorState } from '@/shared/components/feedback/ErrorState';
+import type { AppNotification } from '@/features/notification/types/notification.types';
 
 export default function NotificationsScreen() {
   const { t } = useTranslation('notification');
@@ -28,6 +30,8 @@ export default function NotificationsScreen() {
   const { mutate: markAsRead } = useMarkAsRead();
   const { mutate: markAllAsRead, isPending: isMarkingAll } = useMarkAllAsRead();
 
+  const [selectedNotification, setSelectedNotification] = useState<AppNotification | null>(null);
+
   const unreadCount = unreadData ?? 0;
 
   const onRefresh = useCallback(async () => {
@@ -35,8 +39,9 @@ export default function NotificationsScreen() {
   }, [refetch]);
 
   const handlePress = useCallback(
-    (id: string, isRead: boolean) => {
-      if (!isRead) markAsRead(id);
+    (notification: AppNotification) => {
+      if (!notification.read) markAsRead(notification.id);
+      setSelectedNotification(notification);
     },
     [markAsRead],
   );
@@ -53,19 +58,18 @@ export default function NotificationsScreen() {
             {unreadCount > 0 ? t('unreadCount', { count: unreadCount }) : t('allCaughtUp')}
           </Text>
         </View>
-        {unreadCount > 0 && (
-          <TouchableOpacity
-            onPress={() => markAllAsRead()}
-            activeOpacity={0.7}
-            disabled={isMarkingAll}
-            className="px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-dark-200"
-            style={{ opacity: isMarkingAll ? 0.5 : 1 }}
-          >
-            <Text className="text-neutral-600 dark:text-dark-500 text-xs font-medium">
-              {t('markAllRead')}
-            </Text>
-          </TouchableOpacity>
-        )}
+        {/* Luôn hiện nút "Đọc tất cả", disable khi không có thông báo chưa đọc */}
+        <TouchableOpacity
+          onPress={() => markAllAsRead()}
+          activeOpacity={0.7}
+          disabled={isMarkingAll || unreadCount === 0}
+          className="px-3 py-1.5 rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20"
+          style={{ opacity: (isMarkingAll || unreadCount === 0) ? 0.4 : 1 }}
+        >
+          <Text className="text-violet-600 dark:text-violet-400 text-xs font-semibold">
+            Đọc tất cả
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {isLoading ? (
@@ -83,7 +87,7 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <NotificationItem
               notification={item}
-              onPress={() => handlePress(item.id, item.read)}
+              onPress={() => handlePress(item)}
             />
           )}
           contentContainerStyle={{ flexGrow: 1, paddingBottom: 90 }}
@@ -108,6 +112,11 @@ export default function NotificationsScreen() {
           }
         />
       )}
+
+      <NotificationDetailModal
+        notification={selectedNotification}
+        onClose={() => setSelectedNotification(null)}
+      />
     </SafeAreaView>
   );
 }
