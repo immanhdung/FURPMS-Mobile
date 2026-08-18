@@ -5,6 +5,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { formatDateTime, formatDuration, isUpcoming } from '@/utils/date';
 import { Badge } from '@/shared/components/ui/Badge';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
+import { PLATFORM_LABELS, MEETING_STATUS_LABELS, localizeLabel } from '@/constants/statuses';
 import type { Meeting } from '../types/meeting.types';
 
 interface MeetingCardProps {
@@ -36,7 +37,7 @@ export function MeetingCard({ meeting, proposalTitle, onPress }: MeetingCardProp
             )}
           </View>
           {meeting.status ? (
-            <Badge label={meeting.status} variant={upcoming ? 'info' : 'default'} size="sm" />
+            <Badge label={localizeLabel(MEETING_STATUS_LABELS, meeting.status)} variant={upcoming ? 'info' : 'default'} size="sm" />
           ) : null}
         </View>
 
@@ -60,7 +61,7 @@ export function MeetingCard({ meeting, proposalTitle, onPress }: MeetingCardProp
             {meeting.platform && (
               <View className="flex-row items-center gap-1">
                 <Ionicons name="videocam-outline" size={12} color={colors.icon.muted} />
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{meeting.platform}</Text>
+                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{localizeLabel(PLATFORM_LABELS, meeting.platform)}</Text>
               </View>
             )}
           </View>

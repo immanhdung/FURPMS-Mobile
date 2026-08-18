@@ -4,21 +4,22 @@ const DAY = 24 * HOUR;
 
 export function formatDate(iso: string): string {
   const date = new Date(iso);
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleDateString('vi-VN', {
     day: '2-digit',
-    month: 'short',
+    month: '2-digit',
     year: 'numeric',
   });
 }
 
 export function formatDateTime(iso: string): string {
   const date = new Date(iso);
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleString('vi-VN', {
     day: '2-digit',
-    month: 'short',
+    month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   });
 }
 
@@ -27,19 +28,19 @@ export function formatRelative(iso: string): string {
   const then = new Date(iso).getTime();
   const diff = now - then;
 
-  if (diff < MINUTE) return 'Just now';
-  if (diff < HOUR) return `${Math.floor(diff / MINUTE)}m ago`;
-  if (diff < DAY) return `${Math.floor(diff / HOUR)}h ago`;
-  if (diff < 7 * DAY) return `${Math.floor(diff / DAY)}d ago`;
+  if (diff < MINUTE) return 'Vừa xong';
+  if (diff < HOUR) return `${Math.floor(diff / MINUTE)} phút trước`;
+  if (diff < DAY) return `${Math.floor(diff / HOUR)} giờ trước`;
+  if (diff < 7 * DAY) return `${Math.floor(diff / DAY)} ngày trước`;
 
   return formatDate(iso);
 }
 
 export function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60) return `${minutes} phút`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  return m > 0 ? `${h} giờ ${m} phút` : `${h} giờ`;
 }
 
 export function isUpcoming(iso: string): boolean {

@@ -4,7 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/components/ui/Badge';
 import type { BadgeVariant } from '@/shared/components/ui/Badge';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
-import { ROUND_TYPE_LABELS, ROUND_STATUS, type ReviewRoundType } from '@/constants/statuses';
+import {
+  ROUND_TYPE_LABELS,
+  ROUND_STATUS,
+  ROUND_STATUS_LABELS,
+  MEMBER_ROLE_LABELS,
+  PLATFORM_LABELS,
+  localizeLabel,
+  type ReviewRoundType,
+} from '@/constants/statuses';
 import type { MyMembership } from '../types/membership.types';
 import { useMeetings } from '@/features/meeting/hooks/useMeetings';
 import { useTheme } from '@/hooks/useTheme';
@@ -15,6 +23,8 @@ const roundStatusVariant: Record<string, BadgeVariant> = {
   [ROUND_STATUS.PENDING]: 'default',
   [ROUND_STATUS.OPEN]: 'success',
   [ROUND_STATUS.CLOSED]: 'default',
+  PASSED: 'success',
+  FAILED: 'danger',
 };
 
 interface MembershipCardProps {
@@ -40,11 +50,21 @@ export function MembershipCard({ membership, onPress, actions }: MembershipCardP
 
       <View className="flex-row items-center gap-2 flex-wrap">
         {membership.roundType && (
-          <Badge label={ROUND_TYPE_LABELS[membership.roundType as ReviewRoundType] ?? membership.roundType} variant="purple" size="sm" />
+          <Badge
+            label={ROUND_TYPE_LABELS[membership.roundType as ReviewRoundType] ?? membership.roundType}
+            variant="purple"
+            size="sm"
+          />
         )}
-        {membership.memberRole && <Badge label={membership.memberRole} variant="info" size="sm" />}
+        {membership.memberRole && (
+          <Badge label={localizeLabel(MEMBER_ROLE_LABELS, membership.memberRole)} variant="info" size="sm" />
+        )}
         {membership.roundStatus && (
-          <Badge label={membership.roundStatus} variant={roundStatusVariant[membership.roundStatus] ?? 'default'} size="sm" />
+          <Badge
+            label={localizeLabel(ROUND_STATUS_LABELS, membership.roundStatus)}
+            variant={roundStatusVariant[membership.roundStatus] ?? 'default'}
+            size="sm"
+          />
         )}
         {membership.proposalStatus && <Badge label={membership.proposalStatus} variant="default" size="sm" />}
       </View>
@@ -62,7 +82,7 @@ export function MembershipCard({ membership, onPress, actions }: MembershipCardP
               <Ionicons name="location-outline" size={14} color={colors.accent.success} />
               <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">Hình thức:</Text>
               <Text className="text-neutral-800 dark:text-neutral-200 text-xs font-medium">
-                {meeting.platform || (meeting.meetingLink ? 'Trực tuyến' : 'Chưa xác định')}
+                {localizeLabel(PLATFORM_LABELS, meeting.platform) || (meeting.meetingLink ? 'Trực tuyến' : 'Chưa xác định')}
               </Text>
             </View>
           </View>

@@ -14,7 +14,7 @@ import { useAllScores, useBallotTally } from '@/features/reviewCommittee/hooks/u
 import { useFeedback } from '@/features/reviewCommittee/hooks/useFeedback';
 import { useCouncilMembers } from '@/features/reviewCommittee/hooks/useCouncilMembers';
 import { useCouncilMeetings, useMeetingAttendance, useSaveAttendance } from '@/features/meeting/hooks/useMeetings';
-import { isChairmanRole, isSecretaryRole } from '@/constants/statuses';
+import { isChairmanRole, isSecretaryRole, MEMBER_ROLE_LABELS, localizeLabel } from '@/constants/statuses';
 import { useTheme } from '@/hooks/useTheme';
 import type { MemberOpinion, QaEntry } from '../types/decision.types';
 
@@ -168,7 +168,7 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
                 <View key={member.memberId} className="flex-row items-center justify-between py-2 border-b border-neutral-100 dark:border-dark-200">
                   <View className="flex-1 pr-2">
                     <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{member.memberName}</Text>
-                    <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{member.memberRole}</Text>
+                    <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{localizeLabel(MEMBER_ROLE_LABELS, member.memberRole)}</Text>
                   </View>
                   {secretary && !locked ? (
                     <TouchableOpacity

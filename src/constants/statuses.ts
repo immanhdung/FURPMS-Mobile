@@ -51,9 +51,43 @@ export const REVIEW_ROUND_TYPE = {
 export type ReviewRoundType = (typeof REVIEW_ROUND_TYPE)[keyof typeof REVIEW_ROUND_TYPE];
 
 export const ROUND_TYPE_LABELS: Record<ReviewRoundType, string> = {
-  [REVIEW_ROUND_TYPE.REVIEW]: 'Review',
-  [REVIEW_ROUND_TYPE.ACCEPTANCE]: 'Final',
+  [REVIEW_ROUND_TYPE.REVIEW]: 'Phản biện',
+  [REVIEW_ROUND_TYPE.ACCEPTANCE]: 'Nghiệm thu',
 };
+
+/** Vietnamese display labels for round status values returned by the backend. */
+export const ROUND_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Chưa mở',
+  OPEN: 'Đang mở',
+  CLOSED: 'Đã đóng',
+  PASSED: 'Đạt',
+  FAILED: 'Không đạt',
+};
+
+/** Vietnamese display labels for council member roles. */
+export const MEMBER_ROLE_LABELS: Record<string, string> = {
+  Chairman: 'Chủ tịch',
+  CHAIRMAN: 'Chủ tịch',
+  Secretary: 'Thư ký',
+  SECRETARY: 'Thư ký',
+  Member: 'Thành viên',
+  MEMBER: 'Thành viên',
+  Reviewer: 'Phản biện',
+  REVIEWER: 'Phản biện',
+};
+
+/** Vietnamese display labels for meeting platforms. */
+export const PLATFORM_LABELS: Record<string, string> = {
+  IN_PERSON: 'Trực tiếp',
+  ONLINE: 'Trực tuyến',
+  HYBRID: 'Kết hợp',
+};
+
+/** Helper to get a localised label for any value, falling back to the raw value. */
+export function localizeLabel(map: Record<string, string>, value?: string | null): string {
+  if (!value) return '';
+  return map[value] ?? map[value.toUpperCase()] ?? value;
+}
 
 /** PENDING before staff opens the round, OPEN once opened, CLOSED after closing. Scoring/acceptance forms are locked unless OPEN. */
 export const ROUND_STATUS = {
@@ -88,6 +122,13 @@ export function isSecretaryRole(role?: string | null): boolean {
   return role?.trim().toLowerCase() === 'secretary';
 }
 
+/** Only the 'Reviewer'/'Phản biện' role may submit rubric scores AND written comments in acceptance rounds.
+ *  Chairs, secretaries and plain members can only cast a PASS/FAIL ballot. */
+export function isReviewerRole(role?: string | null): boolean {
+  const r = role?.trim().toLowerCase();
+  return r === 'reviewer' || r === 'phản biện';
+}
+
 export const FINAL_REPORT_STATUS = {
   DRAFT: 'DRAFT',
   SUBMITTED: 'SUBMITTED',
@@ -99,3 +140,11 @@ export type FinalReportStatus = (typeof FINAL_REPORT_STATUS)[keyof typeof FINAL_
 
 export const ACCEPTANCE_RESULTS = ['PASS', 'FAIL'] as const;
 export type AcceptanceResult = (typeof ACCEPTANCE_RESULTS)[number];
+
+/** Vietnamese display labels for meeting status values. */
+export const MEETING_STATUS_LABELS: Record<string, string> = {
+  SCHEDULED: 'Đã lên lịch',
+  IN_PROGRESS: 'Đang diễn ra',
+  COMPLETED: 'Đã kết thúc',
+  CANCELLED: 'Đã hủy',
+};

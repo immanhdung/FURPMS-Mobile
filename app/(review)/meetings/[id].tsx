@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { useMeeting } from '@/features/meeting/hooks/useMeetings';
 import { useMyMemberships } from '@/features/reviewCommittee/hooks/useMemberships';
-import { isAcceptedInvitation } from '@/constants/statuses';
+import { isAcceptedInvitation, PLATFORM_LABELS, MEETING_STATUS_LABELS, localizeLabel } from '@/constants/statuses';
 import { Badge } from '@/shared/components/ui/Badge';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
@@ -71,7 +71,7 @@ export default function ReviewMeetingDetailScreen() {
         {/* Hero */}
         <View className="mb-5 gap-3">
           <View className="flex-row items-center gap-2 flex-wrap">
-            {meeting.status && <Badge label={meeting.status} variant={upcoming ? 'info' : 'default'} size="md" />}
+            {meeting.status && <Badge label={localizeLabel(MEETING_STATUS_LABELS, meeting.status)} variant={upcoming ? 'info' : 'default'} size="md" />}
           </View>
           <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">
             {meeting.title || t('meetings.detail.councilMeeting')}
@@ -135,7 +135,7 @@ export default function ReviewMeetingDetailScreen() {
                         </View>
                         <View className="flex-1">
                           <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-                            {meeting.platform || t('meetings.detail.videoLink')}
+                            {localizeLabel(PLATFORM_LABELS, meeting.platform) || t('meetings.detail.videoLink')}
                           </Text>
                           <Text className="text-violet-600 dark:text-violet-400 text-sm font-medium">
                             {t('meetings.detail.joinOnline')}

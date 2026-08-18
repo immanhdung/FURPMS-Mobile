@@ -18,7 +18,7 @@ import { MinutesPanel } from '@/features/reviewCommittee/components/MinutesPanel
 import { AcceptanceDossierPanel } from '@/features/reviewCommittee/components/AcceptanceDossierPanel';
 import { ReviewContextPanel } from '@/features/reviewCommittee/components/ReviewContextPanel';
 import { formatDateTime } from '@/utils/date';
-import { REVIEW_ROUND_TYPE, ROUND_TYPE_LABELS, isAcceptedInvitation, type ReviewRoundType } from '@/constants/statuses';
+import { REVIEW_ROUND_TYPE, ROUND_TYPE_LABELS, MEMBER_ROLE_LABELS, ROUND_STATUS_LABELS, localizeLabel, isAcceptedInvitation, isReviewerRole, type ReviewRoundType } from '@/constants/statuses';
 
 type Tab = 'INFO' | 'DOCUMENTS' | 'SCORING' | 'DOSSIER' | 'ACCEPTANCE' | 'MINUTES';
 
@@ -33,11 +33,13 @@ export default function CouncilWorkspaceScreen() {
   const membership = useMemo(() => memberships?.find((m) => m.councilId === councilId), [memberships, councilId]);
 
   const isAcceptanceRound = membership?.roundType === REVIEW_ROUND_TYPE.ACCEPTANCE;
+  // Trong vòng nghiệm thu: chỉ "Phản biện" mới có tab Chấm điểm
+  const canScore = !isAcceptanceRound || isReviewerRole(membership?.memberRole);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'INFO', label: 'Đề cương' },
     { key: 'DOCUMENTS', label: t('workspace.tabs.documents') },
-    { key: 'SCORING' as Tab, label: t('workspace.tabs.scoring') },
+    ...(canScore ? [{ key: 'SCORING' as Tab, label: t('workspace.tabs.scoring') }] : []),
     ...(isAcceptanceRound ? [{ key: 'DOSSIER' as Tab, label: 'Hồ sơ' }] : []),
     ...(isAcceptanceRound ? [{ key: 'ACCEPTANCE' as Tab, label: t('workspace.tabs.acceptance') }] : []),
     { key: 'MINUTES', label: t('workspace.tabs.minutes') },
@@ -63,8 +65,8 @@ export default function CouncilWorkspaceScreen() {
           {membership.roundType && (
             <Badge label={ROUND_TYPE_LABELS[membership.roundType as ReviewRoundType] ?? membership.roundType} variant="purple" size="sm" />
           )}
-          {membership.memberRole && <Badge label={membership.memberRole} variant="info" size="sm" />}
-          {membership.roundStatus && <Badge label={membership.roundStatus} variant="default" size="sm" />}
+          {membership.memberRole && <Badge label={localizeLabel(MEMBER_ROLE_LABELS, membership.memberRole)} variant="info" size="sm" />}
+          {membership.roundStatus && <Badge label={localizeLabel(ROUND_STATUS_LABELS, membership.roundStatus)} variant="default" size="sm" />}
           {membership.proposalStatus && <Badge label={membership.proposalStatus} variant="default" size="sm" />}
         </View>
       </View>
@@ -128,7 +130,7 @@ export default function CouncilWorkspaceScreen() {
               />
             )}
             {activeTab === 'DOSSIER' && <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />}
-            {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} roundStatus={membership.roundStatus} />}
+            {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} roundStatus={membership.roundStatus} memberRole={membership.memberRole} />}
             {activeTab === 'MINUTES' && (
               <MinutesPanel councilId={councilId} projectId={membership.projectId} memberRole={membership.memberRole} />
             )}
