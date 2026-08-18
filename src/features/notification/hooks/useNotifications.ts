@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationService } from '../services/notification.service';
 import { useNotificationStore } from '@/stores/notification.store';
 import { QUERY_KEYS } from '@/constants/queryKeys';
+import type { AppNotification } from '../types/notification.types';
 
 export function useNotifications() {
   return useQuery({
@@ -28,7 +29,11 @@ export function useMarkAsRead() {
   const { decrementUnread } = useNotificationStore();
   return useMutation({
     mutationFn: (id: string) => notificationService.markAsRead(id),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      queryClient.setQueryData<AppNotification[]>(QUERY_KEYS.notifications.feed, (old) => {
+        if (!old) return [];
+        return old.map((n) => (n.id === id ? { ...n, read: true } : n));
+      });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.feed });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.count });
       decrementUnread();
@@ -42,6 +47,10 @@ export function useMarkAllAsRead() {
   return useMutation({
     mutationFn: () => notificationService.markAllAsRead(),
     onSuccess: () => {
+      queryClient.setQueryData<AppNotification[]>(QUERY_KEYS.notifications.feed, (old) => {
+        if (!old) return [];
+        return old.map((n) => ({ ...n, read: true }));
+      });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.feed });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications.count });
       setUnreadCount(0);
