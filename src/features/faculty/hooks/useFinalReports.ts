@@ -11,6 +11,8 @@ export function useFinalReport(contractId?: string) {
     queryKey: queryKey(contractId ?? ''),
     queryFn: () => finalReportService.getByContract(contractId!),
     enabled: !!contractId,
+    staleTime: 0,
+    gcTime: 0,
   });
 }
 

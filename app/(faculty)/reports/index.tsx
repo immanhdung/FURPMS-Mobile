@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { videoMeetingService } from '@/services/video-meeting.service';
@@ -43,29 +44,30 @@ function useDocumentUpload(contractId: string, documentType: FinalReportDocument
     setError(null);
     try {
       const file = await uploadService.pickFile(REPORT_FILE_TYPES);
-      if (file) setPickedFile(file);
+      if (file) {
+        setPickedFile(file);
+        setIsUploading(true);
+        try {
+          const result = await finalReportService.uploadDocument(contractId, file, documentType, (p) =>
+            setProgress(p),
+          );
+          setUploadedFile(result);
+          setPickedFile(null);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Upload failed');
+        } finally {
+          setIsUploading(false);
+          setProgress(null);
+        }
+      }
     } finally {
       setIsPickingFile(false);
     }
-  }, []);
+  }, [contractId, documentType]);
 
   const upload = useCallback(async () => {
-    if (!pickedFile) return;
-    setIsUploading(true);
-    setError(null);
-    try {
-      const result = await finalReportService.uploadDocument(contractId, pickedFile, documentType, (p) =>
-        setProgress(p),
-      );
-      setUploadedFile(result);
-      setPickedFile(null);
-      setProgress(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
-    } finally {
-      setIsUploading(false);
-    }
-  }, [pickedFile, contractId, documentType]);
+    // Left as fallback
+  }, []);
 
   const remove = useCallback(() => {
     setPickedFile(null);
@@ -226,11 +228,21 @@ function FinalReportTab({ contractId }: { contractId: string }) {
           <Button
             label={report ? t('reports.resubmit') : t('reports.submitFinalReport')}
             onPress={() =>
-              submitReport({
-                reportFileUrl: reportUpload.uploadedFile!.url,
-                summaryFileUrl: summaryUpload.uploadedFile?.url,
-                language,
-              })
+              submitReport(
+                {
+                  reportFileUrl: reportUpload.uploadedFile!.url,
+                  summaryFileUrl: summaryUpload.uploadedFile?.url,
+                  language,
+                },
+                {
+                  onSuccess: () => {
+                    Alert.alert(t('common:states.successTitle', 'Thành công'), t('reports.submitSuccess', 'Nộp báo cáo cuối cùng thành công.'));
+                  },
+                  onError: (err: any) => {
+                    Alert.alert(t('common:states.errorTitle', 'Thất bại'), err.message || t('reports.submitError', 'Không thể nộp báo cáo cuối cùng.'));
+                  },
+                }
+              )
             }
             loading={isPending}
             disabled={!reportUpload.uploadedFile}
@@ -246,11 +258,17 @@ function FinalReportTab({ contractId }: { contractId: string }) {
 
 export default function ReportsScreen() {
   const { t } = useTranslation('faculty');
-  const { data: contracts, isLoading: contractsLoading } = useMyContracts();
+  const { data: contracts, isLoading: contractsLoading, refetch } = useMyContracts();
   const [contractId, setContractId] = useState<string | undefined>();
   const [tab, setTab] = useState<Tab>('PROGRESS');
 
   const activeContractId = contractId ?? contracts?.[0]?.id;
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">

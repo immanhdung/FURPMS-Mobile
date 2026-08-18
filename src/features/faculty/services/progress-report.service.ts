@@ -1,5 +1,7 @@
 import { httpClient } from '@/services/http.client';
+import { uploadService, type PickedFile, type UploadProgressCallback } from '@/services/upload.service';
 import type { ApiResponse } from '@/types/common';
+import type { ProposalDocument } from '@/features/faculty/types/proposal-document.types';
 import type { UpdateProgressReportPayload, ProgressReport } from '../types/progress-report.types';
 
 export const progressReportService = {
@@ -22,6 +24,25 @@ export const progressReportService = {
 
   async submit(id: string): Promise<ProgressReport> {
     const { data } = await httpClient.post<ApiResponse<ProgressReport>>(`/progress-reports/${id}/submit`);
+    return data.data;
+  },
+
+  async uploadDocument(
+    reportId: string,
+    file: PickedFile,
+    onProgress?: UploadProgressCallback,
+  ): Promise<ProposalDocument> {
+    return uploadService.uploadFile<ProposalDocument>(
+      file,
+      `/progress-reports/${reportId}/documents`,
+      'file',
+      {},
+      onProgress,
+    );
+  },
+
+  async getDocuments(reportId: string): Promise<ProposalDocument[]> {
+    const { data } = await httpClient.get<ApiResponse<ProposalDocument[]>>(`/progress-reports/${reportId}/documents`);
     return data.data;
   },
 };
