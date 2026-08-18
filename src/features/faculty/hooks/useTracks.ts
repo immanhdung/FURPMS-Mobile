@@ -6,5 +6,7 @@ export function useTracksByCycle(cycleId?: number) {
     queryKey: ['tracks', 'by-cycle', cycleId],
     queryFn: () => trackService.listByCycle(cycleId!),
     enabled: !!cycleId,
+    staleTime: 0,
+    gcTime: 0,
   });
 }

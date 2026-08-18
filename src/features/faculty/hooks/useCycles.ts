@@ -6,6 +6,8 @@ export function useOpenCycles() {
   const query = useQuery({
     queryKey: ['cycles', 'all'],
     queryFn: () => cycleService.list(),
+    staleTime: 0,
+    gcTime: 0,
   });
   return { ...query, data: query.data?.filter((c) => isOpenCycle(c.status)) };
 }

@@ -73,7 +73,7 @@ export function PickerField<T>({
           <GlassSurface
             intensity={65}
             rounded={0}
-            style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0, maxHeight: '70%' }}
+            style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0, maxHeight: '70%', minHeight: 350 }}
             onStartShouldSetResponder={() => true}
           >
             <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
@@ -104,17 +104,17 @@ export function PickerField<T>({
                   >
                     <View className="flex-1 pr-3">
                       <Text
-                        className={`text-sm font-sans ${
+                        className={`text-base font-sans ${
                           isSelected ? 'text-violet-600 dark:text-violet-400 font-semibold' : 'text-neutral-900 dark:text-neutral-50'
                         }`}
                       >
                         {item.label}
                       </Text>
                       {item.description && (
-                        <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-0.5">{item.description}</Text>
+                        <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans mt-0.5">{item.description}</Text>
                       )}
                     </View>
-                    {isSelected && <Ionicons name="checkmark" size={18} color={colors.accent.primary} />}
+                    {isSelected && <Ionicons name="checkmark" size={20} color={colors.accent.primary} />}
                   </TouchableOpacity>
                 );
               }}
