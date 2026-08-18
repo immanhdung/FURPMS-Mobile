@@ -128,7 +128,7 @@ export function SubmitProgressReportSheet({ contractId, report, onClose }: Submi
             intensity={65}
             rounded={0}
             style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0, maxHeight: '85%' }}
-            className="px-5 pt-5 pb-24 gap-4"
+            className="px-5 pt-5 pb-8 gap-4"
           >
             <View className="flex-row items-center justify-between">
               <View className="gap-0.5">
@@ -146,7 +146,7 @@ export function SubmitProgressReportSheet({ contractId, report, onClose }: Submi
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <View className="gap-4">
+              <View className="gap-4 pb-20">
                 <Input label={t('createProgressReportSheet.completedContent')} value={completedContent} onChangeText={setCompletedContent} multiline numberOfLines={3} />
                 <Input label={t('createProgressReportSheet.pendingContent')} value={pendingContent} onChangeText={setPendingContent} multiline numberOfLines={3} />
                 <Input
@@ -217,9 +217,12 @@ export function SubmitProgressReportSheet({ contractId, report, onClose }: Submi
                   value={reportFileUrl}
                   onChangeText={setReportFileUrl}
                 />
+
+                <View className="mt-2">
+                  <Button label={t('createProgressReportSheet.submitReport')} onPress={handleSubmit} loading={isPending} fullWidth />
+                </View>
               </View>
             </ScrollView>
-            <Button label={t('createProgressReportSheet.submitReport')} onPress={handleSubmit} loading={isPending} fullWidth />
           </GlassSurface>
         </View>
       </KeyboardAvoidingView>

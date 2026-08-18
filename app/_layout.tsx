@@ -30,7 +30,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().catch(() => {
+        // Non-fatal: Ignore splash screen hiding errors.
+      });
     }
   }, [fontsLoaded, fontError]);
 

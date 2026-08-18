@@ -38,6 +38,11 @@ export function isAcceptedInvitation(status?: string | null): boolean {
   return normalized === INVITATION_STATUS.ACCEPTED || normalized === 'CONFIRMED';
 }
 
+/** Case-insensitive check for pending invitations — handles "Invited", "INVITED", "invited", etc. */
+export function isPendingInvitation(status?: string | null): boolean {
+  return status?.trim().toUpperCase() === INVITATION_STATUS.PENDING;
+}
+
 /** Only Review and Acceptance (final) rounds are used — Screening was removed project-wide. */
 export const REVIEW_ROUND_TYPE = {
   REVIEW: 'REVIEW',

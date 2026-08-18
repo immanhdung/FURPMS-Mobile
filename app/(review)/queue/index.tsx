@@ -153,8 +153,8 @@ export default function ReviewQueueScreen() {
                 activeFilter === 'INVITATIONS'
                   ? t('queue.emptyInvitations')
                   : activeFilter === 'SCORING'
-                  ? t('queue.emptyScoring')
-                  : t('queue.emptyDefault')
+                    ? t('queue.emptyScoring')
+                    : t('queue.emptyDefault')
               }
             />
           }
