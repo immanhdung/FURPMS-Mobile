@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useMyProposals } from '@/features/faculty/hooks/useProposals';
+import { useMyContracts } from '@/features/faculty/hooks/useContracts';
+import { resolveProposalStatus } from '@/utils/status';
 import { ProposalCard } from '@/features/faculty/components/ProposalCard';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
@@ -45,16 +47,24 @@ export default function ProposalsScreen() {
   }, [search]);
 
   const { data, isLoading, isError, refetch, isFetching } = useMyProposals();
+  const { data: contracts } = useMyContracts();
+
+  const resolvedProposals = useMemo(() => {
+    return (data ?? []).map((p) => ({
+      ...p,
+      status: resolveProposalStatus(p.status, contracts, p.id) ?? p.status,
+    }));
+  }, [data, contracts]);
 
   const filtered = useMemo(() => {
     const query = debouncedSearch.trim().toLowerCase();
-    return (data ?? []).filter((p) => {
+    return resolvedProposals.filter((p) => {
       if (activeFilter !== 'ALL' && p.status !== activeFilter) return false;
       if (!query) return true;
       const haystack = `${p.titleVI ?? ''} ${p.titleEN ?? ''}`.toLowerCase();
       return haystack.includes(query);
     });
-  }, [data, activeFilter, debouncedSearch]);
+  }, [resolvedProposals, activeFilter, debouncedSearch]);
 
   const onRefresh = useCallback(async () => {
     await refetch();

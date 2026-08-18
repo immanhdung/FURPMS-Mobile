@@ -5,8 +5,10 @@ import { Badge } from '@/shared/components/ui/Badge';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { useTheme } from '@/hooks/useTheme';
 import { formatRelative } from '@/utils/date';
-import { getStatusLabel } from '@/utils/status';
+import { getStatusLabel, resolveProposalStatus } from '@/utils/status';
 import { PROPOSAL_STATUS } from '@/constants/statuses';
+import { useMyContracts } from '@/features/faculty/hooks/useContracts';
+import { useFinalReport } from '@/features/faculty/hooks/useFinalReports';
 import type { BadgeVariant } from '@/shared/components/ui/Badge';
 import type { ProposalSummary } from '../types/proposal.types';
 
@@ -32,6 +34,10 @@ interface ProposalCardProps {
 export function ProposalCard({ proposal, onPress }: ProposalCardProps) {
   const { t } = useTranslation('faculty');
   const { colors } = useTheme();
+  const { data: contracts } = useMyContracts();
+  const contract = contracts?.find((c) => c.proposalId != null && String(c.proposalId) === String(proposal.id));
+  const { data: finalReport } = useFinalReport(contract?.id);
+  const resolvedStatus = resolveProposalStatus(proposal.status, contracts, proposal.id, finalReport?.status) ?? proposal.status ?? '';
   const title = proposal.titleVI || proposal.titleEN || t('proposal.untitled');
 
   return (
@@ -48,7 +54,7 @@ export function ProposalCard({ proposal, onPress }: ProposalCardProps) {
               </Text>
             )}
           </View>
-          <Badge label={getStatusLabel(proposal.status)} variant={statusVariant[proposal.status ?? ''] ?? 'default'} size="sm" />
+          <Badge label={getStatusLabel(resolvedStatus)} variant={statusVariant[resolvedStatus] ?? 'default'} size="sm" />
         </View>
 
         <View className="h-px bg-neutral-100 dark:bg-dark-200" />

@@ -18,8 +18,10 @@ import { ProposalDocumentsCard } from '@/features/faculty/components/ProposalDoc
 import { ExpectedProductsCard } from '@/features/faculty/components/ExpectedProductsCard';
 import { SubmitProposalSheet } from '@/features/faculty/components/SubmitProposalSheet';
 import { formatDate } from '@/utils/date';
-import { getStatusLabel } from '@/utils/status';
+import { getStatusLabel, resolveProposalStatus } from '@/utils/status';
 import { PROPOSAL_STATUS } from '@/constants/statuses';
+import { useMyContracts } from '@/features/faculty/hooks/useContracts';
+import { useFinalReport } from '@/features/faculty/hooks/useFinalReports';
 import type { BadgeVariant } from '@/shared/components/ui/Badge';
 
 const statusVariant: Record<string, BadgeVariant> = {
@@ -156,6 +158,11 @@ export default function ProposalDetailScreen() {
   const { colors } = useTheme();
 
   const { data: proposal, isLoading, isError, refetch } = useProposal(id);
+  const { data: contracts } = useMyContracts();
+  
+  const contract = contracts?.find((c) => c.proposalId != null && String(c.proposalId) === String(id));
+  const { data: finalReport } = useFinalReport(contract?.id);
+
   const { mutate: submitProposal, isPending: isSubmitting } = useSubmitProposal();
   const { mutate: withdrawProposal, isPending: isWithdrawing } = useWithdrawProposal(id);
   const [submitSheetVisible, setSubmitSheetVisible] = useState(false);
@@ -170,9 +177,11 @@ export default function ProposalDetailScreen() {
     return <ErrorState title={t('proposalDetail.errorTitle')} message={t('proposalDetail.errorMessage')} onRetry={refetch} />;
   }
 
-  const isDraft = proposal.status === PROPOSAL_STATUS.DRAFT;
-  const canWithdraw = proposal.status === PROPOSAL_STATUS.SUBMITTED || proposal.status === PROPOSAL_STATUS.UNDER_REVIEW;
-  const isAcceptancePassed = proposal.status === PROPOSAL_STATUS.ACCEPTANCE_PASSED;
+  const resolvedStatus = resolveProposalStatus(proposal.status, contracts, proposal.id, finalReport?.status) ?? proposal.status;
+
+  const isDraft = resolvedStatus === PROPOSAL_STATUS.DRAFT;
+  const canWithdraw = resolvedStatus === PROPOSAL_STATUS.SUBMITTED || resolvedStatus === PROPOSAL_STATUS.UNDER_REVIEW;
+  const isAcceptancePassed = resolvedStatus === PROPOSAL_STATUS.ACCEPTANCE_PASSED;
   const title = proposal.titleVI || proposal.titleEN || t('proposal.untitled');
 
   function handleWithdraw() {
@@ -194,7 +203,7 @@ export default function ProposalDetailScreen() {
       >
         {/* Hero */}
         <View className="px-5 pt-4 pb-5 gap-3">
-          <Badge label={getStatusLabel(proposal.status)} variant={statusVariant[proposal.status ?? ''] ?? 'default'} size="md" />
+          <Badge label={getStatusLabel(resolvedStatus)} variant={statusVariant[resolvedStatus ?? ''] ?? 'default'} size="md" />
           <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">{title}</Text>
           {proposal.titleVI && proposal.titleEN && proposal.titleVI !== proposal.titleEN && (
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans italic">{proposal.titleEN}</Text>
@@ -202,7 +211,7 @@ export default function ProposalDetailScreen() {
           {proposal.createdAt && (
             <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{t('proposalDetail.created', { date: formatDate(proposal.createdAt) })}</Text>
           )}
-          <ProposalStatusTimeline status={proposal.status} />
+          <ProposalStatusTimeline status={resolvedStatus} />
         </View>
 
         {/* Action buttons */}
@@ -352,7 +361,7 @@ export default function ProposalDetailScreen() {
       />
 
       {/* Congratulations modal for acceptance_passed */}
-      {isAcceptancePassed && (
+      {isAcceptancePassed && congratsVisible && (
         <CongratulatoryBanner
           title={title}
           onClose={() => setCongratsVisible(false)}
