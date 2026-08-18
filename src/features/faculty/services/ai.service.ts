@@ -7,7 +7,7 @@ import type { AiExtractionResult, SemanticSearchResult, ProposalSummaryAi } from
 // summary/feedback are cut as non-essential extras (see plan scope decisions).
 export const aiService = {
   async extractFromFile(file: PickedFile): Promise<AiExtractionResult> {
-    return uploadService.uploadFile<AiExtractionResult>(file, '/ai/extract', 'file');
+    return uploadService.uploadFile<AiExtractionResult>(file, '/proposals/extract', 'file');
   },
   async semanticSearch(query: string): Promise<SemanticSearchResult[]> {
     const { data } = await httpClient.post<ApiResponse<SemanticSearchResult[]>>('/ai/semantic-search', { query });

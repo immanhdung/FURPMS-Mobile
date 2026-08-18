@@ -11,8 +11,8 @@ function PreviewField({ label, value }: { label: string; value?: string | number
   if (value === undefined || value === null || value === '') return null;
   return (
     <View className="gap-1">
-      <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{label}</Text>
-      <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-sans leading-relaxed">{value}</Text>
+      <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{label}</Text>
+      <Text className="text-neutral-900 dark:text-neutral-50 text-base font-sans leading-relaxed">{value}</Text>
     </View>
   );
 }
@@ -52,33 +52,20 @@ export function Step5Preview() {
         <PreviewField label={t('fields.abstract')} value={values.abstractEN} />
         <PreviewField label={t('fields.objectives')} value={values.objectives} />
         <PreviewField label={t('fields.methodology')} value={values.methodology} />
-        <PreviewField label={t('fields.expectedOutput')} value={values.expectedOutput} />
-      </Card>
-
-      <Card>
-        <PreviewField label={t('fields.urgency')} value={values.urgency} />
-        <PreviewField label={t('fields.novelty')} value={values.novelty} />
-        <PreviewField label={t('fields.applicationPotential')} value={values.applicationPotential} />
-        <PreviewField label={t('fields.transferPotential')} value={values.transferPotential} />
-        <PreviewField label={t('fields.facilities')} value={values.facilities} />
-      </Card>
-
-      <Card>
-        <PreviewField label={t('fields.fundingMethod')} value={values.fundingMethod === 'PARTIAL' ? t('fields.fundingPartial') : t('fields.fundingWhole')} />
         <PreviewField label={t('fields.duration')} value={t('fields.durationValue', { count: values.durationMonths })} />
       </Card>
 
       {values.members.length > 0 && (
         <Card>
-          <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mb-1">{t('step5.team', { count: values.members.length })}</Text>
+          <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans mb-1">{t('step5.team', { count: values.members.length })}</Text>
           {values.members.map((m, i) => (
             <View key={i}>
               {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 my-2" />}
-              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">
+              <Text className="text-neutral-900 dark:text-neutral-50 text-base font-medium">
                 {m.fullName}
                 {m.isSecretary ? t('proposalDetail.secretarySuffix') : ''}
               </Text>
-              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{m.email}</Text>
+              <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{m.email}</Text>
             </View>
           ))}
         </Card>

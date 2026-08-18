@@ -50,17 +50,13 @@ export function Step2ResearchContent({ pickedFile, onPickedFileChange, onExtract
     if (!pickedFile) return;
     extractMutation.mutate(pickedFile, {
       onSuccess: (result) => {
-        setValue('titleEN', result.titleEN, { shouldValidate: true });
-        if (result.titleVI) setValue('titleVI', result.titleVI, { shouldValidate: true });
-        setValue('abstractEN', result.abstractEN, { shouldValidate: true });
-        if (result.objectives) setValue('objectives', result.objectives, { shouldValidate: true });
-        if (result.methodology) setValue('methodology', result.methodology);
-        if (result.expectedOutput) setValue('expectedOutput', result.expectedOutput);
-        if (result.urgency) setValue('urgency', result.urgency);
-        if (result.novelty) setValue('novelty', result.novelty);
-        if (result.applicationPotential) setValue('applicationPotential', result.applicationPotential);
-        if (result.transferPotential) setValue('transferPotential', result.transferPotential);
-        if (result.facilities) setValue('facilities', result.facilities);
+        if (result.titleEn) setValue('titleEN', result.titleEn.trim(), { shouldValidate: true });
+        if (result.titleVi) setValue('titleVI', result.titleVi.trim(), { shouldValidate: true });
+        if (result.abstractVi) setValue('abstractEN', result.abstractVi.trim(), { shouldValidate: true });
+        if (result.researchObjectives) setValue('objectives', result.researchObjectives.trim(), { shouldValidate: true });
+        if (result.methodology) setValue('methodology', result.methodology.trim());
+        if (result.expectedOutput) setValue('expectedOutput', result.expectedOutput.trim());
+        if (result.durationMonths) setValue('durationMonths', result.durationMonths, { shouldValidate: true });
         onExtracted?.();
       },
       onError: (error) => {
