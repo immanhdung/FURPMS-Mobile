@@ -38,12 +38,39 @@ export interface ScoreDetailResponse {
 export interface ScoreResponse {
   id: string;
   councilId: string;
-  reviewerId?: string | null;
-  reviewerName?: string | null;
+  evaluatorMemberId?: string | null;
+  evaluatorName?: string | null;
   templateId: string;
   generalComments?: string | null;
   otherRecommendations?: string | null;
   scoreDetails?: ScoreDetailResponse[] | null;
   totalScore?: number | null;
   submittedAt?: string | null;
+}
+
+export interface MemberBallot {
+  memberId: string;
+  memberName: string;
+  memberRole?: string | null;
+  hasSubmitted: boolean;
+  isValidBallot: boolean;
+  totalScore?: number | null;
+  maxScore?: number | null;
+  result?: string | null;
+  comments?: string | null;
+  submittedAt?: string | null;
+}
+
+export interface BallotTally {
+  councilId: string;
+  projectId: string;
+  isAcceptanceRound: boolean;
+  totalMembers: number;
+  ballotsReturned: number;
+  validBallots: number;
+  invalidBallots: number;
+  passCount: number;
+  failCount: number;
+  averageScore?: number | null;
+  ballots: MemberBallot[];
 }

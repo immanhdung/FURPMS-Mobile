@@ -1,16 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { View, Text, Alert, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
+import { Badge } from '@/shared/components/ui/Badge';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
+import { PickerField } from '@/shared/components/ui/PickerField';
 import { LoadingState } from '@/shared/components/feedback/LoadingState';
 import { EmptyState } from '@/shared/components/feedback/EmptyState';
 import { useDecision, useSaveMinutes, useApproveMinutes } from '@/features/reviewCommittee/hooks/useDecision';
-import { useAllScores } from '@/features/reviewCommittee/hooks/useReviewScoring';
+import { useAllScores, useBallotTally } from '@/features/reviewCommittee/hooks/useReviewScoring';
 import { useFeedback } from '@/features/reviewCommittee/hooks/useFeedback';
 import { useCouncilMembers } from '@/features/reviewCommittee/hooks/useCouncilMembers';
+import { useCouncilMeetings, useMeetingAttendance, useSaveAttendance } from '@/features/meeting/hooks/useMeetings';
 import { isChairmanRole, isSecretaryRole } from '@/constants/statuses';
+import { useTheme } from '@/hooks/useTheme';
 import type { MemberOpinion, QaEntry } from '../types/decision.types';
 
 interface MinutesPanelProps {
@@ -21,8 +26,8 @@ interface MinutesPanelProps {
 
 function StatBox({ label, value }: { label: string; value: string | number }) {
   return (
-    <View className="flex-1 items-center gap-1">
-      <Text className="text-neutral-900 dark:text-neutral-50 text-lg font-bold">{value}</Text>
+    <View style={{ width: '50%' }} className="items-center gap-1 p-2">
+      <Text className="text-neutral-900 dark:text-neutral-50 text-base font-bold">{value}</Text>
       <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans text-center">{label}</Text>
     </View>
   );
@@ -30,23 +35,43 @@ function StatBox({ label, value }: { label: string; value: string | number }) {
 
 export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelProps) {
   const { t } = useTranslation(['reviewer', 'common']);
+  const { colors } = useTheme();
+
+  // Queries
   const { data: decision, isLoading: decisionLoading } = useDecision(councilId);
   const { data: allScores, isLoading: scoresLoading } = useAllScores(councilId);
   const { data: feedback, isLoading: feedbackLoading } = useFeedback(councilId);
   const { data: councilMembers } = useCouncilMembers(councilId);
+  
+  // Attendance & Meetings
+  const { data: meetings } = useCouncilMeetings(councilId);
+  const meetingId = useMemo(() => meetings?.[0]?.id ?? null, [meetings]);
+  const { data: attendanceData, isLoading: attendanceLoading } = useMeetingAttendance(meetingId);
+  const { data: tally } = useBallotTally(councilId, projectId);
 
+  // Mutations
   const { mutate: saveMinutes, isPending: isSaving } = useSaveMinutes(councilId);
   const { mutate: approveMinutes, isPending: isApproving } = useApproveMinutes(councilId);
+  const { mutate: saveAttendance, isPending: isSavingAttendance } = useSaveAttendance(meetingId ?? '');
 
   const secretary = isSecretaryRole(memberRole);
   const chairman = isChairmanRole(memberRole);
   const locked = !!decision?.finalizedAt;
 
+  // Local States
   const [result, setResult] = useState('APPROVED');
   const [councilComments, setCouncilComments] = useState('');
   const [recommendations, setRecommendations] = useState('');
   const [qaEntries, setQaEntries] = useState<QaEntry[]>([]);
   const [opinions, setOpinions] = useState<MemberOpinion[]>([]);
+  const [attendance, setAttendance] = useState<Record<string, boolean>>({});
+
+  // Dropdown options
+  const resultOptions = useMemo(() => [
+    { value: 'APPROVED', label: 'Đạt — đề tài qua vòng này', description: 'Đề tài đáp ứng yêu cầu và qua vòng này' },
+    { value: 'REVISION_REQUIRED', label: 'Cần chỉnh sửa — PI sửa và nộp lại', description: 'PI cần chỉnh sửa nội dung theo góp ý và nộp lại' },
+    { value: 'REJECTED', label: 'Không đạt — đề tài dừng lại', description: 'Đề tài dừng lại và không được đi tiếp' },
+  ], []);
 
   useEffect(() => {
     if (!decision) return;
@@ -57,13 +82,46 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
     setOpinions(decision.memberOpinions ?? []);
   }, [decision]);
 
+  useEffect(() => {
+    if (!attendanceData) return;
+    const initial: Record<string, boolean> = {};
+    attendanceData.forEach((entry) => {
+      initial[entry.memberId] = !!entry.attended;
+    });
+    setAttendance(initial);
+  }, [attendanceData]);
+
   function nameFor(userId?: string | null, fallback?: string | null) {
     return councilMembers?.find((m) => m.userId === userId)?.reviewerName ?? fallback ?? t('minutesPanel.defaultReviewer');
   }
 
+  function toggleAttended(memberId: string) {
+    setAttendance((prev) => ({ ...prev, [memberId]: !prev[memberId] }));
+  }
+
+  function handleSaveAttendance() {
+    if (!meetingId || !attendanceData) return;
+    const entries = attendanceData.map((entry) => ({
+      memberId: entry.memberId,
+      attended: !!attendance[entry.memberId],
+      absenceReason: entry.absenceReason,
+    }));
+    saveAttendance(entries, {
+      onSuccess: () => Alert.alert('Thành công', 'Đã lưu điểm danh hội đồng'),
+      onError: (err: any) => Alert.alert('Lỗi', err.message || 'Không thể lưu điểm danh'),
+    });
+  }
+
   function handleSaveDraft() {
     saveMinutes(
-      { projectId: projectId ?? undefined, result, councilComments: councilComments || undefined, recommendations: recommendations || undefined, qaEntries: qaEntries.filter((q) => q.question.trim()).map((q, order) => ({ ...q, order })), memberOpinions: opinions.filter((o) => o.memberName.trim()).map((o, order) => ({ ...o, order })) },
+      {
+        projectId: projectId ?? undefined,
+        result,
+        councilComments: councilComments || undefined,
+        recommendations: recommendations || undefined,
+        qaEntries: qaEntries.filter((q) => q.question.trim()).map((q, order) => ({ ...q, order })),
+        memberOpinions: opinions.filter((o) => o.memberName.trim()).map((o, order) => ({ ...o, order })),
+      },
       {
         onSuccess: () => Alert.alert(t('minutesPanel.savedTitle'), t('minutesPanel.savedMessage')),
         onError: () => Alert.alert(t('minutesPanel.errorTitle'), t('minutesPanel.errorMessage')),
@@ -89,22 +147,91 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
     );
   }
 
-  if (decisionLoading) return <LoadingState message={t('minutesPanel.loading')} />;
+  if (decisionLoading || attendanceLoading) return <LoadingState message={t('minutesPanel.loading')} />;
+
+  const resultLabel = resultOptions.find((o) => o.value === result)?.label ?? result;
 
   return (
     <View className="gap-4">
-      {/* Tally */}
-      <GlassSurface rounded={24} className="p-4">
-        <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mb-3">{t('minutesPanel.referenceOnly')}</Text>
-        <View className="flex-row">
-          <StatBox label={t('minutesPanel.totalMembers')} value={decision?.totalMembers ?? '—'} />
-          <StatBox label={t('minutesPanel.attending')} value={decision?.attendingMembers ?? '—'} />
-          <StatBox label={t('minutesPanel.validBallots')} value={decision?.validBallots ?? '—'} />
-          <StatBox label={t('minutesPanel.avgScore')} value={decision?.averageScore?.toFixed(1) ?? '—'} />
+      {/* Attendance Panel */}
+      <GlassSurface rounded={24} className="p-4 gap-3">
+        <View>
+          <Text className="text-neutral-900 dark:text-neutral-50 text-base font-bold">Thông tin chung — Danh sách hội đồng</Text>
+          <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-0.5">Tự động lấy từ hội đồng — Thư ký không cần nhập lại.</Text>
+        </View>
+
+        {attendanceData && attendanceData.length > 0 ? (
+          <View className="gap-3 mt-1">
+            {attendanceData.map((member) => {
+              const isAttended = attendance[member.memberId] ?? !!member.attended;
+              return (
+                <View key={member.memberId} className="flex-row items-center justify-between py-2 border-b border-neutral-100 dark:border-dark-200">
+                  <View className="flex-1 pr-2">
+                    <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{member.memberName}</Text>
+                    <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{member.memberRole}</Text>
+                  </View>
+                  {secretary && !locked ? (
+                    <TouchableOpacity
+                      onPress={() => toggleAttended(member.memberId)}
+                      activeOpacity={0.7}
+                      className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-50 dark:bg-dark-100 border border-neutral-200 dark:border-dark-200"
+                    >
+                      <Ionicons
+                        name={isAttended ? 'checkbox' : 'square-outline'}
+                        size={20}
+                        color={isAttended ? colors.accent.primary : colors.icon.muted}
+                      />
+                      <Text className="text-neutral-800 dark:text-neutral-200 text-xs font-medium">Có mặt</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Badge
+                      label={isAttended ? 'Có mặt' : 'Vắng mặt'}
+                      variant={isAttended ? 'success' : 'danger'}
+                      size="sm"
+                    />
+                  )}
+                </View>
+              );
+            })}
+
+            <View className="flex-row items-center justify-between mt-1">
+              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
+                Tổng số: {attendanceData.length} · Có mặt: {Object.values(attendance).filter(Boolean).length} · Vắng: {attendanceData.length - Object.values(attendance).filter(Boolean).length}
+              </Text>
+              {secretary && !locked && (
+                <Button
+                  label="Lưu điểm danh"
+                  size="sm"
+                  onPress={handleSaveAttendance}
+                  loading={isSavingAttendance}
+                />
+              )}
+            </View>
+          </View>
+        ) : (
+          <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans italic">Chưa tìm thấy danh sách thành viên.</Text>
+        )}
+      </GlassSurface>
+
+      {/* Meeting Tally Panel */}
+      <GlassSurface rounded={24} className="p-4 gap-3">
+        <Text className="text-neutral-900 dark:text-neutral-50 text-base font-bold">Số liệu cuộc họp</Text>
+        <View className="flex-row flex-wrap">
+          <StatBox label="Phiếu phát ra" value={tally?.totalMembers ?? decision?.totalMembers ?? '—'} />
+          <StatBox label="Phiếu thu về" value={tally?.ballotsReturned ?? decision?.attendingMembers ?? '—'} />
+          <StatBox label="Phiếu hợp lệ" value={tally?.validBallots ?? decision?.validBallots ?? '—'} />
+          <StatBox label="Phiếu không hợp lệ" value={tally?.invalidBallots ?? decision?.invalidBallots ?? '—'} />
+        </View>
+        <View className="h-px bg-neutral-100 dark:bg-dark-200 my-1" />
+        <View className="items-center p-2">
+          <Text className="text-violet-600 dark:text-violet-400 text-2xl font-bold">
+            {tally?.averageScore?.toFixed(2) ?? decision?.averageScore?.toFixed(2) ?? '—'}
+          </Text>
+          <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-1">Điểm trung bình</Text>
         </View>
       </GlassSurface>
 
-      {/* All scores */}
+      {/* Reviewer scores */}
       <View>
         <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold mb-2">{t('minutesPanel.reviewerScores')}</Text>
         {scoresLoading ? (
@@ -117,7 +244,9 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
               <View key={s.id}>
                 {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-4" />}
                 <View className="flex-row items-center justify-between px-4 py-3">
-                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">{nameFor(s.reviewerId, s.reviewerName)}</Text>
+                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">
+                    {s.evaluatorName || nameFor(s.evaluatorMemberId)}
+                  </Text>
                   <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">{s.totalScore?.toFixed(1) ?? '—'}</Text>
                 </View>
               </View>
@@ -141,7 +270,9 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
               <View key={f.id}>
                 {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 mx-4" />}
                 <View className="px-4 py-3">
-                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">{nameFor(f.reviewerId, f.reviewerName)}</Text>
+                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">
+                    {f.reviewerName || nameFor(f.reviewerMemberId)}
+                  </Text>
                   {f.comments && <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-0.5">{f.comments}</Text>}
                 </View>
               </View>
@@ -152,11 +283,17 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
         )}
       </View>
 
-      {/* Minutes body */}
+      {/* Draft minutes editing */}
       {secretary && !locked ? (
         <View className="gap-3">
           <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">{t('minutesPanel.draftMinutes')}</Text>
-          <Input label={t('minutesPanel.resultLabel')} value={result} onChangeText={setResult} placeholder={t('minutesPanel.resultPlaceholder')} autoCapitalize="characters" />
+          <PickerField
+            label="Kết luận hội đồng"
+            value={result}
+            options={resultOptions}
+            onChange={(val) => setResult(val)}
+            required
+          />
           <Input label={t('minutesPanel.councilComments')} value={councilComments} onChangeText={setCouncilComments} multiline numberOfLines={4} />
           <Input label={t('minutesPanel.recommendations')} value={recommendations} onChangeText={setRecommendations} multiline numberOfLines={3} />
           <MinutesEntries title="Hỏi đáp tại phiên họp" rows={qaEntries} onChange={setQaEntries} kind="qa" />
@@ -171,7 +308,7 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
               {locked ? t('minutesPanel.locked') : t('minutesPanel.draft')}
             </Text>
           </View>
-          {decision.result && <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">{t('minutesPanel.resultPrefix', { result: decision.result })}</Text>}
+          {decision.result && <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium">{t('minutesPanel.resultPrefix', { result: resultLabel })}</Text>}
           {decision.councilComments && <Text className="text-neutral-600 dark:text-dark-400 text-sm font-sans leading-relaxed">{decision.councilComments}</Text>}
           {decision.recommendations && (
             <View className="bg-neutral-50 dark:bg-dark-100 rounded-xl p-3">
@@ -195,5 +332,34 @@ export function MinutesPanel({ councilId, projectId, memberRole }: MinutesPanelP
 
 function MinutesEntries({ title, rows, onChange, kind }: { title: string; rows: QaEntry[] | MemberOpinion[]; onChange: (v: any) => void; kind: 'qa' | 'opinion' }) {
   const add = () => onChange([...rows, kind === 'qa' ? { question: '', order: rows.length } : { memberName: '', order: rows.length }]);
-  return <View className="gap-2"><View className="flex-row items-center justify-between"><Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">{title}</Text><TouchableOpacity onPress={add}><Text className="text-violet-600 dark:text-violet-400 text-sm">+ Thêm</Text></TouchableOpacity></View>{rows.map((row: any, index) => <GlassSurface key={index} rounded={16} className="p-3 gap-2">{kind === 'qa' ? <><Input placeholder="Người hỏi" value={row.askedBy ?? ''} onChangeText={(askedBy) => onChange(rows.map((r: any, i) => i === index ? { ...r, askedBy } : r))} /><Input placeholder="Câu hỏi" value={row.question} onChangeText={(question) => onChange(rows.map((r: any, i) => i === index ? { ...r, question } : r))} multiline /><Input placeholder="Câu trả lời" value={row.answer ?? ''} onChangeText={(answer) => onChange(rows.map((r: any, i) => i === index ? { ...r, answer } : r))} multiline /></> : <><Input placeholder="Tên thành viên" value={row.memberName} onChangeText={(memberName) => onChange(rows.map((r: any, i) => i === index ? { ...r, memberName } : r))} /><Input placeholder="Ý kiến chuyên môn" value={row.academicComment ?? ''} onChangeText={(academicComment) => onChange(rows.map((r: any, i) => i === index ? { ...r, academicComment } : r))} multiline /><Input placeholder="Ý kiến kinh phí" value={row.budgetComment ?? ''} onChangeText={(budgetComment) => onChange(rows.map((r: any, i) => i === index ? { ...r, budgetComment } : r))} multiline /></>}<TouchableOpacity onPress={() => onChange(rows.filter((_, i) => i !== index))}><Text className="text-red-500 text-xs">Xóa</Text></TouchableOpacity></GlassSurface>)}</View>;
+  return (
+    <View className="gap-2">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-neutral-700 dark:text-neutral-200 text-sm font-semibold">{title}</Text>
+        <TouchableOpacity onPress={add}>
+          <Text className="text-violet-600 dark:text-violet-400 text-sm">+ Thêm</Text>
+        </TouchableOpacity>
+      </View>
+      {rows.map((row: any, index) => (
+        <GlassSurface key={index} rounded={16} className="p-3 gap-2">
+          {kind === 'qa' ? (
+            <>
+              <Input placeholder="Người hỏi" value={row.askedBy ?? ''} onChangeText={(askedBy) => onChange(rows.map((r: any, i) => i === index ? { ...r, askedBy } : r))} />
+              <Input placeholder="Câu hỏi" value={row.question} onChangeText={(question) => onChange(rows.map((r: any, i) => i === index ? { ...r, question } : r))} multiline />
+              <Input placeholder="Câu trả lời" value={row.answer ?? ''} onChangeText={(answer) => onChange(rows.map((r: any, i) => i === index ? { ...r, answer } : r))} multiline />
+            </>
+          ) : (
+            <>
+              <Input placeholder="Tên thành viên" value={row.memberName} onChangeText={(memberName) => onChange(rows.map((r: any, i) => i === index ? { ...r, memberName } : r))} />
+              <Input placeholder="Ý kiến chuyên môn" value={row.academicComment ?? ''} onChangeText={(academicComment) => onChange(rows.map((r: any, i) => i === index ? { ...r, academicComment } : r))} multiline />
+              <Input placeholder="Ý kiến kinh phí" value={row.budgetComment ?? ''} onChangeText={(budgetComment) => onChange(rows.map((r: any, i) => i === index ? { ...r, budgetComment } : r))} multiline />
+            </>
+          )}
+          <TouchableOpacity onPress={() => onChange(rows.filter((_, i) => i !== index))}>
+            <Text className="text-red-500 text-xs">Xóa</Text>
+          </TouchableOpacity>
+        </GlassSurface>
+      ))}
+    </View>
+  );
 }

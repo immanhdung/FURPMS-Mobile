@@ -45,23 +45,42 @@ function buildNativeDeepLink(platform: VideoPlatform, url: string): string | nul
 
 export const videoMeetingService = {
   async join({ url, preferNativeApp = true }: MeetingJoinOptions): Promise<void> {
-    const platform = detectPlatform(url);
+    try {
+      const platform = detectPlatform(url);
 
-    if (preferNativeApp) {
-      const deepLink = buildNativeDeepLink(platform, url);
-      if (deepLink) {
-        const canOpen = await Linking.canOpenURL(deepLink);
-        if (canOpen) {
-          await Linking.openURL(deepLink);
-          return;
+      if (preferNativeApp) {
+        const deepLink = buildNativeDeepLink(platform, url);
+        if (deepLink) {
+          try {
+            const canOpen = await Linking.canOpenURL(deepLink);
+            if (canOpen) {
+              await Linking.openURL(deepLink);
+              return;
+            }
+          } catch (e) {
+            // Ignore native deep-link check errors
+          }
         }
       }
-    }
 
-    // Fallback: open in system browser
-    const canOpenWeb = await Linking.canOpenURL(url);
-    if (canOpenWeb) {
-      await Linking.openURL(url);
+      // Fallback: open in system browser
+      try {
+        const canOpenWeb = await Linking.canOpenURL(url);
+        if (canOpenWeb) {
+          await Linking.openURL(url);
+        } else {
+          await Linking.openURL(url);
+        }
+      } catch (e) {
+        // Fallback: try direct open
+        try {
+          await Linking.openURL(url);
+        } catch (err) {
+          // Silent catch or warning
+        }
+      }
+    } catch (outerErr) {
+      // Catch all outer execution errors
     }
   },
 

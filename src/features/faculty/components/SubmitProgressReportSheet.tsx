@@ -6,7 +6,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
-import { useUpdateProgressReport, useSubmitProgressReport } from '@/features/faculty/hooks/useProgressReports';
+import { useUpdateProgressReport, useSubmitProgressReport, useProgressReportDetail } from '@/features/faculty/hooks/useProgressReports';
 import type { ProgressReport } from '@/features/faculty/types/progress-report.types';
 import { formatDate } from '@/utils/date';
 
@@ -21,6 +21,7 @@ interface SubmitProgressReportSheetProps {
 export function SubmitProgressReportSheet({ contractId, report, onClose }: SubmitProgressReportSheetProps) {
   const { t } = useTranslation(['faculty', 'common']);
   const { colors } = useTheme();
+  const { data: detail } = useProgressReportDetail(report?.id);
   const { mutate: update, isPending: isUpdating } = useUpdateProgressReport(contractId);
   const { mutate: submit, isPending: isSubmitting } = useSubmitProgressReport(contractId);
 
@@ -33,11 +34,11 @@ export function SubmitProgressReportSheet({ contractId, report, onClose }: Submi
 
   useEffect(() => {
     if (!report) return;
-    setCompletedContent(report.completedContent ?? '');
-    setPendingContent(report.pendingContent ?? '');
+    setCompletedContent(detail?.completedContent ?? '');
+    setPendingContent(detail?.pendingContent ?? '');
     setOverallCompletionPct(report.overallCompletionPct != null ? String(report.overallCompletionPct) : '');
-    setNextPeriodPlan(report.nextPeriodPlan ?? '');
-  }, [report]);
+    setNextPeriodPlan(detail?.nextPeriodPlan ?? '');
+  }, [report, detail]);
 
   function handleClose() {
     onClose();
@@ -53,29 +54,38 @@ export function SubmitProgressReportSheet({ contractId, report, onClose }: Submi
           pendingContent: pendingContent || undefined,
           overallCompletionPct: overallCompletionPct ? Number(overallCompletionPct) : undefined,
           nextPeriodPlan: nextPeriodPlan || undefined,
+          expenditureToDate: detail?.expenditureToDate ?? undefined,
+          piRecommendations: detail?.piRecommendations ?? undefined,
+          reportFileUrl: detail?.reportFileUrl ?? undefined,
+          items: detail?.items?.map((item) => ({
+            activityId: item.activityId,
+            completionRate: item.completionRate,
+            completionStatus: item.completionStatus,
+            notes: item.notes ?? undefined,
+          })) ?? undefined,
         },
       },
       {
         onSuccess: () => {
           submit(report.id, {
             onSuccess: handleClose,
-            onError: () => Alert.alert(t('common:states.errorTitle'), t('createProgressReportSheet.submitErrorMessage')),
+            onError: (err: any) => Alert.alert(t('common:states.errorTitle'), err.message || t('createProgressReportSheet.submitErrorMessage')),
           });
         },
-        onError: () => Alert.alert(t('common:states.errorTitle'), t('createProgressReportSheet.submitErrorMessage')),
+        onError: (err: any) => Alert.alert(t('common:states.errorTitle'), err.message || t('createProgressReportSheet.submitErrorMessage')),
       },
     );
   }
 
   return (
     <Modal visible={!!report} animationType="slide" transparent onRequestClose={handleClose}>
-      <View className="flex-1 justify-end bg-black/40">
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <View className="flex-1 justify-end bg-black/40">
           <GlassSurface
             intensity={65}
             rounded={0}
             style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, borderBottomWidth: 0, maxHeight: '85%' }}
-            className="px-5 pt-5 pb-8 gap-4"
+            className="px-5 pt-5 pb-24 gap-4"
           >
             <View className="flex-row items-center justify-between">
               <View className="gap-0.5">
@@ -103,12 +113,12 @@ export function SubmitProgressReportSheet({ contractId, report, onClose }: Submi
                   keyboardType="numeric"
                 />
                 <Input label={t('createProgressReportSheet.nextPeriodPlan')} value={nextPeriodPlan} onChangeText={setNextPeriodPlan} multiline numberOfLines={3} />
-                <Button label={t('createProgressReportSheet.submitReport')} onPress={handleSubmit} loading={isPending} fullWidth />
               </View>
             </ScrollView>
+            <Button label={t('createProgressReportSheet.submitReport')} onPress={handleSubmit} loading={isPending} fullWidth />
           </GlassSurface>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -34,3 +34,12 @@ export function useSubmitProgressReport(contractId: string) {
     },
   });
 }
+
+export function useProgressReportDetail(id?: string | null) {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: ['progress-report-detail', id ?? ''],
+    queryFn: () => progressReportService.get(id!),
+    enabled: !!id,
+  });
+}

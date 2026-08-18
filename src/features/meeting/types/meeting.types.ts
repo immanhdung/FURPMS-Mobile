@@ -16,3 +16,11 @@ export interface Meeting {
   agenda?: string | null;
   status?: string | null;
 }
+
+export interface AttendanceEntry {
+  memberId: string;
+  memberName?: string | null;
+  memberRole?: string | null;
+  attended?: boolean | null;
+  absenceReason?: string | null;
+}

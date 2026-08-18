@@ -1,7 +1,10 @@
 import { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/hooks/useTheme';
+import { videoMeetingService } from '@/services/video-meeting.service';
 import { PickerField } from '@/shared/components/ui/PickerField';
 import { GlassSurface } from '@/shared/components/ui/GlassSurface';
 import { Button } from '@/shared/components/ui/Button';
@@ -84,6 +87,7 @@ function ReportCard({ children }: { children: React.ReactNode }) {
 
 function ProgressReportsTab({ contractId }: { contractId: string }) {
   const { t } = useTranslation('faculty');
+  const { colors } = useTheme();
   const { data: reports, isLoading } = useProgressReports(contractId);
   const [selectedReport, setSelectedReport] = useState<ProgressReport | null>(null);
 
@@ -111,8 +115,25 @@ function ProgressReportsTab({ contractId }: { contractId: string }) {
             {report.dueDate && (
               <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{t('reports.due', { date: formatDate(report.dueDate) })}</Text>
             )}
+            {report.scheduledMeetingAt && (
+              <View className="flex-row items-center gap-1.5 mt-1 bg-violet-50 dark:bg-violet-950/20 p-2.5 rounded-xl border border-violet-100 dark:border-violet-900/30">
+                <Ionicons name="calendar-outline" size={16} color={colors.accent.primary} />
+                <Text className="text-neutral-800 dark:text-neutral-200 text-xs font-medium">
+                  Lịch họp: {formatDate(report.scheduledMeetingAt)}
+                </Text>
+              </View>
+            )}
             {report.meetingLink && (
-              <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">{t('reports.meetingScheduled')}</Text>
+              <TouchableOpacity
+                onPress={() => videoMeetingService.join({ url: report.meetingLink! })}
+                activeOpacity={0.7}
+                className="flex-row items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/20 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/30"
+              >
+                <Ionicons name="videocam-outline" size={16} color="#10B981" />
+                <Text className="text-emerald-700 dark:text-emerald-400 text-xs font-medium flex-1" numberOfLines={1}>
+                  Link họp: {report.meetingLink}
+                </Text>
+              </TouchableOpacity>
             )}
             {report.evaluationResult && (
               <Text className="text-neutral-700 dark:text-neutral-200 text-xs font-sans">
@@ -233,58 +254,60 @@ export default function ReportsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0">
-      <View className="px-5 pt-6 pb-4 gap-0.5">
-        <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">{t('reports.title')}</Text>
-        <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{t('reports.subtitle')}</Text>
-      </View>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <View className="px-5 pt-6 pb-4 gap-0.5">
+          <Text className="text-neutral-900 dark:text-neutral-50 text-2xl font-bold tracking-tight">{t('reports.title')}</Text>
+          <Text className="text-neutral-500 dark:text-dark-500 text-sm font-sans">{t('reports.subtitle')}</Text>
+        </View>
 
-      {contractsLoading ? (
-        <LoadingState message={t('reports.loadingContracts')} />
-      ) : !contracts || contracts.length === 0 ? (
-        <EmptyState
-          icon="📊"
-          title={t('reports.noContractsTitle')}
-          description={t('reports.noContractsDescription')}
-        />
-      ) : (
-        <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
-          <View className="mb-4">
-            <PickerField
-              label={t('reports.contract')}
-              value={activeContractId}
-              options={contracts.map((c) => ({ value: c.id, label: c.scopeTitle || c.contractNumber || c.id }))}
-              onChange={setContractId}
-            />
-          </View>
+        {contractsLoading ? (
+          <LoadingState message={t('reports.loadingContracts')} />
+        ) : !contracts || contracts.length === 0 ? (
+          <EmptyState
+            icon="📊"
+            title={t('reports.noContractsTitle')}
+            description={t('reports.noContractsDescription')}
+          />
+        ) : (
+          <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
+            <View className="mb-4">
+              <PickerField
+                label={t('reports.contract')}
+                value={activeContractId}
+                options={contracts.map((c) => ({ value: c.id, label: c.scopeTitle || c.contractNumber || c.id }))}
+                onChange={setContractId}
+              />
+            </View>
 
-          <View className="flex-row gap-2 mb-4">
-            {(['PROGRESS', 'FINAL'] as Tab[]).map((tabKey) =>
-              tab === tabKey ? (
-                <TouchableOpacity
-                  key={tabKey}
-                  onPress={() => setTab(tabKey)}
-                  activeOpacity={0.7}
-                  className="flex-1 items-center py-2.5 rounded-xl bg-violet-500 dark:bg-violet-600"
-                >
-                  <Text className="text-sm font-medium text-white">
-                    {tabKey === 'PROGRESS' ? t('reports.tabProgress') : t('reports.tabFinal')}
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity key={tabKey} onPress={() => setTab(tabKey)} activeOpacity={0.7} className="flex-1">
-                  <GlassSurface rounded={12} className="items-center py-2.5">
-                    <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+            <View className="flex-row gap-2 mb-4">
+              {(['PROGRESS', 'FINAL'] as Tab[]).map((tabKey) =>
+                tab === tabKey ? (
+                  <TouchableOpacity
+                    key={tabKey}
+                    onPress={() => setTab(tabKey)}
+                    activeOpacity={0.7}
+                    className="flex-1 items-center py-2.5 rounded-xl bg-violet-500 dark:bg-violet-600"
+                  >
+                    <Text className="text-sm font-medium text-white">
                       {tabKey === 'PROGRESS' ? t('reports.tabProgress') : t('reports.tabFinal')}
                     </Text>
-                  </GlassSurface>
-                </TouchableOpacity>
-              ),
-            )}
-          </View>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity key={tabKey} onPress={() => setTab(tabKey)} activeOpacity={0.7} className="flex-1">
+                    <GlassSurface rounded={12} className="items-center py-2.5">
+                      <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+                        {tabKey === 'PROGRESS' ? t('reports.tabProgress') : t('reports.tabFinal')}
+                      </Text>
+                    </GlassSurface>
+                  </TouchableOpacity>
+                ),
+              )}
+            </View>
 
-          {activeContractId && (tab === 'PROGRESS' ? <ProgressReportsTab contractId={activeContractId} /> : <FinalReportTab contractId={activeContractId} />)}
-        </ScrollView>
-      )}
+            {activeContractId && (tab === 'PROGRESS' ? <ProgressReportsTab contractId={activeContractId} /> : <FinalReportTab contractId={activeContractId} />)}
+          </ScrollView>
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

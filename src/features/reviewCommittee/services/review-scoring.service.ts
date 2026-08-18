@@ -1,6 +1,6 @@
 import { httpClient } from '@/services/http.client';
 import type { ApiResponse } from '@/types/common';
-import type { RubricTemplate, ScoreResponse, SubmitScorePayload } from '../types/review-scoring.types';
+import type { RubricTemplate, ScoreResponse, SubmitScorePayload, BallotTally } from '../types/review-scoring.types';
 
 export const reviewScoringService = {
   async listRubrics(): Promise<RubricTemplate[]> {
@@ -22,6 +22,13 @@ export const reviewScoringService = {
    *  tolerate that status and degrade gracefully rather than erroring the whole screen. */
   async getAllScores(councilId: string): Promise<ScoreResponse[]> {
     const { data } = await httpClient.get<ApiResponse<ScoreResponse[]>>(`/review-scoring/councils/${councilId}/scores`);
+    return data.data;
+  },
+
+  async ballotTally(councilId: string, projectId?: string): Promise<BallotTally> {
+    const { data } = await httpClient.get<ApiResponse<BallotTally>>(`/review-scoring/councils/${councilId}/ballot-tally`, {
+      params: projectId ? { projectId } : undefined,
+    });
     return data.data;
   },
 };

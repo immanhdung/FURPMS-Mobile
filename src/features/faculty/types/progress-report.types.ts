@@ -1,3 +1,13 @@
+export interface ProgressReportItem {
+  id: number;
+  activityId: number;
+  activityName: string;
+  completionRate: number;
+  completionStatus: string;
+  evidenceDescription?: string | null;
+  notes?: string | null;
+}
+
 export interface ProgressReport {
   id: string;
   contractId: string;
@@ -15,6 +25,8 @@ export interface ProgressReport {
   evaluationResult?: string | null;
   evaluationComments?: string | null;
   submittedAt?: string | null;
+  reportFileUrl?: string | null;
+  items?: ProgressReportItem[] | null;
 }
 
 // PI can only fill in content for a report slot staff already scheduled (period/dueDate are
@@ -26,4 +38,11 @@ export interface UpdateProgressReportPayload {
   expenditureToDate?: number;
   nextPeriodPlan?: string;
   piRecommendations?: string;
+  reportFileUrl?: string;
+  items?: {
+    activityId: number;
+    completionRate: number;
+    completionStatus: string;
+    notes?: string;
+  }[];
 }

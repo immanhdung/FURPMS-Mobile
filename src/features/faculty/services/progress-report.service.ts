@@ -11,7 +11,12 @@ export const progressReportService = {
   },
 
   async update(id: string, payload: UpdateProgressReportPayload): Promise<ProgressReport> {
-    const { data } = await httpClient.patch<ApiResponse<ProgressReport>>(`/progress-reports/${id}`, payload);
+    const { data } = await httpClient.put<ApiResponse<ProgressReport>>(`/progress-reports/${id}`, payload);
+    return data.data;
+  },
+
+  async get(id: string): Promise<ProgressReport> {
+    const { data } = await httpClient.get<ApiResponse<ProgressReport>>(`/progress-reports/${id}`);
     return data.data;
   },
 

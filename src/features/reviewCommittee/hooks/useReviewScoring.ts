@@ -45,6 +45,15 @@ export function useSubmitScore(councilId: string) {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.scores.mine(councilId) });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.scores.all(councilId) });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.decisions.byCouncil(councilId) });
+      queryClient.invalidateQueries({ queryKey: ['ballot-tally', councilId] });
     },
+  });
+}
+
+export function useBallotTally(councilId: string, projectId?: string | null) {
+  return useQuery({
+    queryKey: ['ballot-tally', councilId, projectId ?? ''],
+    queryFn: () => reviewScoringService.ballotTally(councilId, projectId || undefined),
+    enabled: !!councilId,
   });
 }

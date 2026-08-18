@@ -76,33 +76,36 @@ export function ProposalDocumentsCard({ proposalId, editable }: ProposalDocument
       {isLoading ? (
         <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('proposalDocumentsCard.loading')}</Text>
       ) : documents && documents.length > 0 ? (
-        documents.map((doc, i) => (
-          <View key={doc.id}>
-            {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 my-1" />}
-            <View className="flex-row items-center gap-3">
-              <View className="bg-violet-100 dark:bg-violet-900/30 w-9 h-9 rounded-xl items-center justify-center">
-                <Ionicons name="document-text-outline" size={18} color={colors.accent.primary} />
-              </View>
-              <TouchableOpacity className="flex-1" activeOpacity={0.7} onPress={() => handleOpen(doc.id, doc.fileName)} disabled={isDownloading}>
-                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium" numberOfLines={1}>
-                  {doc.fileName}
-                </Text>
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
-                  {downloadService.formatFileSize(doc.fileSizeBytes)} · {formatDate(doc.uploadedAt)}
-                </Text>
-              </TouchableOpacity>
-              {editable && (
-                <TouchableOpacity
-                  onPress={() => handleDelete(doc.id, doc.fileName)}
-                  disabled={isDeleting && deletingId === doc.id}
-                  hitSlop={8}
-                >
-                  <Ionicons name="trash-outline" size={18} color={colors.accent.danger} />
+        documents.map((doc, i) => {
+          const decodedName = decodeURIComponent(doc.fileName);
+          return (
+            <View key={doc.id}>
+              {i > 0 && <View className="h-px bg-neutral-100 dark:bg-dark-200 my-1" />}
+              <View className="flex-row items-center gap-3">
+                <View className="bg-violet-100 dark:bg-violet-900/30 w-9 h-9 rounded-xl items-center justify-center">
+                  <Ionicons name="document-text-outline" size={18} color={colors.accent.primary} />
+                </View>
+                <TouchableOpacity className="flex-1" activeOpacity={0.7} onPress={() => handleOpen(doc.id, doc.fileName)} disabled={isDownloading}>
+                  <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium" numberOfLines={1}>
+                    {decodedName}
+                  </Text>
+                  <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
+                    {downloadService.formatFileSize(doc.fileSizeBytes)} · {formatDate(doc.uploadedAt)}
+                  </Text>
                 </TouchableOpacity>
-              )}
+                {editable && (
+                  <TouchableOpacity
+                    onPress={() => handleDelete(doc.id, decodedName)}
+                    disabled={isDeleting && deletingId === doc.id}
+                    hitSlop={8}
+                  >
+                    <Ionicons name="trash-outline" size={18} color={colors.accent.danger} />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-          </View>
-        ))
+          );
+        })
       ) : (
         <Text className="text-neutral-400 dark:text-dark-500 text-sm font-sans">{t('proposalDocumentsCard.empty')}</Text>
       )}
