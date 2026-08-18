@@ -1,11 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Platform,
 } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -39,9 +41,29 @@ export function PDFViewer({ uri, filename, title, showDownloadButton = true, onC
   const [webViewLoading, setWebViewLoading] = useState(true);
   const [webViewError, setWebViewError] = useState(false);
   const { download, open, isDownloading, progress } = useDocumentDownload();
+  const [base64Data, setBase64Data] = useState<string | null>(null);
+  const [loadingBase64, setLoadingBase64] = useState(false);
 
   const viewerUrl = buildViewerUrl(uri);
   const displayTitle = title ?? filename ?? t('pdfViewer.document');
+
+  useEffect(() => {
+    if (Platform.OS === 'android' && (uri.startsWith('file://') || uri.startsWith('/'))) {
+      setLoadingBase64(true);
+      FileSystem.readAsStringAsync(uri, { encoding: 'base64' })
+        .then((data) => {
+          setBase64Data(data);
+          setLoadingBase64(false);
+        })
+        .catch((err) => {
+          console.error('Failed to read PDF as base64', err);
+          setWebViewError(true);
+          setLoadingBase64(false);
+        });
+    } else {
+      setBase64Data(null);
+    }
+  }, [uri]);
 
   const handleDownloadAndOpen = useCallback(async () => {
     if (!filename) return;
@@ -99,7 +121,7 @@ export function PDFViewer({ uri, filename, title, showDownloadButton = true, onC
 
       {/* WebView PDF renderer */}
       <View style={styles.webviewContainer}>
-        {webViewLoading && (
+        {(webViewLoading || loadingBase64) && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color={colors.accent.primary} />
             <Text style={[styles.loadingText, { color: colors.text.secondary }]}>
@@ -134,8 +156,8 @@ export function PDFViewer({ uri, filename, title, showDownloadButton = true, onC
           </View>
         ) : (
           <WebView
-            source={{ uri: viewerUrl }}
-            style={[styles.webview, { opacity: webViewLoading ? 0 : 1 }]}
+            source={base64Data ? { html: getPdfJsHtml(base64Data) } : { uri: viewerUrl }}
+            style={[styles.webview, { opacity: (webViewLoading || loadingBase64) ? 0 : 1 }]}
             onLoadStart={() => {
               setWebViewLoading(true);
               setWebViewError(false);
@@ -200,3 +222,67 @@ const styles = StyleSheet.create({
   },
   openExternalText: { color: '#fff', fontWeight: '600', fontSize: 15 },
 });
+
+function getPdfJsHtml(base64String: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; background-color: #525659; }
+    #viewer { display: flex; flex-direction: column; align-items: center; padding: 10px 0; }
+    .page-container { margin-bottom: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: white; width: 95%; max-width: 800px; }
+    canvas { display: block; width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <div id="viewer"></div>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    
+    try {
+      const base64Data = "${base64String}";
+      const binStr = atob(base64Data);
+      const len = binStr.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binStr.charCodeAt(i);
+      }
+      
+      pdfjsLib.getDocument({ data: bytes }).promise.then(function(pdf) {
+        const viewer = document.getElementById('viewer');
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          pdf.getPage(pageNum).then(function(page) {
+            const viewport = page.getViewport({ scale: 1.5 });
+            const container = document.createElement('div');
+            container.className = 'page-container';
+            
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            
+            container.appendChild(canvas);
+            viewer.appendChild(container);
+            
+            const renderContext = {
+              canvasContext: context,
+              viewport: viewport
+            };
+            page.render(renderContext);
+          });
+        }
+      }).catch(function(error) {
+        document.body.innerHTML = '<div style="padding:20px;color:red;background:white;font-family:sans-serif;">Error loading PDF: ' + error.message + '</div>';
+      });
+    } catch(err) {
+      document.body.innerHTML = '<div style="padding:20px;color:red;background:white;font-family:sans-serif;">Error rendering PDF: ' + err.message + '</div>';
+    }
+  </script>
+</body>
+</html>
+  `;
+}

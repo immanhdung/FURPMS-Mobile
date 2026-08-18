@@ -54,42 +54,42 @@ export default function CouncilWorkspaceScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['bottom']}>
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="px-5 pt-4 pb-4 gap-3">
-          <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">
-            {membership.proposalTitleVI || t('workspace.untitledProposal')}
-          </Text>
-          <View className="flex-row items-center gap-2 flex-wrap">
-            {membership.roundType && (
-              <Badge label={ROUND_TYPE_LABELS[membership.roundType as ReviewRoundType] ?? membership.roundType} variant="purple" size="sm" />
-            )}
-            {membership.memberRole && <Badge label={membership.memberRole} variant="info" size="sm" />}
-            {membership.roundStatus && <Badge label={membership.roundStatus} variant="default" size="sm" />}
-            {membership.proposalStatus && <Badge label={membership.proposalStatus} variant="default" size="sm" />}
-          </View>
+      {/* Header */}
+      <View className="px-5 pt-4 pb-4 gap-3">
+        <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold leading-snug">
+          {membership.proposalTitleVI || t('workspace.untitledProposal')}
+        </Text>
+        <View className="flex-row items-center gap-2 flex-wrap">
+          {membership.roundType && (
+            <Badge label={ROUND_TYPE_LABELS[membership.roundType as ReviewRoundType] ?? membership.roundType} variant="purple" size="sm" />
+          )}
+          {membership.memberRole && <Badge label={membership.memberRole} variant="info" size="sm" />}
+          {membership.roundStatus && <Badge label={membership.roundStatus} variant="default" size="sm" />}
+          {membership.proposalStatus && <Badge label={membership.proposalStatus} variant="default" size="sm" />}
         </View>
+      </View>
 
-        {/* Meetings */}
-        {meetings && meetings.length > 0 && (
-          <View className="px-5 mb-4 gap-2">
-            {meetings.map((m) => (
-              <GlassSurface key={m.id} rounded={24} className="p-4 gap-1.5">
-                <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{m.title || t('workspace.councilMeeting')}</Text>
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{formatDateTime(m.scheduledAt)}</Text>
-                {m.meetingLink && (
-                  <TouchableOpacity onPress={() => Linking.openURL(m.meetingLink!)} activeOpacity={0.7} className="flex-row items-center gap-1.5 mt-1">
-                    <Ionicons name="videocam-outline" size={14} color={colors.accent.primary} />
-                    <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">{t('workspace.joinMeeting')}</Text>
-                  </TouchableOpacity>
-                )}
-              </GlassSurface>
-            ))}
-          </View>
-        )}
+      {/* Meetings */}
+      {meetings && meetings.length > 0 && (
+        <View className="px-5 mb-4 gap-2">
+          {meetings.map((m) => (
+            <GlassSurface key={m.id} rounded={24} className="p-4 gap-1.5">
+              <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-semibold">{m.title || t('workspace.councilMeeting')}</Text>
+              <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">{formatDateTime(m.scheduledAt)}</Text>
+              {m.meetingLink && (
+                <TouchableOpacity onPress={() => Linking.openURL(m.meetingLink!)} activeOpacity={0.7} className="flex-row items-center gap-1.5 mt-1">
+                  <Ionicons name="videocam-outline" size={14} color={colors.accent.primary} />
+                  <Text className="text-violet-600 dark:text-violet-400 text-xs font-medium">{t('workspace.joinMeeting')}</Text>
+                </TouchableOpacity>
+              )}
+            </GlassSurface>
+          ))}
+        </View>
+      )}
 
-        {/* Tabs */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }} className="mb-4">
+      {/* Tabs */}
+      <View className="mb-4">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}>
           {tabs.map((tabItem) => {
             const active = tabItem.key === activeTab;
             return active ? (
@@ -110,20 +110,26 @@ export default function CouncilWorkspaceScreen() {
             );
           })}
         </ScrollView>
+      </View>
 
-        <View className="px-5">
-          {activeTab === 'INFO' && <ReviewContextPanel proposalId={membership.proposalId} />}
-          {activeTab === 'DOCUMENTS' && <ProposalDocumentViewer proposalId={membership.proposalId} />}
-          {activeTab === 'SCORING' && (
-            <RubricScoringForm councilId={councilId} roundType={membership.roundType} roundStatus={membership.roundStatus} />
-          )}
-          {activeTab === 'DOSSIER' && <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />}
-          {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} roundStatus={membership.roundStatus} />}
-          {activeTab === 'MINUTES' && (
-            <MinutesPanel councilId={councilId} projectId={membership.projectId} memberRole={membership.memberRole} />
-          )}
-        </View>
-      </ScrollView>
+      {/* Tab Contents */}
+      <View className="flex-1 px-5">
+        {activeTab === 'DOCUMENTS' ? (
+          <ProposalDocumentViewer proposalId={membership.proposalId} />
+        ) : (
+          <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
+            {activeTab === 'INFO' && <ReviewContextPanel proposalId={membership.proposalId} />}
+            {activeTab === 'SCORING' && (
+              <RubricScoringForm councilId={councilId} roundType={membership.roundType} roundStatus={membership.roundStatus} />
+            )}
+            {activeTab === 'DOSSIER' && <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />}
+            {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} roundStatus={membership.roundStatus} />}
+            {activeTab === 'MINUTES' && (
+              <MinutesPanel councilId={councilId} projectId={membership.projectId} memberRole={membership.memberRole} />
+            )}
+          </ScrollView>
+        )}
+      </View>
     </SafeAreaView>
   );
 }

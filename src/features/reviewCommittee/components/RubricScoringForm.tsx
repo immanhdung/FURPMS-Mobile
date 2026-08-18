@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
@@ -30,6 +30,7 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
   );
 
   const [scores, setScores] = useState<Record<string, number>>({});
+  const [typedScores, setTypedScores] = useState<Record<string, string>>({});
   const [comments, setComments] = useState<Record<string, string>>({});
   const [generalComments, setGeneralComments] = useState('');
   const [otherRecommendations, setOtherRecommendations] = useState('');
@@ -38,11 +39,14 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
     if (!myScore?.scoreDetails) return;
     const nextScores: Record<string, number> = {};
     const nextComments: Record<string, string> = {};
+    const nextTyped: Record<string, string> = {};
     myScore.scoreDetails.forEach((d) => {
       nextScores[d.criterionId] = d.givenScore;
+      nextTyped[d.criterionId] = d.givenScore.toFixed(1);
       if (d.comments) nextComments[d.criterionId] = d.comments;
     });
     setScores(nextScores);
+    setTypedScores(nextTyped);
     setComments(nextComments);
     setGeneralComments(myScore.generalComments ?? '');
     setOtherRecommendations(myScore.otherRecommendations ?? '');
@@ -75,7 +79,41 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
     setScores((prev) => {
       const current = prev[criterionId] ?? 0;
       const next = Math.min(max, Math.max(0, Math.round((current + delta) * 2) / 2));
+      setTypedScores((tPrev) => ({ ...tPrev, [criterionId]: next.toFixed(1) }));
       return { ...prev, [criterionId]: next };
+    });
+  }
+
+  function handleTextChange(criterionId: string, max: number, text: string) {
+    let clean = text.replace(',', '.');
+    const firstDotIdx = clean.indexOf('.');
+    if (firstDotIdx !== -1) {
+      clean = clean.substring(0, firstDotIdx + 1) + clean.substring(firstDotIdx + 1).replace(/\./g, '');
+      const parts = clean.split('.');
+      if (parts[1] && parts[1].length > 1) {
+        clean = parts[0] + '.' + parts[1].substring(0, 1);
+      }
+    } else {
+      clean = clean.replace(/[^\d]/g, '');
+    }
+
+    if (clean !== '') {
+      const num = parseFloat(clean);
+      if (num > max) {
+        clean = max.toString();
+      }
+    }
+
+    setTypedScores((prev) => ({ ...prev, [criterionId]: clean }));
+    const parsed = parseFloat(clean);
+    setScores((prev) => ({ ...prev, [criterionId]: isNaN(parsed) ? 0 : parsed }));
+  }
+
+  function handleBlur(criterionId: string) {
+    setScores((prev) => {
+      const val = prev[criterionId] ?? 0;
+      setTypedScores((tPrev) => ({ ...tPrev, [criterionId]: val.toFixed(1) }));
+      return prev;
     });
   }
 
@@ -116,9 +154,13 @@ export function RubricScoringForm({ councilId, roundType, roundStatus }: RubricS
             <TouchableOpacity onPress={() => adjustScore(criterion.id, criterion.maxScore, -0.5)} hitSlop={8}>
               <Ionicons name="remove-circle-outline" size={28} color={colors.accent.primary} />
             </TouchableOpacity>
-            <Text className="text-neutral-900 dark:text-neutral-50 text-xl font-bold w-16 text-center">
-              {(scores[criterion.id] ?? 0).toFixed(1)}
-            </Text>
+            <TextInput
+              keyboardType="decimal-pad"
+              value={typedScores[criterion.id] ?? (scores[criterion.id] ?? 0).toFixed(1)}
+              onChangeText={(text) => handleTextChange(criterion.id, criterion.maxScore, text)}
+              onBlur={() => handleBlur(criterion.id)}
+              className="text-neutral-900 dark:text-neutral-50 text-xl font-bold w-16 text-center p-1 border-b border-neutral-200 dark:border-dark-300"
+            />
             <TouchableOpacity onPress={() => adjustScore(criterion.id, criterion.maxScore, 0.5)} hitSlop={8}>
               <Ionicons name="add-circle-outline" size={28} color={colors.accent.primary} />
             </TouchableOpacity>

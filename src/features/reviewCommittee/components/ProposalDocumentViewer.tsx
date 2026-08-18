@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -25,12 +25,22 @@ export function ProposalDocumentViewer({ proposalId }: ProposalDocumentViewerPro
   const [previewName, setPreviewName] = useState<string | null>(null);
   const [openingId, setOpeningId] = useState<string | null>(null);
 
+  const [autoLoaded, setAutoLoaded] = useState(false);
+
+  const pdfDocument = useMemo(() => {
+    return documents?.find((doc) => {
+      const decoded = decodeURIComponent(doc.fileName).toLowerCase();
+      return decoded.endsWith('.pdf');
+    });
+  }, [documents]);
+
   async function handleView(documentId: string, fileName: string) {
     setOpeningId(documentId);
     try {
       const result = await download(proposalDocumentService.downloadPath(proposalId, documentId), fileName);
       if (!result) return;
-      if (result.mimeType === 'application/pdf') {
+      const isPdf = decodeURIComponent(fileName).toLowerCase().endsWith('.pdf') || result.mimeType === 'application/pdf';
+      if (isPdf) {
         setPreviewUri(result.uri);
         setPreviewName(fileName);
       } else {
@@ -41,9 +51,28 @@ export function ProposalDocumentViewer({ proposalId }: ProposalDocumentViewerPro
     }
   }
 
+  useEffect(() => {
+    if (pdfDocument && !autoLoaded) {
+      setAutoLoaded(true);
+      handleView(pdfDocument.id, pdfDocument.fileName);
+    }
+  }, [pdfDocument, autoLoaded]);
+
   if (isLoading) return <LoadingState message={t('documentViewer.loading')} />;
   if (!documents || documents.length === 0) {
     return <EmptyState fullScreen={false} icon="📄" title={t('documentViewer.emptyTitle')} description={t('documentViewer.emptyDescription')} />;
+  }
+
+  if (previewUri) {
+    return (
+      <View style={{ height: 650 }} className="rounded-24 overflow-hidden border border-neutral-200 dark:border-dark-200 mb-5">
+        <PDFViewer
+          uri={previewUri}
+          filename={previewName ? decodeURIComponent(previewName) : undefined}
+          onClose={documents.length > 1 ? () => setPreviewUri(null) : undefined}
+        />
+      </View>
+    );
   }
 
   return (
@@ -61,7 +90,7 @@ export function ProposalDocumentViewer({ proposalId }: ProposalDocumentViewerPro
             </View>
             <View className="flex-1">
               <Text className="text-neutral-900 dark:text-neutral-50 text-sm font-medium" numberOfLines={1}>
-                {doc.fileName}
+                {decodeURIComponent(doc.fileName)}
               </Text>
               <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans">
                 {downloadService.formatFileSize(doc.fileSizeBytes)}
@@ -77,11 +106,13 @@ export function ProposalDocumentViewer({ proposalId }: ProposalDocumentViewerPro
         </TouchableOpacity>
       ))}
 
-      <Modal visible={!!previewUri} animationType="slide" onRequestClose={() => setPreviewUri(null)}>
-        {previewUri && (
-          <PDFViewer uri={previewUri} filename={previewName ?? undefined} onClose={() => setPreviewUri(null)} />
-        )}
-      </Modal>
+      {openingId && isDownloading && (
+        <GlassSurface rounded={16} className="p-4 items-center">
+          <Text className="text-sm text-neutral-600 dark:text-neutral-300">
+            Đang tải tài liệu: {progress?.percentage ?? 0}%
+          </Text>
+        </GlassSurface>
+      )}
     </View>
   );
 }
