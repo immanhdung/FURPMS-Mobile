@@ -62,6 +62,7 @@ export default function ProposalWizardScreen() {
   const [pickedFile, setPickedFile] = useState<PickedFile | null>(null);
   const [documentAttached, setDocumentAttached] = useState(false);
   const [submitSheetVisible, setSubmitSheetVisible] = useState(false);
+  const [isSubmittingProposal, setIsSubmittingProposal] = useState(false);
 
   const { data: existingProposal, isLoading: loadingExisting } = useProposal(editId ?? '');
   const { mutate: createProposal, isPending: isCreating } = useCreateProposal();
@@ -143,7 +144,7 @@ export default function ProposalWizardScreen() {
     };
   }
 
-  function saveDraft(onDone?: (id: string) => void) {
+  function saveDraft(onDone?: (id: string) => void, onErrorDone?: () => void) {
     const payload = toPayload(getValues());
     if (proposalId) {
       updateProposal(payload, {
@@ -151,7 +152,20 @@ export default function ProposalWizardScreen() {
           await attachPickedFileIfNeeded(proposalId);
           onDone?.(proposalId);
         },
-        onError: () => Alert.alert(t('common:states.errorTitle'), t('proposalWizard.saveErrorMessage')),
+        onError: (error: any) => {
+          onErrorDone?.();
+          const msg = error?.message || '';
+          if (msg.includes('Đã nộp') || msg.toLowerCase().includes('submitted')) {
+            setSubmitSheetVisible(false);
+            Alert.alert(
+              t('proposalWizard.alreadySubmittedTitle'),
+              t('proposalWizard.alreadySubmittedMessage'),
+              [{ text: 'OK', onPress: () => router.replace(`/(faculty)/proposals/${proposalId}`) }]
+            );
+            return;
+          }
+          Alert.alert(t('common:states.errorTitle'), msg || t('proposalWizard.saveErrorMessage'));
+        },
       });
     } else {
       createProposal(payload, {
@@ -160,7 +174,10 @@ export default function ProposalWizardScreen() {
           await attachPickedFileIfNeeded(created.id);
           onDone?.(created.id);
         },
-        onError: () => Alert.alert(t('common:states.errorTitle'), t('proposalWizard.createErrorMessage')),
+        onError: (error: any) => {
+          onErrorDone?.();
+          Alert.alert(t('common:states.errorTitle'), error?.message || t('proposalWizard.createErrorMessage'));
+        },
       });
     }
   }
@@ -187,28 +204,57 @@ export default function ProposalWizardScreen() {
   }
 
   function handleSubmitProposal(confirmCv: boolean) {
-    saveDraft((id) => {
-      submitProposal(
-        { id, confirmCv },
-        {
-          onSuccess: () => {
-            setSubmitSheetVisible(false);
-            router.replace(`/(faculty)/proposals/${id}`);
+    setIsSubmittingProposal(true);
+    saveDraft(
+      (id) => {
+        submitProposal(
+          { id, confirmCv },
+          {
+            onSuccess: () => {
+              setIsSubmittingProposal(false);
+              setSubmitSheetVisible(false);
+              Alert.alert(
+                t('proposalWizard.submitSuccessTitle'),
+                t('proposalWizard.submitSuccessMessage'),
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => router.replace(`/(faculty)/proposals/${id}`),
+                  },
+                ]
+              );
+            },
+            onError: (error: any) => {
+              setIsSubmittingProposal(false);
+              const msg = error?.message || '';
+              if (msg.includes('Đã nộp') || msg.toLowerCase().includes('submitted')) {
+                setSubmitSheetVisible(false);
+                Alert.alert(
+                  t('proposalWizard.alreadySubmittedTitle'),
+                  t('proposalWizard.alreadySubmittedMessage'),
+                  [{ text: 'OK', onPress: () => router.replace(`/(faculty)/proposals/${id}`) }]
+                );
+                return;
+              }
+              Alert.alert(t('common:states.errorTitle'), msg || t('proposalWizard.submitErrorMessage'));
+            },
           },
-          onError: () => Alert.alert(t('common:states.errorTitle'), t('proposalWizard.submitErrorMessage')),
-        },
-      );
-    });
+        );
+      },
+      () => {
+        setIsSubmittingProposal(false);
+      }
+    );
   }
 
   if (isEditing && loadingExisting) return <LoadingState message={t('proposalWizard.loading')} />;
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-dark-0" edges={['top', 'left', 'right']}>
       <FormProvider {...methods}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
           <WizardStepper currentStep={currentStep} />
-          <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {currentStep === 1 && <Step1CycleFieldType />}
             {currentStep === 2 && (
               <Step2ResearchContent
@@ -223,8 +269,8 @@ export default function ProposalWizardScreen() {
           </ScrollView>
 
           <View
-            className="px-5 pt-3 border-t border-neutral-100 dark:border-dark-200 bg-neutral-50 dark:bg-dark-0 gap-3"
-            style={{ paddingBottom: 76 }}
+            className="px-5 pt-2 border-t border-neutral-100 dark:border-dark-200 bg-neutral-50 dark:bg-dark-0 gap-3"
+            style={{ paddingBottom: 5 }}
           >
             <View className="flex-row gap-3">
               {currentStep > 1 && (
@@ -251,7 +297,7 @@ export default function ProposalWizardScreen() {
 
       <SubmitProposalSheet
         visible={submitSheetVisible}
-        isSubmitting={isSubmitting || isPending}
+        isSubmitting={isSubmittingProposal || isSubmitting || isPending}
         onClose={() => setSubmitSheetVisible(false)}
         onConfirm={handleSubmitProposal}
       />

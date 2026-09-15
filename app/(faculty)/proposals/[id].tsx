@@ -355,7 +355,10 @@ export default function ProposalDetailScreen() {
         onConfirm={(confirmCv) =>
           submitProposal(
             { id, confirmCv },
-            { onSuccess: () => setSubmitSheetVisible(false) },
+            {
+              onSuccess: () => setSubmitSheetVisible(false),
+              onError: (error: any) => Alert.alert(t('common:states.errorTitle'), error?.message || t('proposalWizard.submitErrorMessage')),
+            },
           )
         }
       />

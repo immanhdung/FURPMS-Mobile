@@ -39,6 +39,7 @@ export function EmptyState({
           onPress={action.onPress}
           variant="secondary"
           size="sm"
+          className="self-center"
         />
       )}
     </View>

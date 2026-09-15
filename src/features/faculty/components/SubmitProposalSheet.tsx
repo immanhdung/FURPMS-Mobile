@@ -60,7 +60,13 @@ export function SubmitProposalSheet({ visible, isSubmitting, onClose, onConfirm 
             </Text>
           </TouchableOpacity>
 
-          <Button label={t('submitProposalSheet.submitForReview')} onPress={() => onConfirm(confirmCv)} loading={isSubmitting} fullWidth />
+          <Button
+            label={t('submitProposalSheet.submitForReview')}
+            onPress={() => onConfirm(confirmCv)}
+            loading={isSubmitting}
+            disabled={!confirmCv || isSubmitting}
+            fullWidth
+          />
         </GlassSurface>
       </View>
     </Modal>

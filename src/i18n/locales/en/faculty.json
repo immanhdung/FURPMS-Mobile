@@ -94,6 +94,10 @@
     "draftSavedMessage": "Your proposal has been saved as a draft.",
     "saveErrorMessage": "Failed to save changes. Please try again.",
     "createErrorMessage": "Failed to create proposal. Please try again.",
+    "submitSuccessTitle": "Success",
+    "submitSuccessMessage": "Proposal submitted for review successfully.",
+    "alreadySubmittedTitle": "Notice",
+    "alreadySubmittedMessage": "This proposal has already been submitted.",
     "submitErrorMessage": "Failed to submit proposal. Please try again.",
     "documentNotAttachedTitle": "Document not attached",
     "documentNotAttachedMessage": "Your proposal was saved, but the document could not be uploaded. You can retry from the proposal detail page."

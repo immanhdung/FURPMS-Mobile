@@ -99,6 +99,10 @@
     "draftSavedMessage": "Đề tài của bạn đã được lưu dưới dạng bản nháp.",
     "saveErrorMessage": "Không thể lưu thay đổi. Vui lòng thử lại.",
     "createErrorMessage": "Không thể tạo đề tài. Vui lòng thử lại.",
+    "submitSuccessTitle": "Thành công",
+    "submitSuccessMessage": "Đề tài đã được nộp để phản biện thành công.",
+    "alreadySubmittedTitle": "Thông báo",
+    "alreadySubmittedMessage": "Đề tài này đã được nộp.",
     "submitErrorMessage": "Không thể nộp đề tài. Vui lòng thử lại.",
     "documentNotAttachedTitle": "Chưa đính kèm tài liệu",
     "documentNotAttachedMessage": "Đề tài của bạn đã được lưu, nhưng không thể tải lên tài liệu. Bạn có thể thử lại từ trang chi tiết đề tài."

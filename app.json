@@ -83,7 +83,10 @@
           "faceIDPermission": "Use Face ID to quickly and securely access FURPMS"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-sharing",
+      "expo-splash-screen",
+      "expo-status-bar"
     ]
   }
 }

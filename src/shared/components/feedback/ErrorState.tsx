@@ -35,7 +35,7 @@ export function ErrorState({
         </Text>
       </View>
       {onRetry && (
-        <Button label={t('buttons.tryAgain')} onPress={onRetry} variant="secondary" size="sm" />
+        <Button label={t('buttons.tryAgain')} onPress={onRetry} variant="secondary" size="sm" className="self-center" />
       )}
     </View>
   );

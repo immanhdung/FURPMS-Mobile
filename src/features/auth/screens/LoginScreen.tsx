@@ -69,7 +69,7 @@ export function LoginScreen() {
         >
           <LinearGradient
             colors={['rgba(30,20,70,0.4)', 'rgba(40,20,90,0.55)', 'rgba(18,10,48,0.92)']}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
           <View
             style={{

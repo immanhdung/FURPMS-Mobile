@@ -72,7 +72,7 @@ export function GlassSurface({
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 0.7, y: 0.9 }}
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
         <View className={className}>{children}</View>

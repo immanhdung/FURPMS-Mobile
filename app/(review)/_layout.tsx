@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/useTheme';
@@ -52,7 +51,7 @@ function NotificationTabIcon({
   focused,
   size,
 }: {
-  color: string;
+  color: any;
   focused: boolean;
   size: number;
 }) {
@@ -86,18 +85,14 @@ export default function ReviewLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          position: 'absolute',
-          backgroundColor: 'transparent',
+          backgroundColor: colors.tab.bar,
           borderTopWidth: StyleSheet.hairlineWidth,
-          borderTopColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.5)',
-          elevation: 0,
+          borderTopColor: colors.tab.border,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom + 8,
           paddingTop: 8,
+          ...colors.shadow.sm,
         },
-        tabBarBackground: () => (
-          <BlurView intensity={70} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
-        ),
         tabBarActiveTintColor: colors.tab.active,
         tabBarInactiveTintColor: colors.tab.inactive,
         tabBarLabelStyle: {

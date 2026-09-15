@@ -59,7 +59,7 @@ export function ProfileScreen({ roleLabel, badgeVariant, footerLabel }: ProfileS
             ? ['rgba(35,88,214,0.28)', 'rgba(35,88,214,0)']
             : ['rgba(35,88,214,0.16)', 'rgba(35,88,214,0)']
         }
-        style={[StyleSheet.absoluteFillObject, { height: 260 }]}
+        style={[StyleSheet.absoluteFill, { height: 260 }]}
         pointerEvents="none"
       />
       <ScrollView

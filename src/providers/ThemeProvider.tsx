@@ -33,7 +33,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, [theme, setColorScheme]);
 
   const resolved: 'light' | 'dark' =
-    theme === 'system' ? (deviceScheme ?? 'light') : theme;
+    theme === 'system' ? (deviceScheme === 'dark' ? 'dark' : 'light') : theme;
 
   const colors = (resolved === 'dark' ? darkColors : lightColors) as ThemeColors;
 

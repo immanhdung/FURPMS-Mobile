@@ -26,7 +26,7 @@ export const proposalService = {
   async submit(id: string, confirmCv: boolean): Promise<ProposalDetail> {
     const { data } = await httpClient.post<ApiResponse<ProposalDetail>>(
       `/proposals/${id}/submit`,
-      undefined,
+      null,
       { params: { confirmCv } },
     );
     return data.data;

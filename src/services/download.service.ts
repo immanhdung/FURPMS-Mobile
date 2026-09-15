@@ -3,7 +3,7 @@ import * as Sharing from 'expo-sharing';
 import * as SecureStore from '@/utils/secureStore';
 import { SECURE_KEYS } from '@/constants/storageKeys';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpmsbev2-production.up.railway.app/api';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://furpmsbev2-production-04bd.up.railway.app/api';
 
 export interface DownloadProgress {
   loaded: number;

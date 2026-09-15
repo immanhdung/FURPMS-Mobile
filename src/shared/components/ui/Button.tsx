@@ -12,6 +12,7 @@ interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
   fullWidth?: boolean;
+  className?: string;
 }
 
 const containerVariant: Record<Variant, string> = {
@@ -51,6 +52,7 @@ export function Button({
   iconRight,
   fullWidth = false,
   disabled,
+  className,
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
@@ -63,9 +65,10 @@ export function Button({
         'flex-row items-center justify-center',
         containerVariant[variant],
         containerSize[size],
-        fullWidth ? 'w-full' : 'self-start',
+        fullWidth ? 'w-full' : '',
         isDisabled ? 'opacity-50' : 'opacity-100',
-      ].join(' ')}
+        className,
+      ].filter(Boolean).join(' ')}
       {...props}
     >
       {loading ? (
