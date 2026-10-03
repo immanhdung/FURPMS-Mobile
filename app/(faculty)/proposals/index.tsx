@@ -115,31 +115,33 @@ export default function ProposalsScreen() {
       </View>
 
       {/* Filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
-        className="mb-3 flex-grow-0"
-      >
-        {FILTERS.map(({ key, label }) =>
-          activeFilter === key ? (
-            <TouchableOpacity
-              key={key}
-              onPress={() => setActiveFilter(key)}
-              activeOpacity={0.7}
-              className="px-3.5 py-2 rounded-full bg-violet-500 dark:bg-violet-600"
-            >
-              <Text className="text-sm font-medium text-white">{label}</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity key={key} onPress={() => setActiveFilter(key)} activeOpacity={0.7}>
-              <GlassSurface rounded={999} className="px-3.5 py-2">
-                <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{label}</Text>
-              </GlassSurface>
-            </TouchableOpacity>
-          ),
-        )}
-      </ScrollView>
+      <View style={{ zIndex: 1 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 4 }}
+          className="mb-3 flex-grow-0"
+        >
+          {FILTERS.map(({ key, label }) =>
+            activeFilter === key ? (
+              <TouchableOpacity
+                key={key}
+                onPress={() => setActiveFilter(key)}
+                activeOpacity={0.7}
+                className="px-3.5 py-2 rounded-full bg-violet-500 dark:bg-violet-600"
+              >
+                <Text className="text-sm font-medium text-white">{label}</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity key={key} onPress={() => setActiveFilter(key)} activeOpacity={0.7}>
+                <GlassSurface rounded={999} className="px-3.5 py-2">
+                  <Text className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{label}</Text>
+                </GlassSurface>
+              </TouchableOpacity>
+            ),
+          )}
+        </ScrollView>
+      </View>
 
       {/* List */}
       {isLoading ? (
