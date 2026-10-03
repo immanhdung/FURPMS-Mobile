@@ -3,11 +3,11 @@ import { acceptanceService } from '../services/acceptance.service';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import type { AcceptancePayload } from '../types/acceptance.types';
 
-export function useAcceptance(councilId: string) {
+export function useAcceptance(councilId: string, projectId?: string | null) {
   return useQuery({
     queryKey: QUERY_KEYS.acceptance.byCouncil(councilId),
-    queryFn: () => acceptanceService.get(councilId),
-    enabled: !!councilId,
+    queryFn: () => acceptanceService.get(councilId, projectId!),
+    enabled: !!councilId && !!projectId,
   });
 }
 
@@ -20,3 +20,4 @@ export function useSubmitAcceptance(councilId: string) {
     },
   });
 }
+

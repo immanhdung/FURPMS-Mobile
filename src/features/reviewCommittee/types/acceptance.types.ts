@@ -9,6 +9,7 @@ export interface AcceptanceResponse {
 }
 
 export interface AcceptancePayload {
+  projectId: string;
   result: AcceptanceResult;
   failReason?: string;
 }

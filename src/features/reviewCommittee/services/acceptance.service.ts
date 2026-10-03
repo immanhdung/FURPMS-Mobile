@@ -3,8 +3,10 @@ import type { ApiResponse } from '@/types/common';
 import type { AcceptancePayload, AcceptanceResponse } from '../types/acceptance.types';
 
 export const acceptanceService = {
-  async get(councilId: string): Promise<AcceptanceResponse | null> {
-    const { data } = await httpClient.get<ApiResponse<AcceptanceResponse | null>>(`/councils/${councilId}/acceptance`);
+  async get(councilId: string, projectId: string): Promise<AcceptanceResponse | null> {
+    const { data } = await httpClient.get<ApiResponse<AcceptanceResponse | null>>(`/councils/${councilId}/acceptance/my`, {
+      params: { projectId },
+    });
     return data.data;
   },
 

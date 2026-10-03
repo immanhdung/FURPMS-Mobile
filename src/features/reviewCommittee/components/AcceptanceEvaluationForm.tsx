@@ -10,13 +10,14 @@ import { ACCEPTANCE_RESULTS, ROUND_STATUS, isReviewerRole, type AcceptanceResult
 
 interface AcceptanceEvaluationFormProps {
   councilId: string;
+  projectId?: string | null;
   roundStatus?: string | null;
   memberRole?: string | null;
 }
 
-export function AcceptanceEvaluationForm({ councilId, roundStatus, memberRole }: AcceptanceEvaluationFormProps) {
+export function AcceptanceEvaluationForm({ councilId, projectId, roundStatus, memberRole }: AcceptanceEvaluationFormProps) {
   const { t } = useTranslation('reviewer');
-  const { data: acceptance, isLoading } = useAcceptance(councilId);
+  const { data: acceptance, isLoading } = useAcceptance(councilId, projectId);
   const { mutate: submit, isPending } = useSubmitAcceptance(councilId);
 
   const [result, setResult] = useState<AcceptanceResult>('PASS');
@@ -39,15 +40,16 @@ export function AcceptanceEvaluationForm({ councilId, roundStatus, memberRole }:
   }
 
   function handleSubmit() {
+    if (!projectId) return;
     if (result === 'FAIL' && !failReason.trim() && canWriteComments) {
       Alert.alert(t('acceptanceForm.reasonRequiredTitle'), t('acceptanceForm.reasonRequiredMessage'));
       return;
     }
     submit(
-      { result, failReason: result === 'FAIL' && canWriteComments ? failReason.trim() : undefined },
+      { projectId, result, failReason: result === 'FAIL' && canWriteComments ? failReason.trim() : undefined },
       {
         onSuccess: () => Alert.alert(t('acceptanceForm.savedTitle'), t('acceptanceForm.savedMessage')),
-        onError: () => Alert.alert(t('acceptanceForm.errorTitle'), t('acceptanceForm.errorMessage')),
+        onError: (err: any) => Alert.alert(t('acceptanceForm.errorTitle'), err.message || t('acceptanceForm.errorMessage')),
       },
     );
   }

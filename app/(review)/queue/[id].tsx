@@ -130,7 +130,7 @@ export default function CouncilWorkspaceScreen() {
               />
             )}
             {activeTab === 'DOSSIER' && <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />}
-            {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} roundStatus={membership.roundStatus} memberRole={membership.memberRole} />}
+            {activeTab === 'ACCEPTANCE' && <AcceptanceEvaluationForm councilId={councilId} projectId={membership.projectId} roundStatus={membership.roundStatus} memberRole={membership.memberRole} />}
             {activeTab === 'MINUTES' && (
               <MinutesPanel councilId={councilId} projectId={membership.projectId} memberRole={membership.memberRole} />
             )}
