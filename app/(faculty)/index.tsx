@@ -116,14 +116,14 @@ export default function FacultyDashboard() {
               </GlassSurface>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => router.push('/(faculty)/projects')} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => router.push('/(faculty)/proposals')} activeOpacity={0.7}>
             <GlassSurface rounded={24} className="p-4 flex-row items-center gap-3">
               <View className="bg-violet-100 dark:bg-violet-900/30 rounded-xl p-2">
-                <Ionicons name="briefcase-outline" size={20} color={colors.accent.primary} />
+                <Ionicons name="document-text-outline" size={20} color={colors.accent.primary} />
               </View>
               <View className="flex-1">
-                <Text className="text-neutral-900 dark:text-neutral-50 font-semibold text-sm">Quản lý đề tài</Text>
-                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-0.5">Sản phẩm, điều chỉnh hợp đồng, tiến trình và lịch họp</Text>
+                <Text className="text-neutral-900 dark:text-neutral-50 font-semibold text-sm">Đề tài của tôi</Text>
+                <Text className="text-neutral-500 dark:text-dark-500 text-xs font-sans mt-0.5">Xem danh sách và theo dõi trạng thái đề tài</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.icon.muted} />
             </GlassSurface>
